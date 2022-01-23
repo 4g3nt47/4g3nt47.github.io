@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-01-23T08:17:14+01:00</updated>
+  <updated>2022-01-23T19:42:36+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -70,29 +70,7 @@
   
     <summary>
       
-      About
-
-
-
-  OS - Linux
-  Difficulty - Easy
-  Points - 20
-  Release - 07/Aug/2021
-  IP - 10.10.11.104
-
-
-
-
-
-
-Recon
-
-
-Nmap
-
-Starting Nmap 7.70 ( https://nmap.org ) at 2021-09-28 10:39 WAT
-Stats: 0:00:53 elapsed; 0 hosts completed (1 up), 1 undergoing SYN Stealth Scan                                                       
-SYN Stealth Scan Timing: About 99.99% done; ETC: 10:40 (0:00:00 remaining)    ...
+      Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. ...
     </summary>
   
 
@@ -121,28 +99,7 @@ SYN Stealth Scan Timing: About 99.99% done; ETC: 10:40 (0:00:00 remaining)    ..
   
     <summary>
       
-      About
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-# Nmap 7.70 scan initiated Thu Oct 14 07:14:55 2021 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.101
-Nmap scan report for 10.10.11.101
-Host is up (0.22s latency).
-Not shown: 995 closed ports
-PORT     STATE    SERVICE     VERSION
-22/tcp   open     ssh         OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
-80/tcp   open     http        Apache httpd 2.4.41 (...
+      Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw a...
     </summary>
   
 
@@ -171,30 +128,9 @@ PORT     STATE    SERVICE     VERSION
   
     <summary>
       
-      About
+      Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.
 
-
-
-  OS - Linux
-  Difficulty - Easy
-  Points - 20
-  Release - 24/Jul/2021
-  IP - 10.10.11.100
-
-
-
-
-
-Recon
-
-
-Starting Nmap 7.70 ( https://nmap.org ) at 2021-09-26 09:09 WAT
-Stats: 0:00:07 elapsed; 0 hosts completed (1 up), 1 undergoing Service Scan
-Service scan Timing: About 50.00% done; ETC: 09:09 (0:00:06 remaining)
-Nmap scan report for 10.10.11.100
-Host is up (0.26s latency).
-
-PORT   STA...
+The privesc is a CTF-like challenge, where a custom script used to val...
     </summary>
   
 
@@ -223,31 +159,7 @@ PORT   STA...
   
     <summary>
       
-      About
-
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.70 scan initiated Sat Oct  9 15:30:06 2021 as: nmap -sV -sC -p22,443,8080 -oN nmap.txt 10.10.10.250
-Nmap scan report for seal.htb (10.10.10.250)
-Host is up (0.71s latency).
-
-PORT     STATE SERVICE    VERSION
-22/tcp   open  ssh        OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
-443/tcp  open  ssl/http   nginx 1.18.0 (Ubuntu)
-|_http-server-...
+      Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page...
     </summary>
   
 

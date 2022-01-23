@@ -12,8 +12,8 @@
 <meta name="generator" content="Jekyll v4.2.1" />
 <meta property="og:title" content="Writer - HackTheBox" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="About" />
-<meta property="og:description" content="About" />
+<meta name="description" content="Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application." />
+<meta property="og:description" content="Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application." />
 <link rel="canonical" href="https://4g3nt47.github.io/posts/hackthebox/writer.html" />
 <meta property="og:url" content="https://4g3nt47.github.io/posts/hackthebox/writer.html" />
 <meta property="og:site_name" content="4g3nt47" />
@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"Writer - HackTheBox","dateModified":"2021-12-11T00:00:00+01:00","datePublished":"2021-12-11T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/writer.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/writer.html"},"description":"About","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Writer - HackTheBox","dateModified":"2021-12-11T00:00:00+01:00","datePublished":"2021-12-11T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/writer.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/writer.html"},"description":"Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Writer - HackTheBox | 4g3nt47
   </title><!--
@@ -44,23 +44,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
   <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
-  <!-- GA --><!-- jsDelivr CDN -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-
-  <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+  <!-- GA --><!-- Bootstrap -->
+  <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
 
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css"><!--
+  <link rel="stylesheet" href="/assets/css/all.min.css"><!--
   CSS selector for site.
 -->
 
 <link rel="stylesheet" href="/assets/css/style.css"><link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@1.0.1/dist/bootstrap-toc.min.css"><!-- Manific Popup -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/magnific-popup@1.1.0/dist/magnific-popup.min.css"><!-- JavaScript -->
+    href="/assets/css/bootstrap-toc.min.css"><!-- Manific Popup -->
+  <link rel="stylesheet" href="/assets/css/magnific-popup.min.css"><!-- JavaScript -->
 
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="/assets/js/jquery.min.js"></script>
 
 </head>
 <body data-spy="scroll" data-target="#toc"><!--
@@ -189,8 +185,8 @@
   Calculate the post's reading time, and display the word count in tooltip
  --><!-- words per minute  --><!-- return element -->
 <span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="2394 words">
-  <em>13 min</em> read</span>
+  title="2549 words">
+  <em>14 min</em> read</span>
 <!-- page views --></div>
 
   </div> <!-- .d-flex -->
@@ -198,7 +194,13 @@
 </div> <!-- .post-meta -->
 
 <div class="post-content">
-  <h3 id="about">About<a href="#about" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
+  <p><strong>Writer</strong> is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to <em>SQL injection</em>, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to <em>command injection</em> in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application.</p>
+
+<p>Once inside the box, there are two local users, <code class="language-plaintext highlighter-rouge">kyle</code>, and <code class="language-plaintext highlighter-rouge">john</code>. Access to Kyle’s account was obtained after cracking a hash obtained from a local MySQL database. Once you have access as Kyle, you can exploit a write permission to <code class="language-plaintext highlighter-rouge">/etc/postfix/disclaimer</code> to move laterally to John’s account, and from there exploit another write permission to create a malicious configuration file that will be by <code class="language-plaintext highlighter-rouge">apt</code> through a cron job to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info<a href="#info" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
 <p><img data-src="/assets/img/20211014071205.png" alt="" data-proofer-ignore></p>
@@ -564,7 +566,10 @@ Service detection performed. Please report any incorrect results at https://nmap
           class="post-tag no-text-decoration" >static analysis</a><a href="/tags/arbitrary-file-upload/"
           class="post-tag no-text-decoration" >arbitrary file upload</a><a href="/tags/hash-cracking/"
           class="post-tag no-text-decoration" >hash cracking</a><a href="/tags/apt/"
-          class="post-tag no-text-decoration" >apt</a></div><div class="post-tail-bottom
+          class="post-tag no-text-decoration" >apt</a><a href="/tags/lateral-movement/"
+          class="post-tag no-text-decoration" >lateral movement</a><a href="/tags/python/"
+          class="post-tag no-text-decoration" >python</a><a href="/tags/django/"
+          class="post-tag no-text-decoration" >django</a></div><div class="post-tail-bottom
     d-flex justify-content-between align-items-center mt-3 pt-5 pb-2">
     <div class="license-wrapper">This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">
           CC BY 4.0
@@ -603,10 +608,10 @@ Service detection performed. Please report any incorrect results at https://nmap
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/traffic-analysis/">traffic analysis</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/traffic-analysis/">traffic analysis</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
-<script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@1.0.1/dist/bootstrap-toc.min.js"></script>
+<script src="/assets/js/bootstrap-toc.min.js"></script>
 
 <div id="toc-wrapper" class="pl-0 pr-4 mb-5">
   <div class="panel-heading pl-3 pt-2 mb-2">Contents</div>
@@ -626,6 +631,20 @@ Service detection performed. Please report any incorrect results at https://nmap
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
+        <a href="/posts/hackthebox/bountyhunter.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2021-11-18 00:00:00 +0100">Nov 18, 2021</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>BountyHunter - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on ...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
         <a href="/posts/hackthebox/previse.html">
           <div class="card-body"><!--
   Date format snippet
@@ -634,28 +653,7 @@ Service detection performed. Please report any incorrect results at https://nmap
     date="2022-01-16 00:00:00 +0100">Jan 16</em>
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Previse - HackTheBox</h3>
             <div class="text-muted small">
-              <p>About
-
-
-
-  OS - Linux
-  Difficulty - Easy
-  Points - 20
-  Release - 07/Aug/2021
-  IP - 10.10.11.104
-
-
-
-
-
-
-Recon
-
-
-Nmap
-
-Starting Nmap 7.70 ( https://nmap.org ) at 2021-09-28 10:39 WAT
-Stats: 0:00:5...
+              <p>Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to acc...
               </p>
             </div>
           </div>
@@ -669,56 +667,7 @@ Stats: 0:00:5...
     date="2021-10-20 00:00:00 +0100">Oct 20, 2021</em>
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Dynstr - HackTheBox</h3>
             <div class="text-muted small">
-              <p>About
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-# Nmap 7.70 scan initiated Tue Oct  5 10:33:02 2021 as: nmap -sC -sV -v -oN namp.txt 10.10.10.244
-Increasing send delay for 10.10.10.244 from 0 to 5 due to 14 out of 46...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
-        <a href="/posts/hackthebox/bountyhunter.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2021-11-18 00:00:00 +0100">Nov 18, 2021</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>BountyHunter - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>About
-
-
-
-  OS - Linux
-  Difficulty - Easy
-  Points - 20
-  Release - 24/Jul/2021
-  IP - 10.10.11.100
-
-
-
-
-
-
-Recon
-
-
-Starting Nmap 7.70 ( https://nmap.org ) at 2021-09-26 09:09 WAT
-Stats: 0:00:07 elap...
+              <p>Dynstr, a cool medium-rated linux box that’s all about DNS (as you probably guessed from the name). It features a web service that allows you to update DNS records on the server. One of the paramet...
               </p>
             </div>
           </div>
@@ -765,7 +714,7 @@ Stats: 0:00:07 elap...
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/traffic-analysis/">traffic analysis</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/traffic-analysis/">traffic analysis</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>
@@ -777,7 +726,7 @@ Stats: 0:00:07 elap...
     </a><!--
   Jekyll Simple Search loader
   See: <https://github.com/christian-fei/Simple-Jekyll-Search>
---><script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js"></script>
+--><script src="/assets/js/simple-jekyll-search.min.js"></script>
 
 <script>
 SimpleJekyllSearch({
@@ -810,8 +759,8 @@ SimpleJekyllSearch({
 -->
 
 <!-- layout specified --><!-- image lazy-loading & popup -->
-  <script src="https://cdn.jsdelivr.net/combine/npm/lozad/dist/lozad.min.js,npm/magnific-popup@1/dist/jquery.magnific-popup.min.js,npm/clipboard@2/dist/clipboard.min.js"></script><script defer src="/assets/js/dist/post.min.js"></script><!-- commons -->
+  <script src="/assets/js/clipboard.min.js"></script><script defer src="/assets/js/dist/post.min.js"></script><!-- commons -->
 
-<script src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.16.1,npm/bootstrap@4/dist/js/bootstrap.min.js"></script></body>
+<script src="/assets/js/bootstrap.min.js"></script></body>
 
 </html>
