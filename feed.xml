@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-01-22T13:03:00+01:00</updated>
+  <updated>2022-01-23T08:17:14+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -20,14 +20,14 @@
 
   
   <entry>
-    <title>Previse - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/Previse.html" rel="alternate" type="text/html" title="Previse - HackTheBox" />
-    <published>2022-01-16T00:00:00+01:00</published>
+    <title>Forge - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/forge.html" rel="alternate" type="text/html" title="Forge - HackTheBox" />
+    <published>2022-01-23T00:00:00+01:00</published>
   
-    <updated>2022-01-16T00:00:00+01:00</updated>
+    <updated>2022-01-23T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/Previse.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/Previse.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/forge.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/forge.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -41,28 +41,58 @@
   
     <summary>
       
-      ### About
+      Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This URL upload functionality has a filter that attempts to block SSRFs, but the filter is flawed, and could be exploited to reach another subdomain on the server that foreign hosts are not allowed to dire...
+    </summary>
+  
+
+  </entry>
+
+  
+  <entry>
+    <title>Previse - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/previse.html" rel="alternate" type="text/html" title="Previse - HackTheBox" />
+    <published>2022-01-16T00:00:00+01:00</published>
+  
+    <updated>2022-01-16T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/previse.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/previse.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      About
 
 
-- *OS* - Linux
-- *Difficulty* - Easy
-- *Points* - 20
-- *Release* - 07/Aug/2021
-- *IP* - 10.10.11.104
+
+  OS - Linux
+  Difficulty - Easy
+  Points - 20
+  Release - 07/Aug/2021
+  IP - 10.10.11.104
 
 
 
----
-
-### Recon
 
 
-#### Nmap
 
-```raw
+Recon
+
+
+Nmap
+
 Starting Nmap 7.70 ( https://nmap.org ) at 2021-09-28 10:39 WAT
 Stats: 0:00:53 elapsed; 0 hosts completed (1 up), 1 undergoing SYN Stealth Scan                                                       
-SYN Stealth Scan Timing: About 99.99% done; ETC...
+SYN Stealth Scan Timing: About 99.99% done; ETC: 10:40 (0:00:00 remaining)    ...
     </summary>
   
 
@@ -71,13 +101,13 @@ SYN Stealth Scan Timing: About 99.99% done; ETC...
   
   <entry>
     <title>Writer - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/Writer.html" rel="alternate" type="text/html" title="Writer - HackTheBox" />
+    <link href="https://4g3nt47.github.io/posts/hackthebox/writer.html" rel="alternate" type="text/html" title="Writer - HackTheBox" />
     <published>2021-12-11T00:00:00+01:00</published>
   
     <updated>2021-12-11T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/Writer.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/Writer.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/writer.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/writer.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -91,28 +121,28 @@ SYN Stealth Scan Timing: About 99.99% done; ETC...
   
     <summary>
       
-      ### About
-
-
-![](/assets/img/20211014071205.png)
-
-![](/assets/img/20211014071235.png)
+      About
 
 
 
----
-### Recon
 
 
-#### NMAP
 
-```raw
+
+
+
+Recon
+
+
+NMAP
+
 # Nmap 7.70 scan initiated Thu Oct 14 07:14:55 2021 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.101
 Nmap scan report for 10.10.11.101
 Host is up (0.22s latency).
 Not shown: 995 closed ports
 PORT     STATE    SERVICE     VERSION
-22/tcp   open     ssh         OpenSSH 8.2p1 Ubunt...
+22/tcp   open     ssh         OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
+80/tcp   open     http        Apache httpd 2.4.41 (...
     </summary>
   
 
@@ -121,13 +151,13 @@ PORT     STATE    SERVICE     VERSION
   
   <entry>
     <title>BountyHunter - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/BountyHunter.html" rel="alternate" type="text/html" title="BountyHunter - HackTheBox" />
+    <link href="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html" rel="alternate" type="text/html" title="BountyHunter - HackTheBox" />
     <published>2021-11-18T00:00:00+01:00</published>
   
     <updated>2021-11-18T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/BountyHunter.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/BountyHunter.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -141,27 +171,30 @@ PORT     STATE    SERVICE     VERSION
   
     <summary>
       
-      ### About
-
-
-- *OS* - Linux
-- *Difficulty* - Easy
-- *Points* - 20
-- *Release* - 24/Jul/2021
-- *IP* - 10.10.11.100
+      About
 
 
 
----
-### Recon
+  OS - Linux
+  Difficulty - Easy
+  Points - 20
+  Release - 24/Jul/2021
+  IP - 10.10.11.100
 
 
-```raw
+
+
+
+Recon
+
+
 Starting Nmap 7.70 ( https://nmap.org ) at 2021-09-26 09:09 WAT
 Stats: 0:00:07 elapsed; 0 hosts completed (1 up), 1 undergoing Service Scan
 Service scan Timing: About 50.00% done; ETC: 09:09 (0:00:06 remaining)
 Nmap scan report for 10.10.11.100
-Host is up (0...
+Host is up (0.26s latency).
+
+PORT   STA...
     </summary>
   
 
@@ -170,13 +203,13 @@ Host is up (0...
   
   <entry>
     <title>Seal - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/Seal.html" rel="alternate" type="text/html" title="Seal - HackTheBox" />
+    <link href="https://4g3nt47.github.io/posts/hackthebox/seal.html" rel="alternate" type="text/html" title="Seal - HackTheBox" />
     <published>2021-11-13T00:00:00+01:00</published>
   
     <updated>2021-11-13T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/Seal.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/Seal.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/seal.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/seal.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -190,73 +223,31 @@ Host is up (0...
   
     <summary>
       
-      ### About
+      About
 
 
----
-
-![](/assets/img/20211009152304.png)
-
-![](/assets/img/20211009152340.png)
-
----
-
-### Recon
 
 
-#### NMAP
 
-```raw
+
+
+
+
+
+Recon
+
+
+NMAP
+
 
 # Nmap 7.70 scan initiated Sat Oct  9 15:30:06 2021 as: nmap -sV -sC -p22,443,8080 -oN nmap.txt 10.10.10.250
 Nmap scan report for seal.htb (10.10.10.250)
 Host is up (0.71s latency).
 
 PORT     STATE SERVICE    VERSION
-22/tcp   open  ssh        OpenSSH 8.2p1 Ubuntu 4ubunt...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Synack Red Team 5 CTF</title>
-    <link href="https://4g3nt47.github.io/posts/ctf/Synack5.html" rel="alternate" type="text/html" title="Synack Red Team 5 CTF" />
-    <published>2021-11-08T00:00:00+01:00</published>
-  
-    <updated>2021-11-08T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/ctf/Synack5.html</id>
-    <content src="https://4g3nt47.github.io/posts/ctf/Synack5.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="ctf" />
-    
-  
-
-  
-    <summary>
-      
-      
-
-### Web
-
-#### **SimPlay**
-
-This was a web challenge with downloadable source code. Going through the source files, the file `TimeModel.php` was found to be making a call to `eval()` using user-controlled data that was passed to it by `TimeController.php`
-
-![](/assets/img/2021-11-05_22-40.png)
-
-![](/assets/img/2021-11-05_22-41.png)
-
-I exploited this to identify, and read the flag;
-
-![](/assets...
+22/tcp   open  ssh        OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
+443/tcp  open  ssl/http   nginx 1.18.0 (Ubuntu)
+|_http-server-...
     </summary>
   
 

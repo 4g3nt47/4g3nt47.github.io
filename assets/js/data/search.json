@@ -1,8 +1,18 @@
 [
   
   {
+    "title": "Forge - HackTheBox",
+    "url": "/posts/hackthebox/forge.html",
+    "categories": "hackthebox",
+    "tags": "linux, web, ssrf, broken access control, ftp, python, pdb, custom exploitation",
+    "date": "2022-01-23 00:00:00 +0100",
+    
+    "snippet": "Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This URL upload functionality has a filter that attempts to block SSRFs, but the filter is flawed, and could be exploited to reach another subdomain on the server that foreign hosts are not allowed to directly access. The vector for privilege escalation is a python script that drops into a pdb shell when user caused an exception.StatsReconNMAP# Nmap 7.70 scan initiated Thu Oct 21 20:28:51 2021 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.111Nmap scan report for forge.htb (10.10.11.111)Host is up (0.23s latency).Not shown: 997 closed portsPORT   STATE    SERVICE VERSION21/tcp filtered ftp22/tcp open     ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)80/tcp open     http    Apache httpd 2.4.41| http-methods: |_  Supported Methods: OPTIONS HEAD GET|_http-server-header: Apache/2.4.41 (Ubuntu)|_http-title: GalleryService Info: Host: 10.10.11.111; OS: Linux; CPE: cpe:/o:linux:linux_kernelRead data files from: /usr/bin/../share/nmapService detection performed. Please report any incorrect results at https://nmap.org/submit/ .# Nmap done at Thu Oct 21 20:29:42 2021 -- 1 IP address (1 host up) scanned in 51.39 secondsWebThere is an image upload functionality at /upload that the homepage links to;Uploading a sample image file saves it to the below location on the server;Clicking the Upload from url in the page above gave me an input field for a URL. Attempts to load a local file using the file:// protocol failed, saying only HTTP and HTTPs protocols are allowed. Entering a URL to my attack host, I got a callback;The python-requests user agent in the header of the request makes me suspect this is some kind of Python WSGI web application. Such applications, from my experience, are an absolute pain to gain command execution through arbitrary file uploads due to the special way they handle paths, so I’m going to ignore this.Bruteforcing the web root with ffuf didn’t yield anything of interest, but bruteforcing for hidden subdomains found one (I had to filter out HTTP redirects as all invalid subdomains result in them);Going to the link, I was told access is only allowed to localhost;Judging from the name of the box, this makes me suspect I need to do some request forgery to fool the web app into thinking I am connecting from localhost. Bruteforcing it’s web root found a directory named static, which is similar to the /static page found on forge.htb, except the latter contains an images directory.My first approach to get around this was to use the image upload functionality on forge.htb/upload. I tried to get web app to send a request to the admin domain, which was blocked;My next step was using special HTTP headers to fool the web app into thinking the request to http://admin.forge.htb came from a different host. It didn’t work. So I performed a full port scan on the host in hope that I missed something that may be used to access this page, like a proxy service. No new port was discovered.FootholdReplacing the subdomain in the URL upload functionality with a random string while keeping the forge.htb hostname resulted in the same URL contains blacklisted address response, which indicate the web app is probably not using it to filter submitted URLs, but rather the hostname. Since hostnames are case-insensitive, I tried to bypass the filter by changing the case of the hostname, and it worked;The web app does not appear to be validating if the contents fetched from the given URL is infact a valid image data, which allowed me to read the HTML code of the admin.forge.htb domain by curling the returned URL;Using the same trick to use the file:// protocol to read local files didn’t work. The above HTML code revealed the path /announcements. Using the URL upload trick above, the file was dumped, and was found to contain some very interesting info, including the credential user:heightofsecurity123!;Attempting to connect to the SSH service using the credential showed the SSH server is likely configured to only allow public key authentication.The contents of the admin.forge.htb/announcement page said it has a file upload function that can be invoked using HTTP request to /upload with the URL passed in the GET parameter u, so tried to use the file:// protocol via this u parameter. The upload returned a success message, but curling the file showed the protocol was blocked, and listed the protocols that are allowed;Testing the FTP protocol by giving it an FTP URL to my attack host (ftp://testuser:testpass@&amp;lt;my-IP&amp;gt;/) with test credentials, tcpdump captured an authentication attempt for the target host;Since NMAP has initially reported an FTP service on the host on port 21 as filtered, I used the credentials of user that was previously obtained to connect to the FTP service running locally on the target. It didn’t work, saying the URL contains a blacklisted address. Using the change of case trick used previously bypassed the filter;Requesting the generated link with curl, I got the contents of the root directory of the FTP service;The presence of the user.txt file indicate the FTP root directory is the home directory of a user. And since the SSH service on the host is blocking password authentication, I’m guessing the user will have public key authentication configured. So I crafted a request for .ssh/id_rsa, which will be the private key file of the user, and it worked;I saved the SSH private key as id_rsa, chmod 600 it, and gained access to the box as user over SSH;PrivEscInside the box as user, I have sudo permission to run a python program;The code of the script;#!/usr/bin/env python3import socketimport randomimport subprocessimport pdbport = random.randint(1025, 65535)try:    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    sock.bind((&#39;127.0.0.1&#39;, port))    sock.listen(1)    print(f&#39;Listening on localhost:{port}&#39;)    (clientsock, addr) = sock.accept()    clientsock.send(b&#39;Enter the secret passsword: &#39;)    if clientsock.recv(1024).strip().decode() != &#39;secretadminpassword&#39;:        clientsock.send(b&#39;Wrong password!\\n&#39;)    else:        clientsock.send(b&#39;Welcome admin!\\n&#39;)        while True:            clientsock.send(b&#39;\\nWhat do you wanna do: \\n&#39;)            clientsock.send(b&#39;[1] View processes\\n&#39;)            clientsock.send(b&#39;[2] View free memory\\n&#39;)            clientsock.send(b&#39;[3] View listening sockets\\n&#39;)            clientsock.send(b&#39;[4] Quit\\n&#39;)            option = int(clientsock.recv(1024).strip())            if option == 1:                clientsock.send(subprocess.getoutput(&#39;ps aux&#39;).encode())            elif option == 2:                clientsock.send(subprocess.getoutput(&#39;df&#39;).encode())            elif option == 3:                clientsock.send(subprocess.getoutput(&#39;ss -lnt&#39;).encode())            elif option == 4:                clientsock.send(b&#39;Bye\\n&#39;)                breakexcept Exception as e:    print(e)    pdb.post_mortem(e.__traceback__)finally:    quit()Program LogicThe program, when executed, binds to a random port. When a connection is received, it asks for a password, which must be secretadminpassword. If the password is incorrect, the connection is killed. If the password is correct, user is given a bunch of options of the task they wish to perform. This choice is casted to an integer using int(), and the selected action, if valid, is performed. Should an exception occur during all this, the exception will be printed (print(e)), and a pdb (Python Debugger) shell will be spawned in the command prompt that invoked the script.ExploitA pdb shell is a powerful shell that can be used to access all the functionalities of the python interpreter. Since user input is directly casted to an integer, and any error will result in the pdb shell being launched, I was able to exploit this by simply connecting to the listener created by the script from another terminal using the locally installed netcat program, provide the valid password, and give a non-numeric input when asked for the task to perform;Summary  Identified running services using nmap  Found an image upload functionality on the web page that does not validate data, and accepts URL uploads.  Discovered a hidden subdomain admin.forge.htb by fuzzing with ffuf. Access to the domain is only allowed to local hosts.          Exploited the URL upload functionality in the main forge.htb site to access the admin.forge.htb domain.      Dumping the HTML source of the homepage of the admin domain revealed a link to /announcements, which was found to contain an FTP credential for a user named user.      Exploited the URL upload in admin.forge.htb/upload to read the SSH private key of the user over FTP.        Inside the box as user;          user has access to run /opt/remote-manage.py as root using sudo      Exploited the python script to drop into a pdb shell for privesc.      "
+  },
+  
+  {
     "title": "Previse - HackTheBox",
-    "url": "/posts/hackthebox/Previse.html",
+    "url": "/posts/hackthebox/previse.html",
     "categories": "hackthebox",
     "tags": "linux, web, execute after redirect, broken access control, static analysis, command injection, hash cracking, path tampering",
     "date": "2022-01-16 00:00:00 +0100",
@@ -12,7 +22,7 @@
   
   {
     "title": "Writer - HackTheBox",
-    "url": "/posts/hackthebox/Writer.html",
+    "url": "/posts/hackthebox/writer.html",
     "categories": "hackthebox",
     "tags": "linux, web, sql injection, sqlmap, authentication bypass, command injection, enumeration, static analysis, arbitrary file upload, hash cracking, apt",
     "date": "2021-12-11 00:00:00 +0100",
@@ -22,7 +32,7 @@
   
   {
     "title": "BountyHunter - HackTheBox",
-    "url": "/posts/hackthebox/BountyHunter.html",
+    "url": "/posts/hackthebox/bountyhunter.html",
     "categories": "hackthebox",
     "tags": "linux, web, xxe, lfi, static analysis, python, command injection, custom exploitation",
     "date": "2021-11-18 00:00:00 +0100",
@@ -32,7 +42,7 @@
   
   {
     "title": "Seal - HackTheBox",
-    "url": "/posts/hackthebox/Seal.html",
+    "url": "/posts/hackthebox/seal.html",
     "categories": "hackthebox",
     "tags": "linux, web, apache tomcat, web proxy, git, gitbucket, open signup, path normalization, ansible playbook",
     "date": "2021-11-13 00:00:00 +0100",
@@ -42,7 +52,7 @@
   
   {
     "title": "Synack Red Team 5 CTF",
-    "url": "/posts/ctf/Synack5.html",
+    "url": "/posts/ctf/synack5.html",
     "categories": "ctf",
     "tags": "ctf, synack red team, hackthebox, jeopardy, template injection, sql injection, command injection, rsa, pwn, traffic analysis, static analysis, reversing",
     "date": "2021-11-08 00:00:00 +0100",
@@ -52,7 +62,7 @@
   
   {
     "title": "Explore - HackTheBox",
-    "url": "/posts/hackthebox/Explore.html",
+    "url": "/posts/hackthebox/explore.html",
     "categories": "hackthebox",
     "tags": "android, web, es file explorer, adb, tunneling",
     "date": "2021-10-30 00:00:00 +0100",
@@ -62,7 +72,7 @@
   
   {
     "title": "Cap - HackTheBox",
-    "url": "/posts/hackthebox/Cap.html",
+    "url": "/posts/hackthebox/cap.html",
     "categories": "hackthebox",
     "tags": "linux, traffic analysis, custom exploitation",
     "date": "2021-10-30 00:00:00 +0100",
@@ -72,7 +82,7 @@
   
   {
     "title": "Dynstr - HackTheBox",
-    "url": "/posts/hackthebox/Dynstr.html",
+    "url": "/posts/hackthebox/dynstr.html",
     "categories": "hackthebox",
     "tags": "linux, web, dns, command injection, static analysis, custom exploitation",
     "date": "2021-10-20 00:00:00 +0100",
