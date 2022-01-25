@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-01-23T19:42:36+01:00</updated>
+  <updated>2022-01-25T07:04:15+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,45 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Exploiting Web Applications with MITM Proxy and Elinks</title>
+    <link href="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html" rel="alternate" type="text/html" title="Exploiting Web Applications with MITM Proxy and Elinks" />
+    <published>2022-01-25T00:00:00+01:00</published>
+  
+    <updated>2022-01-25T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/tutorial/mitmproxy.html</id>
+    <content src="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="tutorial" />
+    
+  
+
+  
+    <summary>
+      
+      In this little tutorial, I demonstrate how to use mitmproxy and elinks to exploit a vulnerable web app completely from the command line. The target used is DVWA (Damn Vulnerable Web Application), which is running locally in a docker container.
+
+
+
+The Tools
+
+
+Elinks is a console-based web browser that can be used to browse through websites from the command line. From the manual;
+
+
+  ELinks is a ...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -131,35 +170,6 @@
       Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.
 
 The privesc is a CTF-like challenge, where a custom script used to val...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Seal - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/seal.html" rel="alternate" type="text/html" title="Seal - HackTheBox" />
-    <published>2021-11-13T00:00:00+01:00</published>
-  
-    <updated>2021-11-13T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/seal.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/seal.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page...
     </summary>
   
 
