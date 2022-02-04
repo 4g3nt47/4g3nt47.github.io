@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-01-25T11:07:04+01:00</updated>
+  <updated>2022-02-04T08:50:53+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Horizontall - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" />
+    <published>2022-02-04T00:00:00+01:00</published>
+  
+    <updated>2022-02-04T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/horizontall.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -139,37 +168,6 @@ Elinks is a console-based web browser that can be used to browse through website
     <summary>
       
       Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw a...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>BountyHunter - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html" rel="alternate" type="text/html" title="BountyHunter - HackTheBox" />
-    <published>2021-11-18T00:00:00+01:00</published>
-  
-    <updated>2021-11-18T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.
-
-The privesc is a CTF-like challenge, where a custom script used to val...
     </summary>
   
 

