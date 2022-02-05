@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-02-04T08:50:53+01:00</updated>
+  <updated>2022-02-05T19:10:09+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -22,9 +22,9 @@
   <entry>
     <title>Horizontall - HackTheBox</title>
     <link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" />
-    <published>2022-02-04T00:00:00+01:00</published>
+    <published>2022-02-05T00:00:00+01:00</published>
   
-    <updated>2022-02-04T00:00:00+01:00</updated>
+    <updated>2022-02-05T00:00:00+01:00</updated>
   
     <id>https://4g3nt47.github.io/posts/hackthebox/horizontall.html</id>
     <content src="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
@@ -41,7 +41,7 @@
   
     <summary>
       
-      Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as...
+      Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will gi...
     </summary>
   
 

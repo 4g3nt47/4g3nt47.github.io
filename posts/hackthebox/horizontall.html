@@ -12,19 +12,19 @@
 <meta name="generator" content="Jekyll v4.2.1" />
 <meta property="og:title" content="Horizontall - HackTheBox" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root." />
-<meta property="og:description" content="Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root." />
+<meta name="description" content="Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root." />
+<meta property="og:description" content="Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root." />
 <link rel="canonical" href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
 <meta property="og:url" content="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
 <meta property="og:site_name" content="4g3nt47" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2022-02-04T00:00:00+01:00" />
+<meta property="article:published_time" content="2022-02-05T00:00:00+01:00" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Horizontall - HackTheBox" />
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"Horizontall - HackTheBox","dateModified":"2022-02-04T00:00:00+01:00","datePublished":"2022-02-04T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/horizontall.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/horizontall.html"},"description":"Cap is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Horizontall - HackTheBox","dateModified":"2022-02-05T00:00:00+01:00","datePublished":"2022-02-05T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/horizontall.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/horizontall.html"},"description":"Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Horizontall - HackTheBox | 4g3nt47
   </title><!--
@@ -176,16 +176,16 @@
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeago"
-    date="2022-02-04 00:00:00 +0100"data-toggle="tooltip"
+    date="2022-02-05 00:00:00 +0100"data-toggle="tooltip"
       data-placement="bottom"
-      title="Fri, Feb  4, 2022, 12:00 AM +0100">Feb  4</em>
+      title="Sat, Feb  5, 2022, 12:00 AM +0100">Feb  5</em>
 </span>
 
       <!-- lastmod date --><!-- read time --><!--
   Calculate the post's reading time, and display the word count in tooltip
  --><!-- words per minute  --><!-- return element -->
 <span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="923 words">
+  title="926 words">
   <em>5 min</em> read</span>
 <!-- page views --></div>
 
@@ -194,7 +194,7 @@
 </div> <!-- .post-meta -->
 
 <div class="post-content">
-  <p><strong>Cap</strong> is an easy linux box. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+  <p><strong>Horizontall</strong> is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
 <h3 id="about">About<a href="#about" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
