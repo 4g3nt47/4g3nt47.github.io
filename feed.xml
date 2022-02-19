@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-02-19T17:56:30+01:00</updated>
+  <updated>2022-02-19T18:00:33+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -41,12 +41,11 @@
   
     <summary>
       
-      Cap is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.
+      Bolt is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.
 
 
 
 Info
-
 
 
 
