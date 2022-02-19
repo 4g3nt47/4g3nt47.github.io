@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-02-13T12:14:39+01:00</updated>
+  <updated>2022-02-19T17:56:30+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,46 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Bolt - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" />
+    <published>2022-02-19T00:00:00+01:00</published>
+  
+    <updated>2022-02-19T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/bolt.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/bolt.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Cap is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.
+
+
+
+Info
+
+
+
+
+
+
+...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -139,35 +179,6 @@ Elinks is a console-based web browser that can be used to browse through website
     <summary>
       
       Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Writer - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/writer.html" rel="alternate" type="text/html" title="Writer - HackTheBox" />
-    <published>2021-12-11T00:00:00+01:00</published>
-  
-    <updated>2021-12-11T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/writer.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/writer.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw a...
     </summary>
   
 

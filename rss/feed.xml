@@ -1,4 +1,306 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-02-13T12:14:39+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Horizontall - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" /><published>2022-02-05T00:00:00+01:00</published><updated>2022-02-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/horizontall</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/horizontall.html"><![CDATA[<p><strong>Horizontall</strong> is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-02-19T17:56:30+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Bolt - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" /><published>2022-02-19T00:00:00+01:00</published><updated>2022-02-19T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bolt</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bolt.html"><![CDATA[<p><strong>Cap</strong> is a very interesting <em>medium</em> linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to <strong>SSTI</strong>. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a <em>chrome</em> extension that dumps GPG keys into it’s logs on disk.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20211022084723.png" alt="" /></p>
+
+<p><img src="/assets/img/20211022084802.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+<p><br /></p>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Fri Oct 22 08:49:31 2021 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.114
+Increasing send delay for 10.10.11.114 from 0 to 5 due to 39 out of 129 dropped probes since last increase.
+Nmap scan report for 10.10.11.114
+Host is up (0.22s latency).
+Not shown: 997 closed ports
+PORT    STATE SERVICE  VERSION
+22/tcp  open  ssh      OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+80/tcp  open  http     nginx 1.18.0 (Ubuntu)
+|_http-favicon: Unknown favicon MD5: 76362BB7970721417C5F484705E5045D
+| http-methods: 
+|_  Supported Methods: HEAD OPTIONS GET
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title:     Starter Website -  About 
+443/tcp open  ssl/http nginx 1.18.0 (Ubuntu)
+|_http-favicon: Unknown favicon MD5: 82C6406C68D91356C9A729ED456EECF4
+| http-methods: 
+|_  Supported Methods: GET HEAD POST
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+| http-title: Passbolt | Open source password manager for teams
+|_Requested resource was /auth/login?redirect=%2F
+| ssl-cert: Subject: commonName=passbolt.bolt.htb/organizationName=Internet Widgits Pty Ltd/stateOrProvinceName=Some-State/countryName=AU
+| Issuer: commonName=passbolt.bolt.htb/organizationName=Internet Widgits Pty Ltd/stateOrProvinceName=Some-State/countryName=AU
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2021-02-24T19:11:23
+| Not valid after:  2022-02-24T19:11:23
+| MD5:   3ac3 4f7c ee22 88de 7967 fe85 8c42 afc6
+|_SHA-1: c606 ca92 404f 2f04 6231 68be c4c4 644f e9ed f132
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Fri Oct 22 08:50:21 2021 -- 1 IP address (1 host up) scanned in 50.17 seconds
+</code></pre>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+<p><br /></p>
+
+<p>The website presents itself as <em>a large User Interface Kit that will help you prototype and design beautiful, creative and modern websites</em>.</p>
+
+<p><img src="/assets/img/20211022085623.png" alt="" /></p>
+
+<p>Detected web technologies;</p>
+
+<p><img src="/assets/img/20211022090455.png" alt="" /></p>
+
+<p><img src="/assets/img/20211022085700.png" alt="" /></p>
+
+<p>The footer of the box mentioned the name of the box authors, so this is likely a custom website;</p>
+
+<p><img src="/assets/img/20211022085848.png" alt="" /></p>
+
+<p>Requesting a wrong path in the host returned an interesting title;</p>
+
+<p><img src="/assets/img/20211022092454.png" alt="" /></p>
+
+<p>Bruteforcing the web root with <code class="language-plaintext highlighter-rouge">ffuf</code>, I found a few paths;</p>
+
+<p><img src="/assets/img/20211022085952.png" alt="" /></p>
+
+<p>Going to the contact page, I found a web form and two email addresses; <code class="language-plaintext highlighter-rouge">support@bolt.htb</code>, and <code class="language-plaintext highlighter-rouge">sales@bolt.htb</code>. Using the contact form generated a GET request with no parameters. Checking the source of the form showed that the form is not complete;</p>
+
+<p><img src="/assets/img/20211022091431.png" alt="" /></p>
+
+<p>Checking the pricing page showed an interesting entry;</p>
+
+<p><img src="/assets/img/20211022091714.png" alt="" /></p>
+
+<p>Going to the <code class="language-plaintext highlighter-rouge">/download</code> path gave me a link to download a docker image at http://bolt.htb/uploads/image.tar</p>
+
+<p>At the <code class="language-plaintext highlighter-rouge">/services</code> page there is a field to submit an email address to “get access to freebies &amp; premium products”. This form also doesn’t do anything.</p>
+
+<p>The page at <code class="language-plaintext highlighter-rouge">/login</code> provides an authentication form. Manual fuzzing using burp’s repeater didn’t yield anything. But there is an option to register an account on the page;</p>
+
+<p><img src="/assets/img/20211022093706.png" alt="" /></p>
+
+<p>Sending a request to create an account, however, resulted in a <strong>500 Internal Server Error</strong>;</p>
+
+<p><img src="/assets/img/20211022094030.png" alt="" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">ffuf</code> previously found two pages <code class="language-plaintext highlighter-rouge">/register</code> and <code class="language-plaintext highlighter-rouge">sign-up</code> that I assumed are the same pages because their contents looked similar. Both are used to create an account, but while <code class="language-plaintext highlighter-rouge">/register</code> gave a <strong>500</strong> HTTP error, <code class="language-plaintext highlighter-rouge">/sign-up</code> gave a different response;</p>
+
+<p><img src="/assets/img/20211022094844.png" alt="" /></p>
+
+<p><img src="/assets/img/20211022094909.png" alt="" /></p>
+
+<p>Changing the request method from POST to GET solved the <strong>500</strong> error, but I was not able to login using the credentials submitted, so this functionality is probably not fully implemented too.</p>
+
+<p>Going to the <code class="language-plaintext highlighter-rouge">/check-email</code> path discovered earlier, I got this;</p>
+
+<p><img src="/assets/img/20211022100017.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="passbolt">Passbolt</h3>
+<p><br /></p>
+
+<p>NMAP earlier identified a web service on port <strong>443</strong> (HTTPs) with the name <strong>passbolt.bolt.htb</strong>. Loading the page, it presents itself as an open source password manager;</p>
+
+<p><img src="/assets/img/20211022102528.png" alt="" /></p>
+
+<p>Submitting email addresses in the field gave the error;</p>
+
+<p><img src="/assets/img/20211022104014.png" alt="" /></p>
+
+<p>I found the <em>GitHub</em> repo of the web app at https://github.com/passbolt/passbolt_api. The applications looks pretty solid, so I decided to ignore it.</p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="docker">Docker</h3>
+<p><br /></p>
+
+<p>I downloaded the docker image from the site at http://bolt.htb/download. The image is a <em>.tar</em> archive, which is the format used to export docker containers. Using the <code class="language-plaintext highlighter-rouge">docker import</code> command, I was able to import the docker image on my local host, but I was unable to run any command on it, saying <strong>executable file not found in $PATH</strong> for relative paths, or <strong>no such file or directory</strong> for absolute paths;</p>
+
+<p><img src="/assets/img/20211023093435.png" alt="" /></p>
+
+<p>Since the image is just a <em>.tar</em> archive of the file system of the docker container, I extracted it using the command <code class="language-plaintext highlighter-rouge">tar -xvf image.tar</code> and go through the extracted files manually. I found the source code of the web application, and an <em>sqlite</em> database containing the password hash of the user <code class="language-plaintext highlighter-rouge">admin@bolt.htb</code>;</p>
+
+<p><img src="/assets/img/20211023093758.png" alt="" /></p>
+
+<p>Feeding the hash to <code class="language-plaintext highlighter-rouge">john</code>, I was able to crack it;</p>
+
+<p><img src="/assets/img/20211023094127.png" alt="" /></p>
+
+<p>Giving the email address to the <em>passbolt</em> domain said the email was not associated with any approved user in the domain. But the credential worked on the main <em>bolt.htb</em> domain, and I gained access to the admin dashboard;</p>
+
+<p><img src="/assets/img/20211023100755.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="foothold">Foothold</h3>
+<p><br /></p>
+
+<p>Most of the links in the admin dashboard are dead. I did find a few messages exchanged between some <em>Alexander Pierce</em> and <em>Sarah Bullock</em> in which they were talking about a security concern regarding emails;</p>
+
+<p><img src="/assets/img/20211023150957.png" alt="" /></p>
+
+<p>Sarah saying the demo is restricted to invites only made me believe this is the reason I couldn’t create an account on the web application. Going through the source code of the web application extracted from the docker image, the file <code class="language-plaintext highlighter-rouge">app/base/routes.py</code> was found to contain the code used to create an account. The code validates account creation requests using the parmater <code class="language-plaintext highlighter-rouge">invite_code</code> that must be equal to <code class="language-plaintext highlighter-rouge">XNSS-HSJW-3NGU-8XTJ</code>;</p>
+
+<p><img src="/assets/img/20211023151905.png" alt="" /></p>
+
+<p>So I made a request to create an account through <em>Burp Suite</em> and added the invite code, but it still gave me a <strong>500</strong> error. Testing the invite code on the <strong>passbolt.bolt.htb</strong> domain also didn’t work. This didn’t make much sense, and made me believe the source code I am auditing may actually be for a different service. So I used <code class="language-plaintext highlighter-rouge">ffuf</code> to fuzz for hidden subdomains again, and I got 2 hits (the last 3 were due to <code class="language-plaintext highlighter-rouge">ffuf</code> bugging out after I hit <code class="language-plaintext highlighter-rouge">CTRL + C</code>);</p>
+
+<p><img src="/assets/img/20211023162622.png" alt="" /></p>
+
+<p>Going to the <strong>demo</strong> page, I got a login form;</p>
+
+<p><img src="/assets/img/20211023205421.png" alt="" /></p>
+
+<p>Although the form looks much like the one on the <strong>bolt.htb/login</strong> page, I was unable to login using the credential of <code class="language-plaintext highlighter-rouge">admin:deadbolt</code>. The site allows for account registration that accepts invite code, and I was able to create an account using the invite code previously obtained. The form required an email address ending with <strong>@bolt.htb</strong>, and I was able to supply a fake one as the web app does not appear to be validating emails. After logging in, I got a similar dashboard to the previous one, but this one has more features;</p>
+
+<p><img src="/assets/img/20211023210406.png" alt="" /></p>
+
+<p>The page at http://mail.bolt.htb also gave me a login form. Using the credentials of <code class="language-plaintext highlighter-rouge">admin:deadbolt</code>, I got an error message that says <strong>Connection to storage server failed</strong>. Googling this error showed that it happens usually due to configuration errors. Using the test credentials I used to access <strong>demo</strong> subdomain, I was able to login to the webmail application. This means the web app is creating an email account for every user that signed up on the demo page;</p>
+
+<p><img src="/assets/img/20211023211507.png" alt="" /></p>
+
+<p>Earlier I read some messages exchanged between <em>Alexander Pierce</em> and <em>Sarah Bullock</em> about a security concern regarding emails, so I decided to focus on this webmail. The webmail was identified as <strong>RoundCube 1.4.6</strong>;</p>
+
+<p><img src="/assets/img/20211023212233.png" alt="" /></p>
+
+<p>I found a couple of links online saying this version of the webmail is vulnerable to XSS. My first thought was to target other users through emails, but I can’t send an email as it keeps giving me an <code class="language-plaintext highlighter-rouge">SMTP Error (-1): Connection to server failed</code>.</p>
+
+<p>Going back to the <strong>demo</strong> portal, I have an option to update my profile, which sends a confirmation email to my account in the <strong>mail</strong> portal with a link to click to confirm changes. So I decided to look at how the functionality is implemented in the extracted source code, and found something very interesting. The way the web application generates the email sent to users to inform them about the changes made could be vulnerable to <em>Server Side Template Injection (SSTI)</em>;</p>
+
+<p><img src="/assets/img/20211024094415.png" alt="" /></p>
+
+<p>As can be seen in the image above, the <strong>name</strong> submitted during profile edit is injected directly into the template in the file <code class="language-plaintext highlighter-rouge">templates/emails/update-name.html</code>;</p>
+
+<p><img src="/assets/img/20211024094617.png" alt="" /></p>
+
+<p>Testing the <strong>name</strong> field using the SSTI payload <code class="language-plaintext highlighter-rouge">name{{10*10}}</code>, the web app evaluated the <code class="language-plaintext highlighter-rouge">{{10*10}}</code> expression and replaced it with the result, which is <code class="language-plaintext highlighter-rouge">100</code>;</p>
+
+<p><img src="/assets/img/20211024094757.png" alt="" /></p>
+
+<p>Multiple attempts to execute code or read local files kept giving me a <strong>500 Internal server error</strong>. Using the <code class="language-plaintext highlighter-rouge">{{config.items()}}</code> payload, I obtained some data about the service;</p>
+
+<p><img src="/assets/img/20211024102518.png" alt="" /></p>
+
+<p>Using the payload <code class="language-plaintext highlighter-rouge">{{"".__class__.__mro__[1].__subclasses__()}}</code>, I dumped the accessible classes, and found <code class="language-plaintext highlighter-rouge">subprocess.Popen</code>, which can be used to execute system commands;</p>
+
+<p><img src="/assets/img/20211024114602.png" alt="" /></p>
+
+<p>The index of <code class="language-plaintext highlighter-rouge">subprocess.Popen</code> in the returned list was found to be <strong>222</strong>. This is all the info that is needed to gain code execution on the server. After testing using a local python3 installation, I was able to gain command execution on the host using the payload;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="p">{{</span><span class="s">""</span><span class="p">.</span><span class="n">__class__</span><span class="p">.</span><span class="n">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">__subclasses__</span><span class="p">()[</span><span class="mi">222</span><span class="p">].</span><span class="n">__call__</span><span class="p">([</span><span class="s">"ping"</span><span class="p">,</span> <span class="s">"-c"</span><span class="p">,</span> <span class="s">"10"</span><span class="p">,</span> <span class="s">"10.10.14.95"</span><span class="p">])}}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/20211024120326.png" alt="" /></p>
+
+<p>Directly injection a bash reverse shell kept failing for some reasons, so I just dropped a bash script on the target host using <code class="language-plaintext highlighter-rouge">curl</code>, and ran it;</p>
+
+<p><img src="/assets/img/20211024124315.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<p>Inside the host as <code class="language-plaintext highlighter-rouge">www-data</code>, I found two local users: <strong>eddie</strong>, and <strong>clark</strong>. I obtained credentials for the <em>RoundCube</em> and <em>demo</em> web apps in their configration files for the local MySQL server, but nothing of interest was found inside.</p>
+
+<p>There is an IMAP service running locally, so I started testing the credentials I obtained in the docker image and the configuration files of the web apps. For the user <strong>admin</strong> account, I got an internal error;</p>
+
+<p><img src="/assets/img/20211024203825.png" alt="" /></p>
+
+<p>All the other credentials I have at this point did not work for any account. So I kept going through the filesystem in hope of finding new ones, and I did. The file <code class="language-plaintext highlighter-rouge">/etc/passbolt/passbolt.php</code> contains a MySQL credential;</p>
+
+<p><img src="/assets/img/20211024213330.png" alt="" /></p>
+
+<p>Using the above credential, I got access to the database <code class="language-plaintext highlighter-rouge">passboltdb</code>. Testing for password reuse, I got access to <strong>eddie</strong>’s account;</p>
+
+<p><img src="/assets/img/20211024213942.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>The user <strong>eddie</strong> does not have <code class="language-plaintext highlighter-rouge">sudo</code> permissions to anything. Enumerating the database used by <em>passbolt</em>, I found the public GPG keys of both <strong>eddie</strong> and <strong>clark</strong>, along with a message that was encrypted with the public key of <strong>eddie</strong>, which means I need his private key to decrypt it;</p>
+
+<p><img src="/assets/img/20211025073726.png" alt="" /></p>
+
+<p>Checking his email file at <code class="language-plaintext highlighter-rouge">/var/mail/eddie</code> that I couldn’t access earlier, I saw an interesting message from <strong>clark</strong>;</p>
+
+<p><img src="/assets/img/20211024214358.png" alt="" /></p>
+
+<p>There is a <em>Google Chrome</em> browser at <code class="language-plaintext highlighter-rouge">/opt/chrome</code>, and the SSH server has X11 forwarding enabled. So I launched chrome on the host, and saw a plugin icon for <em>passbolt</em> plugin. Clicking on it launched the plugin, but it stuck like that, saying <code class="language-plaintext highlighter-rouge">Connecting to your account</code>.</p>
+
+<p>Since <strong>clark</strong> has told <strong>eddie</strong> to backup his private key, I assumed the private key is saved somewhere on disk, so I searched the whole filesystem using <code class="language-plaintext highlighter-rouge">grep</code> for GPG private key files, and found a match at <code class="language-plaintext highlighter-rouge">/home/eddie/.config/google-chrome/Default/Local Extension Settings/didegimhafipceonhjepacocaffmoppf/000003.log</code>. I shipped the file to my attack host for analysis. Going through the file in <code class="language-plaintext highlighter-rouge">vim</code>, I was able to extract a private key belonging to <strong>eddie</strong>.</p>
+
+<p>Attempt to import the private key using <code class="language-plaintext highlighter-rouge">gpg</code> failed because the key file is password-protected. I tried all the passwords discovered earlier, and none worked. So I used <code class="language-plaintext highlighter-rouge">gpg2john</code> to convert the key file to a hash that can be bruteforced by <code class="language-plaintext highlighter-rouge">john</code>, and bruteforced it with <code class="language-plaintext highlighter-rouge">rockyou.txt</code>. It took a while, but the password was cracked;</p>
+
+<p><img src="/assets/img/20211025170328.png" alt="" /></p>
+
+<p>Using the password, I was able to import the private key file, and decrypt the message;</p>
+
+<p><img src="/assets/img/20211025170709.png" alt="" /></p>
+
+<p>Using the credential highlighted above, I was able to access the account of the root user;</p>
+
+<p><img src="/assets/img/20211025171008.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified running services using <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Found a local installation of <em>Passbolt</em> password manager at https://passbolt.bolt.htb</li>
+  <li>Enumerated the docker image provided by the site, and found a credential for <em>admin@bolt.htb</em>, which gave me access to the admin dashboard at http://bolt.htb/admin/home</li>
+  <li>Found an invite code in the source code of http://demo.bolt.htb, which I used to create an account on http://demo.bolt.htb, and gained access to the admin dashboard.
+    <ul>
+      <li>Sigining up on the <em>demo</em> portal auto-creates an account on <em>mail</em> portal.</li>
+      <li>Exploited an SSTI flaw on <em>mail</em> portal to gain a foothold into the box as <code class="language-plaintext highlighter-rouge">www-data</code>.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <code class="language-plaintext highlighter-rouge">www-data</code>;
+    <ul>
+      <li>Identified 2 local users; <strong>eddie</strong>, and <strong>clark</strong></li>
+      <li>Found MySQL credentials used by <em>Passbolt</em> in <code class="language-plaintext highlighter-rouge">/etc/passbolt/passbolt.php</code>, which gave me access to the account of <strong>eddie</strong>, and the user flag.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <strong>eddie</strong>;
+    <ul>
+      <li>Found an email from <strong>clark</strong> at <code class="language-plaintext highlighter-rouge">/var/mail/eddie</code>, advising <strong>eddie</strong> to backup his GPG key.</li>
+      <li>Found a message in the table <code class="language-plaintext highlighter-rouge">secrets</code> in the MySQL database used by <em>passbolt</em>. The message was encrypted using <strong>eddie</strong>’s public key.</li>
+      <li>Found the private key of <strong>eddie</strong> inside a log file created by Chrome inside his home directory.</li>
+      <li>The private key was password protected, so I had to crack it using <code class="language-plaintext highlighter-rouge">john</code>.</li>
+      <li>Finally, I used the cracked private key to decrypt the encrypted message, which was found to contain a password. The password gave access to the <strong>root</strong> account.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="docker" /><category term="gpg" /><category term="ssti" /><category term="hash cracking" /><category term="passbolt" /><category term="webmail" /><category term="roundcube" /><summary type="html"><![CDATA[Cap is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.]]></summary></entry><entry><title type="html">Horizontall - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" /><published>2022-02-05T00:00:00+01:00</published><updated>2022-02-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/horizontall</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/horizontall.html"><![CDATA[<p><strong>Horizontall</strong> is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
 <h3 id="about">About</h3>
 <p><br /></p>
@@ -2255,161 +2557,4 @@ Looking at the code file permissions, I noticed it those not have any special pe
       <li>Launching the python CLI shell and calling the <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> method granted me root privileges, indicating the python3 binary likely has SUID bit enabled.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="traffic analysis" /><category term="python" /><category term="custom exploitation" /><category term="idor" /><summary type="html"><![CDATA[Cap is a very easy linux box. It has a web service that allows you to view network interfaces as the output of ifconfig, and the ability to briefly capture packets for 5 seconds (and download the .pcap file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an IDOR vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have SUID permissions, which indicate the python interpreter may actually be running as root.]]></summary></entry><entry><title type="html">Explore - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/explore.html" rel="alternate" type="text/html" title="Explore - HackTheBox" /><published>2021-10-30T00:00:00+01:00</published><updated>2021-10-30T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/explore</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/explore.html"><![CDATA[<p><strong>Explore</strong> is a box that’s first of it’s kind. It is (I think) the first android box ever released on Hack The Box. For foothold, you need to use an exploit for <em>ES File Explorer</em> to read arbitrary files on the device. This will lead you to an image file that contains a credential, which grants access to the box over SSH. Once in, there is an ADB service running locally on port <strong>5555</strong>, which you can connect to using the ADB tool and elevate to root.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<ul>
-  <li><em>OS</em> - Android</li>
-  <li><em>Difficulty</em> - Easy</li>
-  <li><em>Points</em> - 20</li>
-  <li><em>Release</em> - 26/Jun/2021</li>
-  <li><em>IP</em> - 10.10.10.247</li>
-</ul>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<pre><code class="language-raw">Nmap scan report for 10.10.10.247
-Host is up (0.25s latency).
-
-PORT      STATE    SERVICE VERSION
-2222/tcp  open     ssh     (protocol 2.0)
-| fingerprint-strings: 
-|   NULL: 
-|_    SSH-2.0-SSH Server - Banana Studio
-| ssh-hostkey: 
-|_  2048 71:90:e3:a7:c9:5d:83:66:34:88:3d:eb:b4:c7:88:fb (RSA)
-5555/tcp  filtered freeciv
-59777/tcp open     http    Bukkit JSONAPI httpd for Minecraft game server 3.6.0 or older
-|_http-title: Site doesn't have a title (text/plain).
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port2222-TCP:V=7.70%I=7%D=10/29%Time=617C5151%P=x86_64-pc-linux-gnu%r(N
-SF:ULL,24,"SSH-2\.0-SSH\x20Server\x20-\x20Banana\x20Studio\r\n");
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-</code></pre>
-
-<h4 id="services">Services</h4>
-
-<ul>
-  <li>SSH server on port <strong>2222</strong></li>
-  <li>HTTP server on port 59777
-<img src="/assets/img/20210924184841.png" alt="" /></li>
-  <li>Port 5555 - non-responsive.</li>
-</ul>
-
-<h4 id="web-server">Web Server</h4>
-
-<p>Blank web page with no directory listing.</p>
-
-<p><img src="/assets/img/20210924185727.png" alt="" /></p>
-
-<p>Discovered folder <code class="language-plaintext highlighter-rouge">init/</code> showing some error:</p>
-
-<p><img src="/assets/img/20210924185802.png" alt="" /></p>
-
-<p>Fuzzing the <code class="language-plaintext highlighter-rouge">init/</code> folder didn’t reveal anything of importance. However, continuous fuzzing of the root directory with <strong>ffuf</strong> found some folders;</p>
-
-<p><img src="/assets/img/20210924191505.png" alt="" /></p>
-
-<p>The above marked folders are commonly found in the root of android devices. This was confirmed by making a request to a special folder found in the internal storage of all android devices;</p>
-
-<p><img src="/assets/img/20210924191734.png" alt="" /></p>
-
-<p>Since internal storage is the home of an android user, request to <code class="language-plaintext highlighter-rouge">user.txt</code> inside the <code class="language-plaintext highlighter-rouge">/sdcard</code> revealed the user flag;</p>
-
-<p><img src="/assets/img/20210926165521.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="foothold">Foothold</h3>
-<p><br /></p>
-
-<p>My initial target of choice for foothold is the SSH server running on port 2222. It has been identified as <strong>SSH Server Banana Studio</strong> (<strong>net.xnano.android.sshserver</strong>) in it’s service banner, and provides a username and password login. Google searches lead me to this app;</p>
-
-<p><img src="/assets/img/20210926170442.png" alt="" /></p>
-
-<p>In the descriptions, it says anonymous login with username <strong>ssh</strong> and blank password is allowed, but that didn’t work on the target;</p>
-
-<p><img src="/assets/img/20210926170612.png" alt="" /></p>
-
-<p>Installing the SSH server on an android device showed that the <strong>ssh</strong> user need to be enabled, after which I was able to login (to the test android device) with no password;</p>
-
-<p><img src="/assets/img/20210926171152.png" alt="" /></p>
-
-<p>At this point, I went back to recon, and found that the service on port <strong>59777</strong> may actually be an <strong>ES File Explorer</strong> service after a search on <code class="language-plaintext highlighter-rouge">exploitdb</code> showed an exploit that targets port <strong>59777</strong> on android. <code class="language-plaintext highlighter-rouge">searchsploit</code> doesn’t have any option to search exploit contents, atleast none that I know of, so I had to use <code class="language-plaintext highlighter-rouge">grep</code> on the path where <code class="language-plaintext highlighter-rouge">exploitdb</code> store it’s exploits;</p>
-
-<p><img src="/assets/img/20211029102150.png" alt="" /></p>
-
-<p><img src="/assets/img/20211029100850.png" alt="" /></p>
-
-<p>Using the <code class="language-plaintext highlighter-rouge">listFiles</code> command, I was able to list files on the server, but I am not sure the exploit can be used to list a specific directory;</p>
-
-<p><img src="/assets/img/20211029101012.png" alt="" /></p>
-
-<p>Testing the other commands implemented in the exploit, the <code class="language-plaintext highlighter-rouge">listPics</code> command showed an interesting file;</p>
-
-<p><img src="/assets/img/20211029101146.png" alt="" /></p>
-
-<p>Requesting the file in a browser, I got the credential <code class="language-plaintext highlighter-rouge">kristi:Kr1sT!5h@Rp3xPl0r3!</code>;</p>
-
-<p><img src="/assets/img/20210926173830.png" alt="" /></p>
-
-<p>Using the credential, I was able to get an SSH access on the device;</p>
-
-<p><img src="/assets/img/20210926174148.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>Querying for listening services showed that port <strong>5555</strong>, which NMAP reported earlier as filtered, is running;</p>
-
-<p><img src="/assets/img/20210926174558.png" alt="" /></p>
-
-<p>I then setup an SSH tunnel between my attack host and the target to allow access to the service;</p>
-
-<p><img src="/assets/img/20210926212426.png" alt="" /></p>
-
-<p>Port <strong>5555</strong> is the default port used when connecting an android device to an ADB daemon over TCP. Using the <em>ADB</em> client installed on my host, I was able to connect to the service over TCP;</p>
-
-<p><img src="/assets/img/20210926212608.png" alt="" /></p>
-
-<p>Using the <code class="language-plaintext highlighter-rouge">su</code> command, root privileges were obtained, and the root flag was found in the <code class="language-plaintext highlighter-rouge">/data</code> directory;</p>
-
-<p><img src="/assets/img/20210926212507.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified running services using NMAP.</li>
-  <li>Found a web server on port <strong>59777</strong>;
-    <ul>
-      <li>Bruteforcing with <code class="language-plaintext highlighter-rouge">gobuster</code> reveals a file structure similar to that of android devices.</li>
-      <li>Obtained user flag at <code class="language-plaintext highlighter-rouge">/sdcard/user.txt</code> since <code class="language-plaintext highlighter-rouge">/sdcard</code> is the home directory of android users.</li>
-    </ul>
-  </li>
-  <li>Tracked down the application that provide the SSH service running on the host on port <strong>2222</strong>, and installed it on an android device for testing.</li>
-  <li>Found an exploit targetting port <strong>59777</strong> on android devices in <code class="language-plaintext highlighter-rouge">exploitdb</code></li>
-  <li>Obtained SSH access on the box using the credentials of <code class="language-plaintext highlighter-rouge">kristi</code>.</li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">kristi</code>;
-    <ul>
-      <li>Setup an SSH tunnel from my attack host to the target on port <strong>5555</strong>, which is the port used by ADB.</li>
-      <li>Connect to the ADB service using <code class="language-plaintext highlighter-rouge">adb</code> installed on my host, and obtained root access using the <code class="language-plaintext highlighter-rouge">su</code> command.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="android" /><category term="web" /><category term="es file explorer" /><category term="adb" /><category term="tunneling" /><summary type="html"><![CDATA[Explore is a box that’s first of it’s kind. It is (I think) the first android box ever released on Hack The Box. For foothold, you need to use an exploit for ES File Explorer to read arbitrary files on the device. This will lead you to an image file that contains a credential, which grants access to the box over SSH. Once in, there is an ADB service running locally on port 5555, which you can connect to using the ADB tool and elevate to root.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="traffic analysis" /><category term="python" /><category term="custom exploitation" /><category term="idor" /><summary type="html"><![CDATA[Cap is a very easy linux box. It has a web service that allows you to view network interfaces as the output of ifconfig, and the ability to briefly capture packets for 5 seconds (and download the .pcap file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an IDOR vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have SUID permissions, which indicate the python interpreter may actually be running as root.]]></summary></entry></feed>
