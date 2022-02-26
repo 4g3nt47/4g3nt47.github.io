@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-02-19T18:00:33+01:00</updated>
+  <updated>2022-02-26T10:36:17+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,52 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Driver - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" />
+    <published>2022-02-26T00:00:00+01:00</published>
+  
+    <updated>2022-02-26T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/driver.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/driver.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Driver is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an SCF File Attack to capture and crack the password of a local user using responder. After cracking the hash, you can exploit the Print Nightmare vulnerability to gain a privileged access to the box.
+
+About
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+# Nmap 7.70 scan initiated Tue Oct  5 ...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -149,35 +195,6 @@ Elinks is a console-based web browser that can be used to browse through website
     <summary>
       
       Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This URL upload functionality has a filter that attempts to block SSRFs, but the filter is flawed, and could be exploited to reach another subdomain on the server that foreign hosts are not allowed to dire...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Previse - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/previse.html" rel="alternate" type="text/html" title="Previse - HackTheBox" />
-    <published>2022-01-16T00:00:00+01:00</published>
-  
-    <updated>2022-01-16T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/previse.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/previse.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. ...
     </summary>
   
 
