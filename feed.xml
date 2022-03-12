@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-03-12T07:41:41+01:00</updated>
+  <updated>2022-03-12T18:36:23+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Devzat - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/devzat.html" rel="alternate" type="text/html" title="Devzat - HackTheBox" />
+    <published>2022-03-12T00:00:00+01:00</published>
+  
+    <updated>2022-03-12T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/devzat.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/devzat.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local u...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -166,35 +195,6 @@ Elinks is a console-based web browser that can be used to browse through website
 
 
   ELinks is a ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Forge - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/forge.html" rel="alternate" type="text/html" title="Forge - HackTheBox" />
-    <published>2022-01-23T00:00:00+01:00</published>
-  
-    <updated>2022-01-23T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/forge.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/forge.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This URL upload functionality has a filter that attempts to block SSRFs, but the filter is flawed, and could be exploited to reach another subdomain on the server that foreign hosts are not allowed to dire...
     </summary>
   
 

