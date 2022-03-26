@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"Devzat - HackTheBox","dateModified":"2022-03-12T00:00:00+01:00","datePublished":"2022-03-12T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/devzat.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/devzat.html"},"description":"Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/devzat.html"},"url":"https://4g3nt47.github.io/posts/hackthebox/devzat.html","headline":"Devzat - HackTheBox","dateModified":"2022-03-12T00:00:00+01:00","datePublished":"2022-03-12T00:00:00+01:00","description":"Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Devzat - HackTheBox | 4g3nt47
   </title><!--
@@ -517,26 +517,7 @@ Service detection performed. Please report any incorrect results at https://nmap
     date="2022-03-26 00:00:00 +0100">Mar 26</em>
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Secret - HackTheBox</h3>
             <div class="text-muted small">
-              <p>
-
-Info
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-# Nmap 7.70 scan initiated Sat Oct 30 20:00:45 2021 as: nmap -sV -sC -v -oN nmap.txt 10.10.11.120
-Nmap scan report for secret.htb (10.10.11.120)
-Host is up (0.25s late...
+              <p>Secret is an easy linux box where you have to exploit a sensitive information leak in a git repo to recover a JWT secret, which allows you to forge a JWT token that gives you access to an API endpo...
               </p>
             </div>
           </div>

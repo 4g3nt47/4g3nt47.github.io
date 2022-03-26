@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-03-26T16:59:23+01:00</updated>
+  <updated>2022-03-26T17:09:19+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -41,7 +41,9 @@
   
     <summary>
       
-      
+      Secret is an easy linux box where you have to exploit a sensitive information leak in a git repo to recover a JWT secret, which allows you to forge a JWT token that gives you access to an API endpoint that’s vulnerable to command injection. Once on the box, you will be exploiting a custom SUID binary that allows for core dumping.
+
+
 
 Info
 
@@ -58,14 +60,7 @@ Recon
 
 NMAP
 
-# Nmap 7.70 scan initiated Sat Oct 30 20:00:45 2021 as: nmap -sV -sC -v -oN nmap.txt 10.10.11.120
-Nmap scan report for secret.htb (10.10.11.120)
-Host is up (0.25s latency).
-Not shown: 997 closed ports
-PORT     STATE SERVICE VERSION
-22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
-80/tcp   open  http    nginx 1.18.0 (Ubuntu)
-| http...
+# Nmap 7.70 scan initiated Sat Oct...
     </summary>
   
 
