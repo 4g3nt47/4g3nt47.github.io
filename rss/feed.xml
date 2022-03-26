@@ -1,4 +1,216 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-03-12T18:36:23+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Devzat - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/devzat.html" rel="alternate" type="text/html" title="Devzat - HackTheBox" /><published>2022-03-12T00:00:00+01:00</published><updated>2022-03-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/devzat</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/devzat.html"><![CDATA[<p><strong>Devzat</strong> is a pretty easy <em>medium</em> linux box. It starts with a website that inform you about a chat service on the host accessible on port <strong>8000</strong>. Some enumeration will yield a hidden subdomain that’s vulnerable to <em>command injection</em>. Once inside the box, there is an instance of <em>InfluxDB</em> running locally that’s vulnerable to <strong>CVE-2019-20933</strong>, which you can use to gain access to the box as another local user. Privesc involves exploiting a <em>path traversal</em> flaw in a custom code.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-03-26T16:59:23+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Secret - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/secret.html" rel="alternate" type="text/html" title="Secret - HackTheBox" /><published>2022-03-26T00:00:00+01:00</published><updated>2022-03-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/secret</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/secret.html"><![CDATA[<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20211031081337.png" alt="" /></p>
+
+<p><img src="/assets/img/20211031081355.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Sat Oct 30 20:00:45 2021 as: nmap -sV -sC -v -oN nmap.txt 10.10.11.120
+Nmap scan report for secret.htb (10.10.11.120)
+Host is up (0.25s latency).
+Not shown: 997 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+80/tcp   open  http    nginx 1.18.0 (Ubuntu)
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title: DUMB Docs
+3000/tcp open  http    Node.js (Express middleware)
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-title: DUMB Docs
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sat Oct 30 20:01:41 2021 -- 1 IP address (1 host up) scanned in 56.17 seconds
+</code></pre>
+
+<h4 id="web">Web</h4>
+
+<p><img src="/assets/img/20211031081510.png" alt="" /></p>
+
+<p><img src="/assets/img/20211031082706.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">/doc</code> path in the website provides a demo for creating and accessing accounts using the API;</p>
+
+<p><img src="/assets/img/20211031081706.png" alt="" /></p>
+
+<p>Possible credential?</p>
+
+<p><img src="/assets/img/20211031081811.png" alt="" /></p>
+
+<p>Account login;</p>
+
+<p><img src="/assets/img/20211031081837.png" alt="" /></p>
+
+<p>There is a link to download source code in the homepage;</p>
+
+<p><img src="/assets/img/20211031081959.png" alt="" /></p>
+
+<p>It is a ZIP file, which I download and extract. It contains a <code class="language-plaintext highlighter-rouge">.git</code> folder in the root, so it’s a GIT repository. Running <code class="language-plaintext highlighter-rouge">git log</code> command showed something interesting;</p>
+
+<p><img src="/assets/img/20211031082300.png" alt="" /></p>
+
+<p>So I ran the <code class="language-plaintext highlighter-rouge">git diff</code> command using the commit ID to see what changes were made, and I got the token used to sign JWT tokens as indicated by the file <code class="language-plaintext highlighter-rouge">routes/verifytoken.js</code>;</p>
+
+<p><img src="/assets/img/20211031082359.png" alt="" /></p>
+
+<p><img src="/assets/img/20211031082447.png" alt="" /></p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="rouge-code"><pre><span class="kd">const</span> <span class="nx">jwt</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">jsonwebtoken</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">header</span><span class="p">(</span><span class="dl">"</span><span class="s2">auth-token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">token</span><span class="p">)</span> <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mi">401</span><span class="p">).</span><span class="nx">send</span><span class="p">(</span><span class="dl">"</span><span class="s2">Access Denied</span><span class="dl">"</span><span class="p">);</span>
+
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">verified</span> <span class="o">=</span> <span class="nx">jwt</span><span class="p">.</span><span class="nx">verify</span><span class="p">(</span><span class="nx">token</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">TOKEN_SECRET</span><span class="p">);</span>
+        <span class="nx">req</span><span class="p">.</span><span class="nx">user</span> <span class="o">=</span> <span class="nx">verified</span><span class="p">;</span>
+        <span class="nx">next</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mi">400</span><span class="p">).</span><span class="nx">send</span><span class="p">(</span><span class="dl">"</span><span class="s2">Invalid Token</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The login API is also vulnerable to user enumeration as login attempt using a valid email with a bad password said <strong>Password is wrong</strong>, while attempt with invalid email says <strong>Email is wrong</strong>.</p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="foothold">Foothold</h3>
+<p><br /></p>
+
+<p>Using <em>Burp Suite</em>, I was able to create an account using the following request;</p>
+
+<p><img src="/assets/img/20211031084145.png" alt="" /></p>
+
+<p>Logging into the account gave me a token, which I forged on https://jwt.io using the JWT secret obtained, and changed the username to <code class="language-plaintext highlighter-rouge">theadmin</code> (the administrative username obtained by going through the source files). Using the forged token, request to <code class="language-plaintext highlighter-rouge">/api/priv</code> showed I am now the admin;</p>
+
+<p><img src="/assets/img/20211031084644.png" alt="" /></p>
+
+<p>I am now authenticated as an admin, but still have no idea how to utilise the API.</p>
+
+<p>Using the <code class="language-plaintext highlighter-rouge">package.json</code> file in the root of the repo, which contains dependencies of the project and their version numbers, I started looking for exploits online, but couldn’t find anything interesting. So I continue to enumerate previous commits using <code class="language-plaintext highlighter-rouge">git diff</code>, and found an interesting commit with the ID <code class="language-plaintext highlighter-rouge">e297a2797a5f62b6011654cf6fb6ccb6712d2d5b</code>;</p>
+
+<p><img src="/assets/img/20211031100641.png" alt="" /></p>
+
+<p>That looks like a shell command that can be exploited if I can control the value of <code class="language-plaintext highlighter-rouge">req.query.file</code>. Crafting a request in <em>Burp Suite</em> for the endpoint, I got this;</p>
+
+<p><img src="/assets/img/20211031101119.png" alt="" /></p>
+
+<p>I assumed <code class="language-plaintext highlighter-rouge">req.query</code> is used to store all queries defined in the request, so I added a GET parameter named <code class="language-plaintext highlighter-rouge">file</code> with a test value, and it got included in the command;</p>
+
+<p><img src="/assets/img/20211031101334.png" alt="" /></p>
+
+<p>Injecting an encoded bash reverse shell in the <code class="language-plaintext highlighter-rouge">file</code> parameter, I got a shell as the user <strong>dasith</strong>;</p>
+
+<p><img src="/assets/img/20211031101959.png" alt="" /></p>
+
+<p><img src="/assets/img/20211031102057.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>Can’t list sudo permissions for the user as I still don’t have his password. <code class="language-plaintext highlighter-rouge">netstat</code> showed a service running locally, which was identified as <em>MongoDB</em> using <code class="language-plaintext highlighter-rouge">telnet</code>;</p>
+
+<p><img src="/assets/img/20211031102910.png" alt="" /></p>
+
+<p>Checking the <code class="language-plaintext highlighter-rouge">.env</code> file, I got a path for the service;</p>
+
+<p><img src="/assets/img/20211031103224.png" alt="" /></p>
+
+<p>The user does not have SSH public key authentication setup, so I used <code class="language-plaintext highlighter-rouge">ssh-keygen</code> to setup one, so I can setup port-forwarding to the MongoDB service over SSH. I still got the same error when trying to access the MongoDB service over HTTP.</p>
+
+<p>After reading up on <em>MongoDB</em>, I found a cheatsheet at https://gist.github.com/michaeltreat/d3bdc989b54cff969df86484e091fd0c that helped me enumerate the service. I found a database named <code class="language-plaintext highlighter-rouge">web-auth</code> containing four (4) hashes;</p>
+
+<p><img src="/assets/img/20211031104847.png" alt="" /></p>
+
+<p><img src="/assets/img/20211031104911.png" alt="" /></p>
+
+<p>Attempt to crack the hashes using <code class="language-plaintext highlighter-rouge">john</code> was taking way too long, so I aborted it and move on. One of the hashes was eventually cracked, but didn’t give me access to anything.</p>
+
+<p>Inside <code class="language-plaintext highlighter-rouge">/opt/</code>, I found a SUID binary owned by root, and what looks like the source code. Running it, it asks for a filename, and then report some stats for the file;</p>
+
+<p><img src="/assets/img/20211031110157.png" alt="" /></p>
+
+<p>Privileges are dropped when saving results, which means I can’t write anything to protected paths. Attempts to step through the process while loading protected files using <code class="language-plaintext highlighter-rouge">strace</code> and <code class="language-plaintext highlighter-rouge">gdb</code> failed because they can’t attach to a process of higher privileges.</p>
+
+<p>Going through the source code, I noticed core dumping was enabled;</p>
+
+<p><img src="/assets/img/20211101174829.png" alt="" /></p>
+
+<p>Fuzzing the program’s input did not cause the program to crash. After taking a sanity check, I realized I could cause a program to crash and dump core by sending it a SIGSEGV (signal ID: 11). Running <code class="language-plaintext highlighter-rouge">kill -n 11 &lt;PID&gt;</code> while the program is asking where the results should be saved, I was able to crash it;</p>
+
+<p><img src="/assets/img/20211101175418.png" alt="" /></p>
+
+<p>Checking <code class="language-plaintext highlighter-rouge">/var/crash</code>, I found the crash file generated;</p>
+
+<p><img src="/assets/img/20211101175510.png" alt="" /></p>
+
+<p>After googling around, I learned that such crash files can be processed using <code class="language-plaintext highlighter-rouge">apport-unpack</code> tool, so I did;</p>
+
+<p><img src="/assets/img/20211101175648.png" alt="" /></p>
+
+<p>The file <code class="language-plaintext highlighter-rouge">CoreDump</code> was identified as the core dump;</p>
+
+<p><img src="/assets/img/20211101175813.png" alt="" /></p>
+
+<p>So I load it in the <code class="language-plaintext highlighter-rouge">gdb</code> installed on the host, and searched the memory mappings of the program using the<code class="language-plaintext highlighter-rouge">find</code> command, and manually go through the stack using <code class="language-plaintext highlighter-rouge">x/s &lt;some-address&gt;</code>, but could only locate the name of the file (<code class="language-plaintext highlighter-rouge">/root/.ssh/id_rsa</code>) that was given to the SUID binary before the crash. With the help of the <code class="language-plaintext highlighter-rouge">strings</code> command-line tool, I was able to extract the private key of <code class="language-plaintext highlighter-rouge">root</code> (which was the file given to the binary before the crash);</p>
+
+<p><img src="/assets/img/20211101180210.png" alt="" /></p>
+
+<p>I used the key to gain access to the box as <code class="language-plaintext highlighter-rouge">root</code> over SSH;</p>
+
+<p><img src="/assets/img/20211101180443.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified running services with <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Used the documentation to create an account on the web API.</li>
+  <li>Found the JWT token signing key in a previous commit in the source files using <code class="language-plaintext highlighter-rouge">git diff</code>, and used it to forge a token for the admin user.</li>
+  <li>Found the path <code class="language-plaintext highlighter-rouge">/api/logs</code> that’s accessible only to admins is vulnerable to command injection, which I exploited to gain access to the box as the user <code class="language-plaintext highlighter-rouge">dasith</code></li>
+  <li>Inside the box as <code class="language-plaintext highlighter-rouge">dasith</code>;
+    <ul>
+      <li>Exploited a SUID binary by causing it to core dump after reading the private SSH key of the root user.</li>
+      <li>Retrieved the SSH key in the crash file using <code class="language-plaintext highlighter-rouge">apport-unpack</code> and <code class="language-plaintext highlighter-rouge">strings</code>, and gained root access to the box over SSH.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="api" /><category term="nodejs" /><category term="static analysis" /><category term="git" /><category term="jwt" /><category term="command injection" /><category term="information disclosure" /><category term="tunneling" /><category term="apport" /><category term="custom exploitation" /><summary type="html"><![CDATA[]]></summary></entry><entry><title type="html">Devzat - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/devzat.html" rel="alternate" type="text/html" title="Devzat - HackTheBox" /><published>2022-03-12T00:00:00+01:00</published><updated>2022-03-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/devzat</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/devzat.html"><![CDATA[<p><strong>Devzat</strong> is a pretty easy <em>medium</em> linux box. It starts with a website that inform you about a chat service on the host accessible on port <strong>8000</strong>. Some enumeration will yield a hidden subdomain that’s vulnerable to <em>command injection</em>. Once inside the box, there is an instance of <em>InfluxDB</em> running locally that’s vulnerable to <strong>CVE-2019-20933</strong>, which you can use to gain access to the box as another local user. Privesc involves exploiting a <em>path traversal</em> flaw in a custom code.</p>
 
 <p><br /></p>
 
@@ -235,7 +447,7 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Located the password inside the backups and used it to access the feature, which is used to read files from disk. I used it to load the SSH private key of the root user.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="cve" /><category term="command injection" /><category term="influxdb" /><category term="path traversal" /><category term="tunneling" /><category term="custom exploitation" /><summary type="html"><![CDATA[Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.]]></summary></entry><entry><title type="html">Driver - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" /><published>2022-02-26T00:00:00+01:00</published><updated>2022-02-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/driver</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/driver.html"><![CDATA[<p><strong>Driver</strong> is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an <em>SCF File Attack</em> to capture and crack the password of a local user using <code class="language-plaintext highlighter-rouge">responder</code>. After cracking the hash, you can exploit the <em>Print Nightmare</em> vulnerability to gain a privileged access to the box.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="cve" /><category term="command injection" /><category term="influxdb" /><category term="path traversal" /><category term="tunneling" /><category term="custom exploitation" /><summary type="html"><![CDATA[Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.]]></summary></entry><entry><title type="html">Driver - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" /><published>2022-02-26T00:00:00+01:00</published><updated>2022-02-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/driver</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/driver.html"><![CDATA[<p><strong>Driver</strong> is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an <em>SCF File Attack</em> to capture and crack the password of a local user using <code class="language-plaintext highlighter-rouge">responder</code>. After cracking the hash, you can exploit the <em>Print Nightmare</em> vulnerability to gain a privileged access to the box.</p>
 
 <h3 id="about">About</h3>
 <p><br /></p>
@@ -379,7 +591,7 @@ command=ToggleDesktop
   <li>Found a firmware update page in the admin panel that allows for file upload.</li>
   <li>Performed an SCF File Attack to capture the SMB hash of a user named <strong>tony</strong> using <code class="language-plaintext highlighter-rouge">responder</code>, and cracked it using <code class="language-plaintext highlighter-rouge">john</code>.</li>
   <li>Ran a <em>PrintNightmare</em> exploit on the target to gain a privileged access on the box.</li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="windows" /><category term="smb" /><category term="scf file attack" /><category term="print nightmare" /><category term="responder" /><category term="metasploit" /><category term="msfvenom" /><category term="smb" /><summary type="html"><![CDATA[Driver is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an SCF File Attack to capture and crack the password of a local user using responder. After cracking the hash, you can exploit the Print Nightmare vulnerability to gain a privileged access to the box.]]></summary></entry><entry><title type="html">Bolt - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" /><published>2022-02-19T00:00:00+01:00</published><updated>2022-02-19T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bolt</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bolt.html"><![CDATA[<p><strong>Bolt</strong> is a very interesting <em>medium</em> linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to <strong>SSTI</strong>. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a <em>chrome</em> extension that dumps GPG keys into it’s logs on disk.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="windows" /><category term="smb" /><category term="scf file attack" /><category term="print nightmare" /><category term="responder" /><category term="metasploit" /><category term="msfvenom" /><category term="smb" /><summary type="html"><![CDATA[Driver is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an SCF File Attack to capture and crack the password of a local user using responder. After cracking the hash, you can exploit the Print Nightmare vulnerability to gain a privileged access to the box.]]></summary></entry><entry><title type="html">Bolt - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" /><published>2022-02-19T00:00:00+01:00</published><updated>2022-02-19T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bolt</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bolt.html"><![CDATA[<p><strong>Bolt</strong> is a very interesting <em>medium</em> linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to <strong>SSTI</strong>. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a <em>chrome</em> extension that dumps GPG keys into it’s logs on disk.</p>
 
 <p><br /></p>
 
@@ -681,7 +893,7 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Finally, I used the cracked private key to decrypt the encrypted message, which was found to contain a password. The password gave access to the <strong>root</strong> account.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="docker" /><category term="gpg" /><category term="ssti" /><category term="hash cracking" /><category term="passbolt" /><category term="webmail" /><category term="roundcube" /><summary type="html"><![CDATA[Bolt is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.]]></summary></entry><entry><title type="html">Horizontall - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" /><published>2022-02-05T00:00:00+01:00</published><updated>2022-02-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/horizontall</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/horizontall.html"><![CDATA[<p><strong>Horizontall</strong> is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="docker" /><category term="gpg" /><category term="ssti" /><category term="hash cracking" /><category term="passbolt" /><category term="webmail" /><category term="roundcube" /><summary type="html"><![CDATA[Bolt is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.]]></summary></entry><entry><title type="html">Horizontall - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" /><published>2022-02-05T00:00:00+01:00</published><updated>2022-02-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/horizontall</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/horizontall.html"><![CDATA[<p><strong>Horizontall</strong> is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a <em>Laravel</em> instance running locally, which is also vulnerable to <em>RCE</em>, and will give you access to the box as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
 <h3 id="about">About</h3>
 <p><br /></p>
@@ -846,7 +1058,7 @@ Nmap done: 1 IP address (1 host up) scanned in 99.42 seconds
       <li>Setup a tunnel with SSH, which allowed me to exploit the <em>RCE</em> flaw.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="static analysis" /><category term="cve" /><category term="rce" /><category term="tunneling" /><summary type="html"><![CDATA[Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root.]]></summary></entry><entry><title type="html">Exploiting Web Applications with MITM Proxy and Elinks</title><link href="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html" rel="alternate" type="text/html" title="Exploiting Web Applications with MITM Proxy and Elinks" /><published>2022-01-25T00:00:00+01:00</published><updated>2022-01-25T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/tutorial/mitmproxy</id><content type="html" xml:base="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html"><![CDATA[<p>In this little tutorial, I demonstrate how to use <code class="language-plaintext highlighter-rouge">mitmproxy</code> and <code class="language-plaintext highlighter-rouge">elinks</code> to exploit a vulnerable web app completely from the command line. The target used is DVWA (Damn Vulnerable Web Application), which is running locally in a docker container.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="static analysis" /><category term="cve" /><category term="rce" /><category term="tunneling" /><summary type="html"><![CDATA[Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will give you access to the box as root.]]></summary></entry><entry><title type="html">Exploiting Web Applications with MITM Proxy and Elinks</title><link href="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html" rel="alternate" type="text/html" title="Exploiting Web Applications with MITM Proxy and Elinks" /><published>2022-01-25T00:00:00+01:00</published><updated>2022-01-25T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/tutorial/mitmproxy</id><content type="html" xml:base="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html"><![CDATA[<p>In this little tutorial, I demonstrate how to use <code class="language-plaintext highlighter-rouge">mitmproxy</code> and <code class="language-plaintext highlighter-rouge">elinks</code> to exploit a vulnerable web app completely from the command line. The target used is DVWA (Damn Vulnerable Web Application), which is running locally in a docker container.</p>
 
 <p><br /></p>
 
@@ -1317,7 +1529,7 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Exploited the python script to drop into a <code class="language-plaintext highlighter-rouge">pdb</code> shell for privesc.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="ssrf" /><category term="broken access control" /><category term="ftp" /><category term="python" /><category term="pdb" /><category term="custom exploitation" /><summary type="html"><![CDATA[Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This URL upload functionality has a filter that attempts to block SSRFs, but the filter is flawed, and could be exploited to reach another subdomain on the server that foreign hosts are not allowed to directly access. The vector for privilege escalation is a python script that drops into a pdb shell when user caused an exception.]]></summary></entry><entry><title type="html">Previse - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/previse.html" rel="alternate" type="text/html" title="Previse - HackTheBox" /><published>2022-01-16T00:00:00+01:00</published><updated>2022-01-16T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/previse</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/previse.html"><![CDATA[<p><strong>Previse</strong> is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the <strong>302</strong> redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. Foothold involves exploiting a <em>command injection</em> flaw in the web application, and privilege escalation is via <em>path tampering</em>.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="ssrf" /><category term="broken access control" /><category term="ftp" /><category term="python" /><category term="pdb" /><category term="custom exploitation" /><summary type="html"><![CDATA[Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This URL upload functionality has a filter that attempts to block SSRFs, but the filter is flawed, and could be exploited to reach another subdomain on the server that foreign hosts are not allowed to directly access. The vector for privilege escalation is a python script that drops into a pdb shell when user caused an exception.]]></summary></entry><entry><title type="html">Previse - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/previse.html" rel="alternate" type="text/html" title="Previse - HackTheBox" /><published>2022-01-16T00:00:00+01:00</published><updated>2022-01-16T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/previse</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/previse.html"><![CDATA[<p><strong>Previse</strong> is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the <strong>302</strong> redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. Foothold involves exploiting a <em>command injection</em> flaw in the web application, and privilege escalation is via <em>path tampering</em>.</p>
 
 <p><br /></p>
 
@@ -1540,7 +1752,7 @@ Nmap done: 1 IP address (1 host up) scanned in 86.13 seconds
       <li>The script was found to be making a call to another binary using a <em>relative path</em>, which make it vulnerable to <em>arbitrary code execution</em> via <code class="language-plaintext highlighter-rouge">$PATH</code> tampering. This flaw was exploited to gain a root shell.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="execute after redirect" /><category term="broken access control" /><category term="static analysis" /><category term="command injection" /><category term="hash cracking" /><category term="path tampering" /><summary type="html"><![CDATA[Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. Foothold involves exploiting a command injection flaw in the web application, and privilege escalation is via path tampering.]]></summary></entry><entry><title type="html">Writer - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/writer.html" rel="alternate" type="text/html" title="Writer - HackTheBox" /><published>2021-12-11T00:00:00+01:00</published><updated>2021-12-11T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/writer</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/writer.html"><![CDATA[<p><strong>Writer</strong> is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to <em>SQL injection</em>, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to <em>command injection</em> in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="execute after redirect" /><category term="broken access control" /><category term="static analysis" /><category term="command injection" /><category term="hash cracking" /><category term="path tampering" /><summary type="html"><![CDATA[Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. Foothold involves exploiting a command injection flaw in the web application, and privilege escalation is via path tampering.]]></summary></entry><entry><title type="html">Writer - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/writer.html" rel="alternate" type="text/html" title="Writer - HackTheBox" /><published>2021-12-11T00:00:00+01:00</published><updated>2021-12-11T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/writer</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/writer.html"><![CDATA[<p><strong>Writer</strong> is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to <em>SQL injection</em>, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to <em>command injection</em> in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application.</p>
 
 <p>Once inside the box, there are two local users, <code class="language-plaintext highlighter-rouge">kyle</code>, and <code class="language-plaintext highlighter-rouge">john</code>. Access to Kyle’s account was obtained after cracking a hash obtained from a local MySQL database. Once you have access as Kyle, you can exploit a write permission to <code class="language-plaintext highlighter-rouge">/etc/postfix/disclaimer</code> to move laterally to John’s account, and from there exploit another write permission to create a malicious configuration file that will be by <code class="language-plaintext highlighter-rouge">apt</code> through a cron job to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
@@ -1893,7 +2105,7 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Created a malicious configuration file in <code class="language-plaintext highlighter-rouge">/etc/apt/apt.conf.d</code> that execute a reverse shell command when <code class="language-plaintext highlighter-rouge">apt-get update</code> was invoked, and gained access to the box as <strong>root</strong>.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="sql injection" /><category term="sqlmap" /><category term="authentication bypass" /><category term="command injection" /><category term="enumeration" /><category term="static analysis" /><category term="arbitrary file upload" /><category term="hash cracking" /><category term="apt" /><category term="lateral movement" /><category term="python" /><category term="django" /><summary type="html"><![CDATA[Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application.]]></summary></entry><entry><title type="html">BountyHunter - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html" rel="alternate" type="text/html" title="BountyHunter - HackTheBox" /><published>2021-11-18T00:00:00+01:00</published><updated>2021-11-18T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bountyhunter</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html"><![CDATA[<p>Another interesting easy linux box, <strong>Bounty Hunter</strong> is a box that features a web application that is vulnerable to <em>XML External Entitiy</em> injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.</p>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="sql injection" /><category term="sqlmap" /><category term="authentication bypass" /><category term="command injection" /><category term="enumeration" /><category term="static analysis" /><category term="arbitrary file upload" /><category term="hash cracking" /><category term="apt" /><category term="lateral movement" /><category term="python" /><category term="django" /><summary type="html"><![CDATA[Writer is definitely one of the toughest boxes I have ever solved at the time of writing this. It features a website that is vulnerable to SQL injection, which leads to authentication bypass. Once you have access, there is a feature that allows you to add and edit stories, which is vulnerable to command injection in the filename, but will be tricky to spot without using the SQL injection flaw and reading the python code of the web application.]]></summary></entry><entry><title type="html">BountyHunter - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html" rel="alternate" type="text/html" title="BountyHunter - HackTheBox" /><published>2021-11-18T00:00:00+01:00</published><updated>2021-11-18T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/bountyhunter</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/bountyhunter.html"><![CDATA[<p>Another interesting easy linux box, <strong>Bounty Hunter</strong> is a box that features a web application that is vulnerable to <em>XML External Entitiy</em> injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.</p>
 
 <p>The privesc is a CTF-like challenge, where a custom script used to validate “tickets” is making a call to the <code class="language-plaintext highlighter-rouge">exec()</code> function of python with user-controlled data.</p>
 
@@ -2276,298 +2488,4 @@ __Ticket Code:__
       </li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="xxe" /><category term="lfi" /><category term="static analysis" /><category term="python" /><category term="command injection" /><category term="custom exploitation" /><summary type="html"><![CDATA[Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.]]></summary></entry><entry><title type="html">Seal - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/seal.html" rel="alternate" type="text/html" title="Seal - HackTheBox" /><published>2021-11-13T00:00:00+01:00</published><updated>2021-11-13T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/seal</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/seal.html"><![CDATA[<p><strong>Seal</strong> is a medium linux box. It features a web service on port <strong>443</strong> running <em>Apache Tomcat</em>, and a <em>GitBucket</em> installation running locally, but accessible through the proxy on port <strong>8080</strong> (nginx). The <em>GitBucket</em> allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the <em>tomcat</em> admin login page, but access to the panel was blocked by <em>nginx</em>. This was bypassed thanks to a <em>path normalization</em> vulnerability, and the <code class="language-plaintext highlighter-rouge">.war</code> upload used to deploy web applications in <em>tomcat</em> was used to gain code execution on the server.</p>
-
-<p>Once inside, two different exploits targeting <code class="language-plaintext highlighter-rouge">ansible-playbook</code> were used, first to move laterally, and second to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<hr />
-
-<p><img src="/assets/img/20211009152304.png" alt="" /></p>
-
-<p><img src="/assets/img/20211009152340.png" alt="" /></p>
-
-<hr />
-
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<pre><code class="language-raw">
-# Nmap 7.70 scan initiated Sat Oct  9 15:30:06 2021 as: nmap -sV -sC -p22,443,8080 -oN nmap.txt 10.10.10.250
-Nmap scan report for seal.htb (10.10.10.250)
-Host is up (0.71s latency).
-
-PORT     STATE SERVICE    VERSION
-22/tcp   open  ssh        OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
-443/tcp  open  ssl/http   nginx 1.18.0 (Ubuntu)
-|_http-server-header: nginx/1.18.0 (Ubuntu)
-|_http-title: Seal Market
-| ssl-cert: Subject: commonName=seal.htb/organizationName=Seal Pvt Ltd/stateOrProvinceName=London/countryName=UK
-| Not valid before: 2021-05-05T10:24:03
-|_Not valid after:  2022-05-05T10:24:03
-| tls-alpn: 
-|_  http/1.1
-| tls-nextprotoneg: 
-|_  http/1.1
-8080/tcp open  http-proxy
-| fingerprint-strings: 
----[snip]---
-| http-auth: 
-| HTTP/1.1 401 Unauthorized\x0D
-|_  Server returned status 401 but no WWW-Authenticate header.
-|_http-title: Site doesn't have a title (text/html;charset=utf-8).
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
----[snip]---
-SF:);
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Sat Oct  9 15:30:45 2021 -- 1 IP address (1 host up) scanned in 38.91 seconds
-
-
-</code></pre>
-
-<h4 id="web-service">Web Service</h4>
-
-<p><img src="/assets/img/20211009154229.png" alt="" /></p>
-
-<p><img src="/assets/img/20211009155234.png" alt="" /></p>
-
-<p>The web page looks quite nice for a HTB box, and <em>Wappalyzer</em> detected about 11 web technologies. Going through the links showed that almost all of them are dead.</p>
-
-<p>One thing I noticed is the lack of web service running on port <strong>80</strong>, but a HTTPs service on port <strong>443</strong>. The NMAP scan identified the web server as <strong>nginx 1.18.0</strong>, but the server was later identified as <strong>Apache Tomcat 9.0.31</strong> during manual probing to determine if the server uses PHP;</p>
-
-<p><img src="/assets/img/20211009161848.png" alt="" /></p>
-
-<p>The search field in the homepage generate the below GET request;</p>
-
-<p><img src="/assets/img/20211009162251.png" alt="" /></p>
-
-<p>Continuous fuzzing of the <code class="language-plaintext highlighter-rouge">Vegetable</code> parameter showed above made no difference on response received, indicating the web page might be static.</p>
-
-<p>Bruteforcing with <code class="language-plaintext highlighter-rouge">gobuster</code> failed, citing SSL certificate errors (I later found out that it need the <code class="language-plaintext highlighter-rouge">-k</code> argument to disable TLS validation). <code class="language-plaintext highlighter-rouge">ffuf</code> worked and discovered some interesting pages;</p>
-
-<p><img src="/assets/img/20211009163134.png" alt="" /></p>
-
-<p>The page <code class="language-plaintext highlighter-rouge">/dashboard/</code> looks promising, but all the links are dead;</p>
-
-<p><img src="/assets/img/20211009162844.png" alt="" /></p>
-
-<p>The response code of <strong>304</strong>, which is for unmodified contents and used for caching, indicate it’s probably just a static page;</p>
-
-<p><img src="/assets/img/20211009163456.png" alt="" /></p>
-
-<p>Another page of interest is <code class="language-plaintext highlighter-rouge">/admin</code>, which on request redirected me to <code class="language-plaintext highlighter-rouge">http://seal.htb/admin/</code>, which failed because the NMAP scan earlier showed no service running on port <strong>80</strong>. Since NMAP previously identified a web proxy on port <strong>8080</strong>, I enabled this proxy in Firefox using the <em>FoxyProxy</em> plugin, and gained access to the page;</p>
-
-<p><img src="/assets/img/20211009165351.png" alt="" /></p>
-
-<p><img src="/assets/img/20211009165432.png" alt="" /></p>
-
-<p>Guessing common username and passwords didn’t work. Using the create account link, I created an account with the username <code class="language-plaintext highlighter-rouge">testuser</code> and password <code class="language-plaintext highlighter-rouge">testpass</code>, and was able to login;</p>
-
-<p><img src="/assets/img/20211009170559.png" alt="" /></p>
-
-<p>Using the repository search feature, I discovered a user named <code class="language-plaintext highlighter-rouge">root</code> with 2 repos. Going through the repos of <code class="language-plaintext highlighter-rouge">root</code>, I found another user named <code class="language-plaintext highlighter-rouge">alex</code>;</p>
-
-<p><img src="/assets/img/20211009170908.png" alt="" /></p>
-
-<p><img src="/assets/img/20211009171100.png" alt="" /></p>
-
-<p>The <code class="language-plaintext highlighter-rouge">seal_market</code> repo owned by root is of interest as it’s contents match that of the web page at https://seal.htb/. It also contains the name of the box, and some administrative todo list in the README file;</p>
-
-<p><img src="/assets/img/20211009172809.png" alt="" /></p>
-
-<p>Another user named <code class="language-plaintext highlighter-rouge">luis</code> was also identified while going through this repo, bringing the count of discovered users to <strong>3</strong> (<em>root</em>, <em>luis</em>, and <em>alex</em>).</p>
-
-<p>Going through the users homepages, the user  <code class="language-plaintext highlighter-rouge">root</code> has the highest entries in activity log. One commit stands out as it mentioned an update to <em>Tomcat’s</em> configuration file;</p>
-
-<p><img src="/assets/img/20211009175148.png" alt="" /></p>
-
-<p>Viewing the commit log showed a credential;</p>
-
-<p><img src="/assets/img/20211009175530.png" alt="" /></p>
-
-<p>Another commit in the <code class="language-plaintext highlighter-rouge">seal_market</code> repo showed some config for the <code class="language-plaintext highlighter-rouge">nginx</code> reverse proxy with the path <code class="language-plaintext highlighter-rouge">/manager/html</code>. Request for <code class="language-plaintext highlighter-rouge">/manager</code> forces redirect to <code class="language-plaintext highlighter-rouge">/manager/html</code>, which showed a <strong>403 Forbidden</strong> response;</p>
-
-<p><img src="/assets/img/20211009214448.png" alt="" /></p>
-
-<p>A bit of googling on the variable <code class="language-plaintext highlighter-rouge">$ssl_client_verify</code> showed it is used by <em>nginx</em> to store the result of an SSL certificate verification for the client. Since I am getting a <strong>403</strong>, the above config indicate I may have failed the validation or something else. I am not sure. These are all very interesting info, but I have no clue how to exploit them.</p>
-
-<hr />
-<h3 id="gitbucket">GitBucket</h3>
-<p><br /></p>
-
-<p>Focusing more on the GitBucker users discovered, I noticed that <code class="language-plaintext highlighter-rouge">alex</code> is the admin of the <code class="language-plaintext highlighter-rouge">infra</code> repo, <code class="language-plaintext highlighter-rouge">luis</code> is a core developer, and <code class="language-plaintext highlighter-rouge">root</code> is well… root.</p>
-
-<p>Earlier I found a credential for the user <code class="language-plaintext highlighter-rouge">tomcat</code> while going through the activity log of the <code class="language-plaintext highlighter-rouge">root</code> user. Testing the password against all the three users found, I gained access to the account of <code class="language-plaintext highlighter-rouge">luis</code>;</p>
-
-<p><img src="/assets/img/20211009225604.png" alt="" /></p>
-
-<p>No any private repo was found inside Luis’ homepage, and the last activity of the account was on 5 May, which make me believe I am going at it the wrong way.</p>
-
-<hr />
-<h3 id="seal-market">Seal Market</h3>
-<p><br /></p>
-
-<p>While requests for https://seal.htb/dashboard/ succeeded, any other request to a path through <em>Burp Suite</em> gave me the error;</p>
-
-<p><img src="/assets/img/20211009234005.png" alt="" /></p>
-
-<p>Without <em>Burp Suite</em>, request for https://seal.htb/admin/dashboard/ showed <strong>403 Forbidden</strong>, while any other path showed the error;</p>
-
-<p><img src="/assets/img/20211009234628.png" alt="" /></p>
-
-<p>Going back to the <code class="language-plaintext highlighter-rouge">/manager/</code> path discovered earlier. I got this very informative error when requesting a random path;</p>
-
-<p><img src="/assets/img/20211010075520.png" alt="" /></p>
-
-<p>Requesting the <code class="language-plaintext highlighter-rouge">/manager/text</code> path gave me an authentication prompt;</p>
-
-<p><img src="/assets/img/20211010075736.png" alt="" /></p>
-
-<p>The <strong>Tomcat Manager Application</strong> prompt made me remember the previous credential obtained from the GitBucket repository, which is <code class="language-plaintext highlighter-rouge">tomcat:42MrHBf*z8{Z%</code>. I was able to login using the credential, but got the following message;</p>
-
-<p><img src="/assets/img/20211010080844.png" alt="" /></p>
-
-<p>I imagined the above message is because I am accessing the page from a foreign host, so I tried to use the HTTP proxy on port <strong>8080</strong> to access the page, but it didn’t work.</p>
-
-<p>I then started testing the HTTP proxy for HTTP request smuggling attacks, which is an attack I had to learn on the fly, and it didn’t work as the proxy blocks the use of both <strong>Content-Length</strong> and <strong>Transfer-Encoding</strong> headers in a single request, which the method I was trying depends on. Some bypass techniques that include adding a whitespace in front of the header name, and a tab in front of the header value, were also detected by the proxy, and blocked;</p>
-
-<p><img src="/assets/img/20211012154449.png" alt="" /></p>
-
-<p>With that method down the drain, I started googling on how to bypass that <strong>403</strong> code. I tried quite a few of the methods, some of which were implemented in scripts hosted on <em>Github</em>, and none worked. I was running out of ideas at this point.</p>
-
-<p>I went fully manual using Burp Suite and researching ways to bypass that <strong>403</strong>, as I was quite confident this should work due to the presence of the reverse proxy. After lots of trials and errors, I found an article on <em>Acunetix</em> about a <em>path normalization vulnerability</em> when accessing <em>Apache Tomcat</em> using <em>Nginx</em> as a reverse proxy;</p>
-
-<p><img src="/assets/img/20211013100914.png" alt="" /></p>
-
-<p>Using the path <code class="language-plaintext highlighter-rouge">/manager/..;/manager/html</code>, which the <em>nginx</em> proxy let through as it does not match it’s rule for <code class="language-plaintext highlighter-rouge">/manager/html</code>, and <em>Apache Tomcat</em> normalize to <code class="language-plaintext highlighter-rouge">/manager/html</code>, I was able to bypass the <strong>403</strong> error and access the page. AT LAST!!!</p>
-
-<p><img src="/assets/img/20211013101204.png" alt="" /></p>
-
-<hr />
-<h3 id="tomcat-manager">Tomcat Manager</h3>
-<p><br /></p>
-
-<p>With access to the Tomcat Manager, I gained access to a <em>.war</em> file upload functionality;</p>
-
-<p><img src="/assets/img/20211013101544.png" alt="" /></p>
-
-<p>Since <em>.war</em> files are used to package <em>.jsp</em> web apps, I found a webshell on <em>Github</em>, uploaded it, and deployed it on the server;</p>
-
-<p><img src="/assets/img/20211013103948.png" alt="" /></p>
-
-<p><img src="/assets/img/20211013103849.png" alt="" /></p>
-
-<p>Going to https://seal.htb/webshell gave me a foothold into the box as the <em>tomcat</em> user, which I used to spawn a bash reverse shell back to my attack box;</p>
-
-<p><img src="/assets/img/20211013104849.png" alt="" /></p>
-
-<hr />
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<p>With command execution inside the box as <em>tomcat</em>, it’s time to upgrade to a user account. A local user named <code class="language-plaintext highlighter-rouge">luis</code> was found, and inside his home is the user flag which is not readable to us.</p>
-
-<p>Moving through the filesystem to find something of interest, I found some directories inside <code class="language-plaintext highlighter-rouge">/opt/backups</code>, which are <code class="language-plaintext highlighter-rouge">playbook</code> and <code class="language-plaintext highlighter-rouge">arhives</code>. The <code class="language-plaintext highlighter-rouge">archives</code> contains some <code class="language-plaintext highlighter-rouge">.gz</code> archives, while the <code class="language-plaintext highlighter-rouge">playbook</code> contains a file named <code class="language-plaintext highlighter-rouge">run.yml</code>;</p>
-
-<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-</pre></td><td class="rouge-code"><pre><span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span> <span class="s">localhost</span>
-  <span class="na">tasks</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copy Files</span>
-    <span class="na">synchronize</span><span class="pi">:</span> <span class="s">src=/var/lib/tomcat9/webapps/ROOT/admin/dashboard dest=/opt/backups/files copy_links=yes</span>
-  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Server Backups</span>
-    <span class="na">archive</span><span class="pi">:</span>
-      <span class="na">path</span><span class="pi">:</span> <span class="s">/opt/backups/files/</span>
-      <span class="na">dest</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/opt/backups/archives/backup--.gz"</span>
-  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Clean</span>
-    <span class="na">file</span><span class="pi">:</span>
-      <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
-      <span class="na">path</span><span class="pi">:</span> <span class="s">/opt/backups/files/</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>Dumping a list of all running processes indicate the program <code class="language-plaintext highlighter-rouge">ansible-playbook</code> is being executed by a cron job as <code class="language-plaintext highlighter-rouge">luis</code> with the above <em>.yml</em> file as an argument, likely after every <strong>30</strong> seconds judging from the <code class="language-plaintext highlighter-rouge">sleep 30</code> instruction;</p>
-
-<p><img src="/assets/img/20211013163819.png" alt="" /></p>
-
-<p>After reading up a bit about <em>ansible</em>, the above <em>.yml</em> file begins to make sense; It is used to copy all files inside the directory defined in the <code class="language-plaintext highlighter-rouge">src</code> parameter into <code class="language-plaintext highlighter-rouge">dst</code>, including files pointed to by symbolic links (<code class="language-plaintext highlighter-rouge">copy_links=yes</code>).</p>
-
-<p>The upper/root part of source directory is not writeable to the <em>tomcat</em> user. Looking at the inner files, however, I noticed the <code class="language-plaintext highlighter-rouge">uploads</code> folder is writable to everyone;</p>
-
-<p><img src="/assets/img/20211013162640.png" alt="" /></p>
-
-<p>Since there is a <code class="language-plaintext highlighter-rouge">.ssh</code> directory in the home of the user <em>luis</em>, it is likely this user has SSH public key authentication configured, so I moved into the writeable uploads directory and create a symlink to the SSH private key, which will be at <code class="language-plaintext highlighter-rouge">/home/luis/.ssh/id_rsa</code>. This is possible because you don’t need any permission on a file before you can create a symlink to it;</p>
-
-<p><img src="/assets/img/20211013165415.png" alt="" /></p>
-
-<p>I then monitor the <code class="language-plaintext highlighter-rouge">/opt/backups/archives</code> for a new file to pop up, and one did. I immeditaley copied it <code class="language-plaintext highlighter-rouge">/dev/shm/.0</code> and extract it. Inside the extracted uploads directory, I found the <code class="language-plaintext highlighter-rouge">id_rsa</code> file containing the private key of <em>luis</em>;</p>
-
-<p><img src="/assets/img/20211013165835.png" alt="" /></p>
-
-<p>I shipped the key file to my attack host using <code class="language-plaintext highlighter-rouge">netcat</code> and gained access to the box over SSH as <em>luis</em>;</p>
-
-<p><img src="/assets/img/20211013170702.png" alt="" /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>Inside the host as <em>luis</em>, I have permission to run <code class="language-plaintext highlighter-rouge">/usr/bin/ansible-playbook</code> with any argument as root using <code class="language-plaintext highlighter-rouge">sudo</code>. Since this is a standard program, I look it up in https://gtfobins.github.io, and got a hit;</p>
-
-<p><img src="/assets/img/20211013171517.png" alt="" /></p>
-
-<p><img src="/assets/img/20211013171543.png" alt="" /></p>
-
-<p>Using the above payload, I gained root on the box;</p>
-
-<p><img src="/assets/img/20211013171616.png" alt="" /></p>
-
-<p>This is my fastest privilege escalation on HackTheBox at the time of writing this.</p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified port 22, 443, and 8080 using <code class="language-plaintext highlighter-rouge">nmap</code></li>
-  <li>Bruteforced the web service on port 443 for hidden paths, and found <code class="language-plaintext highlighter-rouge">/dashboard/</code></li>
-  <li>Discovered <code class="language-plaintext highlighter-rouge">/admin/</code> web service on port 443, which redirect to http://seal.htb/admin/, which lead me to a GitBucket installation using the proxy on port 8080.</li>
-  <li>Inside <em>GitBucket</em>;
-    <ul>
-      <li>Found 3 users: <em>root</em>, <em>alex</em>, and <em>luis</em>.</li>
-      <li>Found a credential for <em>tomcat</em> user. Using the password, gained access to <em>luis</em> account on the GitBucket server.</li>
-    </ul>
-  </li>
-  <li>Used the <em>tomcat</em> credential for a web login at https://seal.htb/manager/text, which succeeded, but access was blocked by <em>nginx</em> reverse proxy.</li>
-  <li>Expoited a path normalization vulnerability to gain access to <code class="language-plaintext highlighter-rouge">/manager/html</code>.</li>
-  <li>Used the <code class="language-plaintext highlighter-rouge">.war</code> file upload functionality to upload a webshell and gain foothold into the box as the user <code class="language-plaintext highlighter-rouge">tomcat</code>.</li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">tomcat</code>;
-    <ul>
-      <li>Identified a cron job that uses <code class="language-plaintext highlighter-rouge">ansible-playbook</code> and a configuration file to copy files to a directory, resolving all symlinks in the process.</li>
-      <li>Exploited the copy operation to have <code class="language-plaintext highlighter-rouge">ansible-playbook</code> fetch a user’s SSH private key, which I used to gain access to the box over SSH as the user <em>luis</em>.</li>
-    </ul>
-  </li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">luis</code>;
-    <ul>
-      <li>Identified a sudo permission to run <code class="language-plaintext highlighter-rouge">ansible-playbook</code> with any argument as root.</li>
-      <li>Found a privilege escalation exploit on https://gtfobins.github.io, which gave me root access to the box.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="apache tomcat" /><category term="web proxy" /><category term="git" /><category term="gitbucket" /><category term="open signup" /><category term="path normalization" /><category term="ansible playbook" /><summary type="html"><![CDATA[Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page, but access to the panel was blocked by nginx. This was bypassed thanks to a path normalization vulnerability, and the .war upload used to deploy web applications in tomcat was used to gain code execution on the server.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="xxe" /><category term="lfi" /><category term="static analysis" /><category term="python" /><category term="command injection" /><category term="custom exploitation" /><summary type="html"><![CDATA[Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on the server, which can be used to download a PHP file that contains a username and password, which grants access to box over SSH.]]></summary></entry></feed>

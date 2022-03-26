@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/previse.html"},"url":"https://4g3nt47.github.io/posts/hackthebox/previse.html","headline":"Previse - HackTheBox","dateModified":"2022-01-16T00:00:00+01:00","datePublished":"2022-01-16T00:00:00+01:00","description":"Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. Foothold involves exploiting a command injection flaw in the web application, and privilege escalation is via path tampering.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Previse - HackTheBox","dateModified":"2022-01-16T00:00:00+01:00","datePublished":"2022-01-16T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/previse.html","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/previse.html"},"description":"Previse is an easy linux box that I really enjoyed. It has an Execute After Redirect (EAR) vulnerability, whereby the application issues a redirect when an unauthenticated user is attempting to access protected pages. However, the contents of the page is still returned in the body of the 302 redirect, but would be hard to notice in a browser as the browser will immediately follow the redirect. Foothold involves exploiting a command injection flaw in the web application, and privilege escalation is via path tampering.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Previse - HackTheBox | 4g3nt47
   </title><!--
@@ -425,7 +425,8 @@ Nmap done: 1 IP address (1 host up) scanned in 86.13 seconds
 
   <!-- categories --><div class="post-meta mb-3">
     <i class="far fa-folder-open fa-fw mr-1"></i><a href='/categories/hackthebox/'>hackthebox</a></div><!-- tags --><div class="post-tags">
-    <i class="fa fa-tags fa-fw mr-1"></i><a href="/tags/linux/"
+    <i class="fa fa-tags fa-fw mr-1"></i><a href="/tags/hackthebox/"
+          class="post-tag no-text-decoration" >hackthebox</a><a href="/tags/linux/"
           class="post-tag no-text-decoration" >linux</a><a href="/tags/web/"
           class="post-tag no-text-decoration" >web</a><a href="/tags/execute-after-redirect/"
           class="post-tag no-text-decoration" >execute after redirect</a><a href="/tags/broken-access-control/"
@@ -472,7 +473,7 @@ Nmap done: 1 IP address (1 host up) scanned in 86.13 seconds
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/tunneling/">tunneling</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a><a class="post-tag" href="/tags/cve/">cve</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/tunneling/">tunneling</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
 <script src="/assets/js/bootstrap-toc.min.js"></script>
@@ -578,7 +579,7 @@ Nmap done: 1 IP address (1 host up) scanned in 86.13 seconds
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/tunneling/">tunneling</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a><a class="post-tag" href="/tags/cve/">cve</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/tunneling/">tunneling</a><a class="post-tag" href="/tags/hash-cracking/">hash cracking</a><a class="post-tag" href="/tags/broken-access-control/">broken access control</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>

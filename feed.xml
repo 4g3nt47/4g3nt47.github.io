@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-03-12T18:36:23+01:00</updated>
+  <updated>2022-03-26T16:59:23+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,59 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Secret - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/secret.html" rel="alternate" type="text/html" title="Secret - HackTheBox" />
+    <published>2022-03-26T00:00:00+01:00</published>
+  
+    <updated>2022-03-26T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/secret.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/secret.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      
+
+Info
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+# Nmap 7.70 scan initiated Sat Oct 30 20:00:45 2021 as: nmap -sV -sC -v -oN nmap.txt 10.10.11.120
+Nmap scan report for secret.htb (10.10.11.120)
+Host is up (0.25s latency).
+Not shown: 997 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+80/tcp   open  http    nginx 1.18.0 (Ubuntu)
+| http...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -156,45 +209,6 @@ Info
     <summary>
       
       Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will gi...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Exploiting Web Applications with MITM Proxy and Elinks</title>
-    <link href="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html" rel="alternate" type="text/html" title="Exploiting Web Applications with MITM Proxy and Elinks" />
-    <published>2022-01-25T00:00:00+01:00</published>
-  
-    <updated>2022-01-25T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/tutorial/mitmproxy.html</id>
-    <content src="https://4g3nt47.github.io/posts/tutorial/mitmproxy.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="tutorial" />
-    
-  
-
-  
-    <summary>
-      
-      In this little tutorial, I demonstrate how to use mitmproxy and elinks to exploit a vulnerable web app completely from the command line. The target used is DVWA (Damn Vulnerable Web Application), which is running locally in a docker container.
-
-
-
-The Tools
-
-
-Elinks is a console-based web browser that can be used to browse through websites from the command line. From the manual;
-
-
-  ELinks is a ...
     </summary>
   
 
