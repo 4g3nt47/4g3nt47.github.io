@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-03-26T17:09:19+01:00</updated>
+  <updated>2022-03-27T10:41:21+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -20,47 +20,48 @@
 
   
   <entry>
-    <title>Secret - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/secret.html" rel="alternate" type="text/html" title="Secret - HackTheBox" />
-    <published>2022-03-26T00:00:00+01:00</published>
+    <title>Error-based SQL Injection- DVWA</title>
+    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html" rel="alternate" type="text/html" title="Error-based SQL Injection- DVWA" />
+    <published>2022-03-27T00:00:00+01:00</published>
   
-    <updated>2022-03-26T00:00:00+01:00</updated>
+    <updated>2022-03-27T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/secret.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/secret.html" />
+    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html</id>
+    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
 
   
     
-    <category term="hackthebox" />
+    <category term="dvwa" />
     
   
 
   
     <summary>
       
-      Secret is an easy linux box where you have to exploit a sensitive information leak in a git repo to recover a JWT secret, which allows you to forge a JWT token that gives you access to an API endpoint that’s vulnerable to command injection. Once on the box, you will be exploiting a custom SUID binary that allows for core dumping.
+      This is an exercise in OWASP DVWA for exploiting SQL injection.
 
 
 
-Info
+Error-based SQL Injection - DVWA
+
+
+Difficulty: Easy
+
+
+In this mode, we are presented with a form to enter a user ID, which is used to display the first name and surname of a user;
 
 
 
 
 
+Adding a single quote to the input gave an SQL error;
 
 
 
-
-Recon
-
-
-NMAP
-
-# Nmap 7.70 scan initiated Sat Oct...
+This means we have an error-based SQL injection. The payload 1' order by 2-- - didn’t gi...
     </summary>
   
 
@@ -68,28 +69,46 @@ NMAP
 
   
   <entry>
-    <title>Devzat - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/devzat.html" rel="alternate" type="text/html" title="Devzat - HackTheBox" />
-    <published>2022-03-12T00:00:00+01:00</published>
+    <title>File Upload- DVWA</title>
+    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_file_upload.html" rel="alternate" type="text/html" title="File Upload- DVWA" />
+    <published>2022-03-27T00:00:00+01:00</published>
   
-    <updated>2022-03-12T00:00:00+01:00</updated>
+    <updated>2022-03-27T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/devzat.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/devzat.html" />
+    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_file_upload.html</id>
+    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_file_upload.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
 
   
     
-    <category term="hackthebox" />
+    <category term="dvwa" />
     
   
 
   
     <summary>
       
-      Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local u...
+      This is an exercise in OWASP DVWA for exploiting file upload vulnerabilities.
+
+
+
+File Upload - DVWA
+
+
+Difficulty: Easy
+
+
+In this mode, we are presented with a file upload form;
+
+
+
+As expected, there is no filter, and I was able to upload a PHP code that execute a bash reverse shell;
+
+
+
+The web application is kind enough to give us the path of the upload. Going to the URL, I got a shell on the b...
     </summary>
   
 
@@ -97,45 +116,48 @@ NMAP
 
   
   <entry>
-    <title>Driver - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" />
-    <published>2022-02-26T00:00:00+01:00</published>
+    <title>File Inclusion - DVWA</title>
+    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_file_inclusion.html" rel="alternate" type="text/html" title="File Inclusion - DVWA" />
+    <published>2022-03-27T00:00:00+01:00</published>
   
-    <updated>2022-02-26T00:00:00+01:00</updated>
+    <updated>2022-03-27T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/driver.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/driver.html" />
+    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_file_inclusion.html</id>
+    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_file_inclusion.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
 
   
     
-    <category term="hackthebox" />
+    <category term="dvwa" />
     
   
 
   
     <summary>
       
-      Driver is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an SCF File Attack to capture and crack the password of a local user using responder. After cracking the hash, you can exploit the Print Nightmare vulnerability to gain a privileged access to the box.
-
-About
+      This is an exercise in OWASP DVWA for local and remote file inclusion.
 
 
 
+File Inclusion - DVWA
+
+
+Difficulty: Low
+
+
+In this mode, we are presented with 3 URLs, both of which accept a filename as a value to the GET parameter page;
 
 
 
 
 
+Changing the value to /etc/hostname gave me the hostname of the box, along with the rest of the page;
 
-Recon
 
 
-NMAP
-
-# Nmap 7.70 scan initiated Tue Oct  5 ...
+That’s cool and all, but we want to see if we can get RCE...
     </summary>
   
 
@@ -143,38 +165,35 @@ NMAP
 
   
   <entry>
-    <title>Bolt - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/bolt.html" rel="alternate" type="text/html" title="Bolt - HackTheBox" />
-    <published>2022-02-19T00:00:00+01:00</published>
+    <title>CSRF + Stored XSS - DVWA</title>
+    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_csrf_plus_xss.html" rel="alternate" type="text/html" title="CSRF + Stored XSS - DVWA" />
+    <published>2022-03-27T00:00:00+01:00</published>
   
-    <updated>2022-02-19T00:00:00+01:00</updated>
+    <updated>2022-03-27T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/bolt.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/bolt.html" />
+    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_csrf_plus_xss.html</id>
+    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_csrf_plus_xss.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
 
   
     
-    <category term="hackthebox" />
+    <category term="dvwa" />
     
   
 
   
     <summary>
       
-      Bolt is a very interesting medium linux box featuring some heavy enumeration. For foothold, you exploit a web page that’s vulnerable to SSTI. After some enumeration, you will find a MySQL credential in a configuration file, which will give you access to a local user. For privilege escalation, you will take advantage of a chrome extension that dumps GPG keys into it’s logs on disk.
+      This is an exercise in OWASP DVWA where I chained Stored XSS with CSRF.
 
 
 
-Info
+CSRF and Stored XSS - DVWA
 
 
-
-
-
-...
+For this challenge, we will be chaining the CSRF vulnerability with stored XSS vulnerability since there is no other way to make another user in the application interact with our payload. We will be using the account of smithy, whose password is password, to target the user admin, which I am ...
     </summary>
   
 
@@ -182,28 +201,46 @@ Info
 
   
   <entry>
-    <title>Horizontall - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" rel="alternate" type="text/html" title="Horizontall - HackTheBox" />
-    <published>2022-02-05T00:00:00+01:00</published>
+    <title>Command Injection - DVWA</title>
+    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html" rel="alternate" type="text/html" title="Command Injection - DVWA" />
+    <published>2022-03-27T00:00:00+01:00</published>
   
-    <updated>2022-02-05T00:00:00+01:00</updated>
+    <updated>2022-03-27T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/horizontall.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/horizontall.html" />
+    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html</id>
+    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
 
   
     
-    <category term="hackthebox" />
+    <category term="dvwa" />
     
   
 
   
     <summary>
       
-      Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which host a vulnerable web application that you can exploit to gain code execution on the server. Once inside, you will find a Laravel instance running locally, which is also vulnerable to RCE, and will gi...
+      This is an exercise in OWASP DVWA for command injection.
+
+
+
+Command Injection - DVWA
+
+
+Difficulty: Easy
+
+
+This mode gave us an input field for an IP address. Following submission, and a short delay, some output that look to be the result of the ping command was displayed;
+
+
+
+The user input is submitted in a POST request;
+
+
+
+Since we do know our instance of DVWA is running on a linux host, we we...
     </summary>
   
 
