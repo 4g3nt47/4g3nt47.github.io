@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-03-27T10:41:21+01:00</updated>
+  <updated>2022-04-02T08:48:13+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Shibboleth - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" rel="alternate" type="text/html" title="Shibboleth - HackTheBox" />
+    <published>2022-04-02T00:00:00+01:00</published>
+  
+    <updated>2022-04-02T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/shibboleth.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can us...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -194,53 +223,6 @@ CSRF and Stored XSS - DVWA
 
 
 For this challenge, we will be chaining the CSRF vulnerability with stored XSS vulnerability since there is no other way to make another user in the application interact with our payload. We will be using the account of smithy, whose password is password, to target the user admin, which I am ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Command Injection - DVWA</title>
-    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html" rel="alternate" type="text/html" title="Command Injection - DVWA" />
-    <published>2022-03-27T00:00:00+01:00</published>
-  
-    <updated>2022-03-27T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html</id>
-    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="dvwa" />
-    
-  
-
-  
-    <summary>
-      
-      This is an exercise in OWASP DVWA for command injection.
-
-
-
-Command Injection - DVWA
-
-
-Difficulty: Easy
-
-
-This mode gave us an input field for an IP address. Following submission, and a short delay, some output that look to be the result of the ping command was displayed;
-
-
-
-The user input is submitted in a POST request;
-
-
-
-Since we do know our instance of DVWA is running on a linux host, we we...
     </summary>
   
 
