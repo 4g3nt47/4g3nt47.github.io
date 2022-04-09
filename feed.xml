@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-04-02T08:48:13+01:00</updated>
+  <updated>2022-04-09T15:37:26+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,37 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Overflow - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/overflow.html" rel="alternate" type="text/html" title="Overflow - HackTheBox" />
+    <published>2022-04-09T00:00:00+01:00</published>
+  
+    <updated>2022-04-09T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/overflow.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/overflow.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Overflow is an amazing hard-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an oracle padding vulnerability to gain access to an admin dashboard that’s vulnerable to SQL injection, use the SQL injection to retrieve and crack a hash for another domain, which is vulnerable to an exiftool RCE.
+
+There are two local users on the box; one accessible through password r...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -187,42 +218,6 @@ Changing the value to /etc/hostname gave me the hostname of the box, along with 
 
 
 That’s cool and all, but we want to see if we can get RCE...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>CSRF + Stored XSS - DVWA</title>
-    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_csrf_plus_xss.html" rel="alternate" type="text/html" title="CSRF + Stored XSS - DVWA" />
-    <published>2022-03-27T00:00:00+01:00</published>
-  
-    <updated>2022-03-27T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_csrf_plus_xss.html</id>
-    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_csrf_plus_xss.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="dvwa" />
-    
-  
-
-  
-    <summary>
-      
-      This is an exercise in OWASP DVWA where I chained Stored XSS with CSRF.
-
-
-
-CSRF and Stored XSS - DVWA
-
-
-For this challenge, we will be chaining the CSRF vulnerability with stored XSS vulnerability since there is no other way to make another user in the application interact with our payload. We will be using the account of smithy, whose password is password, to target the user admin, which I am ...
     </summary>
   
 

