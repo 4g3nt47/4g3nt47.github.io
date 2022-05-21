@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-04-21T11:25:58+01:00</updated>
+  <updated>2022-05-21T18:35:38+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Pandora - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/pandora.html" rel="alternate" type="text/html" title="Pandora - HackTheBox" />
+    <published>2022-05-21T00:00:00+01:00</published>
+  
+    <updated>2022-05-21T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/pandora.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/pandora.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I ...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -151,53 +180,6 @@ Adding a single quote to the input gave an SQL error;
 
 
 This means we have an error-based SQL injection. The payload 1' order by 2-- - didn’t gi...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>File Upload- DVWA</title>
-    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_file_upload.html" rel="alternate" type="text/html" title="File Upload- DVWA" />
-    <published>2022-03-27T00:00:00+01:00</published>
-  
-    <updated>2022-03-27T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_file_upload.html</id>
-    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_file_upload.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="dvwa" />
-    
-  
-
-  
-    <summary>
-      
-      This is an exercise in OWASP DVWA for exploiting file upload vulnerabilities.
-
-
-
-File Upload - DVWA
-
-
-Difficulty: Easy
-
-
-In this mode, we are presented with a file upload form;
-
-
-
-As expected, there is no filter, and I was able to upload a PHP code that execute a bash reverse shell;
-
-
-
-The web application is kind enough to give us the path of the upload. Going to the URL, I got a shell on the b...
     </summary>
   
 

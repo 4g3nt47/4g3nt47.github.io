@@ -1,4 +1,171 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-04-21T11:25:58+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Backdoor - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/backdoor.html" rel="alternate" type="text/html" title="Backdoor - HackTheBox" /><published>2022-04-23T00:00:00+01:00</published><updated>2022-04-23T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/backdoor</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/backdoor.html"><![CDATA[<p><strong>Backdoor</strong> is a very easy linux box on <em>HackTheBox</em>. It starts with a web service running <em>wordpress</em> with a plugin that’s vulnerable to <em>path traversal</em>, which you can use to read arbitrary files on the box. You then use this bug to identify a service running on the box on port <strong>1337</strong>, which you can exploit to gain a foothold on the box as the local user. Privesc is stupidly easy, and targets a <em>screen</em> session running on the box as root.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-05-21T18:35:38+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Pandora - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/pandora.html" rel="alternate" type="text/html" title="Pandora - HackTheBox" /><published>2022-05-21T00:00:00+01:00</published><updated>2022-05-21T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/pandora</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/pandora.html"><![CDATA[<p><strong>Pandora</strong> is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port <strong>161</strong> (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through <em>path tampering</em> to gain code execution as root.</p>
+
+<p><br /></p>
+
+<h3 id="about">About</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20220208055528.png" alt="" /></p>
+
+<p><img src="/assets/img/20220208055557.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Fri Jan 28 14:55:17 2022 as: nmap -sS -sV -v -oN nmap.txt 10.10.11.136
+Nmap scan report for pandora.htb (10.10.11.136)
+Host is up (0.29s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Fri Jan 28 14:59:09 2022 -- 1 IP address (1 host up) scanned in 232.39 seconds
+</code></pre>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+
+<p><img src="/assets/img/20220208060055.png" alt="" /></p>
+
+<p>The site has a contact-us form that does generate a request, but the response, which just returns the homepage of the site, does not change no matter what I did to the parameters;</p>
+
+<p><img src="/assets/img/20220208060341.png" alt="" /></p>
+
+<p>Bruteforcing the web root for hidden files, and also for hidden subdomains didn’t give me anything of use. A quick UDP port scan with NMAP showed port <strong>161</strong> (SNMP) is open. So I scanned it deeper with <code class="language-plaintext highlighter-rouge">-sU -sC -sV</code> flags, and found a credential <code class="language-plaintext highlighter-rouge">daniel</code>:<code class="language-plaintext highlighter-rouge">HotelBabylon23</code> that is being passed to a script as command line argument;</p>
+
+<p><img src="/assets/img/20220208061826.png" alt="" /></p>
+
+<p>The script that did this enumeration is <code class="language-plaintext highlighter-rouge">snmp-processes</code>, which is used to discover running processes on a host running SNMP. Using the credential, I was able to get access to the box over SSH;</p>
+
+<p><img src="/assets/img/20220208062306.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<h4 id="pandorapandahtb">pandora.panda.htb</h4>
+
+<p>After poking around a little inside the box, the apache configuration file at <code class="language-plaintext highlighter-rouge">/etc/apache2/sites-available/pandora.conf</code> showed a hidden subdomain;</p>
+
+<p><img src="/assets/img/20220208063020.png" alt="" /></p>
+
+<p>I added the hostname to my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file, but was unable to access it as on request the server simply returns that static web page at <code class="language-plaintext highlighter-rouge">pandora.htb/</code>. Notice in the first line of the Apache2 config that the hostname for the virtual host is <strong>localhost</strong>. This means the domain is accessible only locally. So with my SSH access into the box, I setup an SSH tunnel so I can access the site over port <strong>8888</strong> on my attack host;</p>
+
+<p><img src="/assets/img/20220209212210.png" alt="" /></p>
+
+<p>Then I updated my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file;</p>
+
+<p><img src="/assets/img/20220209212316.png" alt="" /></p>
+
+<p>And it worked;</p>
+
+<p><img src="/assets/img/20220209212416.png" alt="" /></p>
+
+<p>I couldn’t read the <code class="language-plaintext highlighter-rouge">include/config.php</code> file as it is owned by <strong>matt</strong> and the permissions were locked down.</p>
+
+<p>A search in <code class="language-plaintext highlighter-rouge">searchsploit</code> for exploits targeting this service gave a bunch of results;</p>
+
+<p><img src="/assets/img/20220208064507.png" alt="" /></p>
+
+<p>Testing the credentials of <strong>daniel</strong>, I was able to get a different response that indicates a valid credential, with possibly restricted permissions;</p>
+
+<p><img src="/assets/img/20220208064935.png" alt="" /></p>
+
+<p>I have no idea what this API is, so I went back into the box as <strong>daniel</strong>, and start going through the source code of the web app. Inside the <code class="language-plaintext highlighter-rouge">include/</code> folder, I found a file named <code class="language-plaintext highlighter-rouge">api.php</code>, which likely contains the implementation of the API I have access to.</p>
+
+<p>Sending a request to the URL at <code class="language-plaintext highlighter-rouge">/include/api.php</code> gave me this;</p>
+
+<p><img src="/assets/img/20220208130155.png" alt="" /></p>
+
+<p>So I started poking around at the source code of the API to figure out how it works. It accepts username and password through the GET parameters <code class="language-plaintext highlighter-rouge">user</code> and <code class="language-plaintext highlighter-rouge">pass</code> respectively. Supplying the creds of <strong>daniel</strong> gave me a different output;</p>
+
+<p><img src="/assets/img/20220208130355.png" alt="" /></p>
+
+<p>Reviewing the source code even more, I realized it expects to be told the task to perform using the parameter <code class="language-plaintext highlighter-rouge">op</code>;</p>
+
+<p><img src="/assets/img/20220208130613.png" alt="" /></p>
+
+<p>The above gave us three valid values for the <code class="language-plaintext highlighter-rouge">op</code> parameter, which are <code class="language-plaintext highlighter-rouge">get</code>, <code class="language-plaintext highlighter-rouge">set</code>, and <code class="language-plaintext highlighter-rouge">help</code>. Looking further into the source code revealed something nice;</p>
+
+<p><img src="/assets/img/20220208130832.png" alt="" /></p>
+
+<p>If I can control the value assigned to the variable <code class="language-plaintext highlighter-rouge">$ext_name</code>, I can control the file that will be included, which I could exploit to load PHP files for <em>arbitrary code execution</em>. Turns out I can, because <code class="language-plaintext highlighter-rouge">$ext_name</code> is assigned the value of a GET parameter;</p>
+
+<p><img src="/assets/img/20220208131814.png" alt="" /></p>
+
+<p>So I logged back into the box and into <code class="language-plaintext highlighter-rouge">/dev/shm/.0</code> directory, and created a PHP script named <code class="language-plaintext highlighter-rouge">.api.php</code> containing my reverse shell;</p>
+
+<p><img src="/assets/img/20220209213324.png" alt="" /></p>
+
+<p>I then have the web app execute the script using the request;</p>
+
+<p><img src="/assets/img/20220209213432.png" alt="" /></p>
+
+<p>Sending this, I got a shell as the user <strong>matt</strong>;</p>
+
+<p><img src="/assets/img/20220209213723.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>The user <strong>matt</strong> does not have sudo permissions on any file in the box. Searching for SUID binaries gave an interesting result;</p>
+
+<p><img src="/assets/img/20220209214320.png" alt="" /></p>
+
+<p>It’s a binary file, so I shipped it over to my attack host and opened it in <code class="language-plaintext highlighter-rouge">radare2</code>. Dumping strings contained in the binary revealed a possible command that could be vulnerable to <em>path tampering</em>;</p>
+
+<p><img src="/assets/img/20220209214759.png" alt="" /></p>
+
+<p>I checked if it’s indeed used as a command by listing all references to it using the command <code class="language-plaintext highlighter-rouge">axt @ &lt;address&gt;</code>. I got one match in the <code class="language-plaintext highlighter-rouge">main()</code> function;</p>
+
+<p><img src="/assets/img/20220209215056.png" alt="" /></p>
+
+<p>Using my shell on the box as <strong>matt</strong>, I moved to a writeable directory, created a file named <code class="language-plaintext highlighter-rouge">tar</code> containing a reverse shell, made it executable, added it to the <code class="language-plaintext highlighter-rouge">$PATH</code> variable, and called the <code class="language-plaintext highlighter-rouge">pandora_backup</code> script. This gave me root access to the box;</p>
+
+<p><img src="/assets/img/20220209222448.png" alt="" /></p>
+
+<p><img src="/assets/img/20220209222501.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified port <strong>22</strong> and <strong>80</strong>.</li>
+  <li>UDP port scan revealed port <strong>161</strong> (SNMP) is open.</li>
+  <li>NMAP’s <code class="language-plaintext highlighter-rouge">snmp-process</code> revealed a password for a user named <strong>daniel</strong>, which gave access to the box over SSH.</li>
+  <li>Inside as <strong>daniel</strong>
+    <ul>
+      <li>Found a vhost configured with apache that is accessible only locally.</li>
+      <li>Setup a tunnel through SSH to access the site from my box.</li>
+      <li>Found a vulnerable API that can be exploited for <em>code execution</em> as the user <strong>matt</strong>.</li>
+    </ul>
+  </li>
+  <li>Inside as <strong>matt</strong>
+    <ul>
+      <li>Found a custom SUID script.</li>
+      <li>Basic analysis with <code class="language-plaintext highlighter-rouge">radare2</code> showed it’s vulnerable to <em>path tampering</em>.</li>
+      <li>Exploited it to gain code execution as <em>root</em>.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="snmp" /><category term="vhost" /><category term="apache" /><category term="php" /><category term="static analysis" /><category term="lfi" /><category term="suid" /><category term="reverse engineering" /><category term="path tampering" /><category term="radare2" /><summary type="html"><![CDATA[Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through path tampering to gain code execution as root.]]></summary></entry><entry><title type="html">Backdoor - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/backdoor.html" rel="alternate" type="text/html" title="Backdoor - HackTheBox" /><published>2022-04-23T00:00:00+01:00</published><updated>2022-04-23T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/backdoor</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/backdoor.html"><![CDATA[<p><strong>Backdoor</strong> is a very easy linux box on <em>HackTheBox</em>. It starts with a web service running <em>wordpress</em> with a plugin that’s vulnerable to <em>path traversal</em>, which you can use to read arbitrary files on the box. You then use this bug to identify a service running on the box on port <strong>1337</strong>, which you can exploit to gain a foothold on the box as the local user. Privesc is stupidly easy, and targets a <em>screen</em> session running on the box as root.</p>
 
 <p><br /></p>
 
@@ -2072,91 +2239,4 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
 
 <p><img src="/assets/img/20220324210755.png" alt="" /></p>
 
-<p>This approach worked, but the web app is also filtering file extension, so I was unable to gain code execution. However, this can still be exploited to gain code execution by chaining it with the LFI vuln in DVWA.</p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="file upload" /><category term="rce" /><category term="magic bytes" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA for exploiting file upload vulnerabilities.]]></summary></entry><entry><title type="html">Error-based SQL Injection- DVWA</title><link href="https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html" rel="alternate" type="text/html" title="Error-based SQL Injection- DVWA" /><published>2022-03-27T00:00:00+01:00</published><updated>2022-03-27T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based</id><content type="html" xml:base="https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html"><![CDATA[<p>This is an exercise in OWASP DVWA for exploiting SQL injection.</p>
-
-<p><br /></p>
-
-<h3 id="error-based-sql-injection---dvwa">Error-based SQL Injection - DVWA</h3>
-<p><br /></p>
-
-<h4 id="difficulty-easy">Difficulty: Easy</h4>
-<p><br /></p>
-
-<p>In this mode, we are presented with a form to enter a user ID, which is used to display the first name and surname of a user;</p>
-
-<p><img src="/assets/img/20220327073156.png" alt="" /></p>
-
-<p><img src="/assets/img/20220327073215.png" alt="" /></p>
-
-<p>Adding a single quote to the input gave an SQL error;</p>
-
-<p><img src="/assets/img/20220327073331.png" alt="" /></p>
-
-<p>This means we have an <em>error-based SQL injection</em>. The payload <code class="language-plaintext highlighter-rouge">1' order by 2-- -</code> didn’t give any error, but <code class="language-plaintext highlighter-rouge">1' order by 3-- -</code> did, which means the query we are injecting to is retrieving <strong>2</strong> columns. Injecting a <em>union</em> query showed that both columns are reflected in the response;</p>
-
-<p><img src="/assets/img/20220327073838.png" alt="" /></p>
-
-<p>Name of the current database;</p>
-
-<p><img src="/assets/img/20220327073933.png" alt="" /></p>
-
-<p>Existing databases;</p>
-
-<p><img src="/assets/img/20220327074422.png" alt="" /></p>
-
-<p>Tables in <code class="language-plaintext highlighter-rouge">dvwa</code> databases;</p>
-
-<p><img src="/assets/img/20220327074739.png" alt="" /></p>
-
-<p><code class="language-plaintext highlighter-rouge">users</code> looks interesting. Let’s see what columns it have;</p>
-
-<p><img src="/assets/img/20220327074942.png" alt="" /></p>
-
-<p>Looks like this table is used to store user credentials;</p>
-
-<p><img src="/assets/img/20220327075345.png" alt="" /></p>
-
-<p>I copied these hashes to a format <code class="language-plaintext highlighter-rouge">john</code> can process, and was able to crack them;</p>
-
-<p><img src="/assets/img/20220327075721.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="difficulty-medium">Difficulty: Medium</h4>
-<p><br /></p>
-
-<p>In this mode, the form is different. It uses a set of predefined user IDs as input;</p>
-
-<p><img src="/assets/img/20220327080027.png" alt="" /></p>
-
-<p>This means we will have to rely on a proxy for injection. Intercepting the request in <code class="language-plaintext highlighter-rouge">mitmproxy</code> and testing for SQL injection using a single quote gave an error;</p>
-
-<p><img src="/assets/img/20220327080425.png" alt="" /></p>
-
-<p>Same thing happens when injecting with double quotes. Injecting without any quote worked, which means the application is likely injecting the user input directly without enclosing in quote, which will work since the developer expects the input to be an integer;</p>
-
-<p><img src="/assets/img/20220327080751.png" alt="" /></p>
-
-<p>This injection can be exploited much more conveniently using tools like <code class="language-plaintext highlighter-rouge">sqlmap</code>, and I was able to use it to dump the hashes in the <code class="language-plaintext highlighter-rouge">users</code> table;</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre>sqlmap <span class="nt">-u</span> <span class="s1">'http://buster/dvwa/vulnerabilities/sqli/'</span> <span class="nt">--data</span> <span class="s1">'id=1&amp;Submit=Submit'</span> <span class="nt">--cookie</span> <span class="s1">'security=medium; PHPSESSID=5c8siun1tr567gd519v1mivcbi'</span> <span class="nt">-D</span> dvwa <span class="nt">-T</span> <span class="nb">users</span> <span class="nt">--dump</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><img src="/assets/img/20220327081759.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="difficulty-high">Difficulty: High</h4>
-<p><br /></p>
-
-<table>
-  <tbody>
-    <tr>
-      <td>This mode also gives a different form. The payload used in [[06 - SQL Injection - Error-based#Difficulty Easy</td>
-      <td>easy mode]] also worked in this mode, the only twist is that a seperate window is created in browser for user input, while the results are displayed in the main window;</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><img src="/assets/img/20220327082145.png" alt="" /></p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="sql injection" /><category term="sqlmap" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA for exploiting SQL injection.]]></summary></entry></feed>
+<p>This approach worked, but the web app is also filtering file extension, so I was unable to gain code execution. However, this can still be exploited to gain code execution by chaining it with the LFI vuln in DVWA.</p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="file upload" /><category term="rce" /><category term="magic bytes" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA for exploiting file upload vulnerabilities.]]></summary></entry></feed>
