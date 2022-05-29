@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-05-21T18:35:38+01:00</updated>
+  <updated>2022-05-29T09:51:21+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>AdmirerToo - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/admirertoo.html" rel="alternate" type="text/html" title="AdmirerToo - HackTheBox" />
+    <published>2022-05-29T00:00:00+01:00</published>
+  
+    <updated>2022-05-29T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/admirertoo.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/admirertoo.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, ...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -131,55 +160,6 @@ There are two local users on the box; one accessible through password r...
     <summary>
       
       Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can us...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Error-based SQL Injection- DVWA</title>
-    <link href="https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html" rel="alternate" type="text/html" title="Error-based SQL Injection- DVWA" />
-    <published>2022-03-27T00:00:00+01:00</published>
-  
-    <updated>2022-03-27T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html</id>
-    <content src="https://4g3nt47.github.io/posts/dvwa/dvwa_sqli_error_based.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="dvwa" />
-    
-  
-
-  
-    <summary>
-      
-      This is an exercise in OWASP DVWA for exploiting SQL injection.
-
-
-
-Error-based SQL Injection - DVWA
-
-
-Difficulty: Easy
-
-
-In this mode, we are presented with a form to enter a user ID, which is used to display the first name and surname of a user;
-
-
-
-
-
-Adding a single quote to the input gave an SQL error;
-
-
-
-This means we have an error-based SQL injection. The payload 1' order by 2-- - didn’t gi...
     </summary>
   
 
