@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-05-29T09:51:21+01:00</updated>
+  <updated>2022-06-04T12:52:03+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Timing - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/timing.html" rel="alternate" type="text/html" title="Timing - HackTheBox" />
+    <published>2022-06-04T00:00:00+01:00</published>
+  
+    <updated>2022-06-04T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/timing.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/timing.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recov...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -131,35 +160,6 @@
       Overflow is an amazing hard-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an oracle padding vulnerability to gain access to an admin dashboard that’s vulnerable to SQL injection, use the SQL injection to retrieve and crack a hash for another domain, which is vulnerable to an exiftool RCE.
 
 There are two local users on the box; one accessible through password r...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Shibboleth - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" rel="alternate" type="text/html" title="Shibboleth - HackTheBox" />
-    <published>2022-04-02T00:00:00+01:00</published>
-  
-    <updated>2022-04-02T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/shibboleth.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/shibboleth.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can us...
     </summary>
   
 
