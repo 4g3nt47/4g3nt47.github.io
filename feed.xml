@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-06-04T12:52:03+01:00</updated>
+  <updated>2022-06-11T16:10:16+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,50 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Meta - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/meta.html" rel="alternate" type="text/html" title="Meta - HackTheBox" />
+    <published>2022-06-10T00:00:00+01:00</published>
+  
+    <updated>2022-06-10T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/meta.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/meta.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Meta is a pretty easy medium-rated box on HackTheBox. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an exiftool CVE. User access is also another CVE targeting ImageMagick, and privesc to root is through a vulnerable sudo configuration on neofetch, which allows you to hijack the configuration file used by the program.
+
+
+
+Info
+
+
+
+
+
+
+
+Recon
+
+
+NMAP...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -129,37 +173,6 @@
     <summary>
       
       Backdoor is a very easy linux box on HackTheBox. It starts with a web service running wordpress with a plugin that’s vulnerable to path traversal, which you can use to read arbitrary files on the box. You then use this bug to identify a service running on the box on port 1337, which you can exploit to gain a foothold on the box as the local user. Privesc is stupidly easy, and targets a screen s...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Overflow - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/overflow.html" rel="alternate" type="text/html" title="Overflow - HackTheBox" />
-    <published>2022-04-09T00:00:00+01:00</published>
-  
-    <updated>2022-04-09T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/overflow.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/overflow.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Overflow is an amazing hard-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an oracle padding vulnerability to gain access to an admin dashboard that’s vulnerable to SQL injection, use the SQL injection to retrieve and crack a hash for another domain, which is vulnerable to an exiftool RCE.
-
-There are two local users on the box; one accessible through password r...
     </summary>
   
 
