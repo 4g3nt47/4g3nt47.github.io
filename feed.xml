@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-06-11T16:10:16+01:00</updated>
+  <updated>2022-06-18T18:29:06+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,55 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Paper - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/paper.html" rel="alternate" type="text/html" title="Paper - HackTheBox" />
+    <published>2022-06-18T00:00:00+01:00</published>
+  
+    <updated>2022-06-18T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/paper.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/paper.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Paper is a nice and easy linux box. It starts with a wordpress site that can be exploited to leak user drafts, which will lead you to an instance of RocketChat with a custom bot that’s vulnerable to path traversal. Privesc is through a CVE affecting Polkit.
+
+
+
+Info
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+# Nmap 7.70 scan initiated Sun Feb  6 02:17:09 2022 as: nmap -sC -sC -oN nmap.txt -v 10.10.11.143
+Nmap scan ...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -144,35 +193,6 @@ NMAP...
     <summary>
       
       Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Backdoor - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/backdoor.html" rel="alternate" type="text/html" title="Backdoor - HackTheBox" />
-    <published>2022-04-23T00:00:00+01:00</published>
-  
-    <updated>2022-04-23T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/backdoor.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/backdoor.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Backdoor is a very easy linux box on HackTheBox. It starts with a web service running wordpress with a plugin that’s vulnerable to path traversal, which you can use to read arbitrary files on the box. You then use this bug to identify a service running on the box on port 1337, which you can exploit to gain a foothold on the box as the local user. Privesc is stupidly easy, and targets a screen s...
     </summary>
   
 
