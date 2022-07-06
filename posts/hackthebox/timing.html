@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/timing.html"},"url":"https://4g3nt47.github.io/posts/hackthebox/timing.html","headline":"Timing - HackTheBox","dateModified":"2022-06-04T00:00:00+01:00","datePublished":"2022-06-04T00:00:00+01:00","description":"Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recover from a previous git commit. Privesc targets a custom SUID script that runs a Java program, which allows you to write arbitrary files in any directory you can enter.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Timing - HackTheBox","dateModified":"2022-06-04T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/timing.html","datePublished":"2022-06-04T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/timing.html"},"description":"Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recover from a previous git commit. Privesc targets a custom SUID script that runs a Java program, which allows you to write arbitrary files in any directory you can enter.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Timing - HackTheBox | 4g3nt47
   </title><!--
@@ -72,7 +72,7 @@
     <div class="site-title mt-3">
       <a href="/">4g3nt47</a>
     </div>
-    <div class="site-subtitle font-italic">Welcome to my InfoSec blog</div>
+    <div class="site-subtitle font-italic">Welcome to my infosec blog</div>
 
   </div><!-- .profile-wrapper -->
 
@@ -615,7 +615,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/lfi/">lfi</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
 <script src="/assets/js/bootstrap-toc.min.js"></script>
@@ -721,7 +721,7 @@ Service detection performed. Please report any incorrect results at https://nmap
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/lfi/">lfi</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>

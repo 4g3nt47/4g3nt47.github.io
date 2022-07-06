@@ -3,8 +3,8 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
-  <subtitle>A simple blog for InfoSec and other tech-related stuffs!</subtitle>
-  <updated>2022-06-18T18:29:06+01:00</updated>
+  <subtitle>A blog for infosec stuff.</subtitle>
+  <updated>2022-07-06T03:36:36+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,55 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Undetected - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/undetected.html" rel="alternate" type="text/html" title="Undetected - HackTheBox" />
+    <published>2022-07-02T00:00:00+01:00</published>
+  
+    <updated>2022-07-02T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/undetected.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/undetected.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Undetected is a fun medium linux box that will have you working on the trail of an attacker. Foothold is pretty easy as the site is using a PHP library that allows for RCE. Once on the box, you will need to recover the password of a local user account from a binary that was dropped by the attacker. PrivEsc is through a backdoored SSH daemon (SSHDoor).
+
+
+
+About
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.7...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -164,35 +213,6 @@ NMAP...
     <summary>
       
       AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Pandora - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/pandora.html" rel="alternate" type="text/html" title="Pandora - HackTheBox" />
-    <published>2022-05-21T00:00:00+01:00</published>
-  
-    <updated>2022-05-21T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/pandora.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/pandora.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I ...
     </summary>
   
 

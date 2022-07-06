@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/overflow.html"},"url":"https://4g3nt47.github.io/posts/hackthebox/overflow.html","headline":"Overflow - HackTheBox","dateModified":"2022-04-09T00:00:00+01:00","datePublished":"2022-04-09T00:00:00+01:00","description":"Overflow is an amazing hard-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an oracle padding vulnerability to gain access to an admin dashboard that’s vulnerable to SQL injection, use the SQL injection to retrieve and crack a hash for another domain, which is vulnerable to an exiftool RCE.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Overflow - HackTheBox","dateModified":"2022-04-09T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/overflow.html","datePublished":"2022-04-09T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/overflow.html"},"description":"Overflow is an amazing hard-rated box on HackTheBox. To gain a foothold on the box, you will need to exploit an oracle padding vulnerability to gain access to an admin dashboard that’s vulnerable to SQL injection, use the SQL injection to retrieve and crack a hash for another domain, which is vulnerable to an exiftool RCE.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Overflow - HackTheBox | 4g3nt47
   </title><!--
@@ -72,7 +72,7 @@
     <div class="site-title mt-3">
       <a href="/">4g3nt47</a>
     </div>
-    <div class="site-subtitle font-italic">Welcome to my InfoSec blog</div>
+    <div class="site-subtitle font-italic">Welcome to my infosec blog</div>
 
   </div><!-- .profile-wrapper -->
 
@@ -1166,7 +1166,7 @@ int main(){
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/lfi/">lfi</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
 <script src="/assets/js/bootstrap-toc.min.js"></script>
@@ -1203,6 +1203,20 @@ int main(){
           </div>
         </a>
       </div><div class="card">
+        <a href="/posts/hackthebox/undetected.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-07-02 00:00:00 +0100">Jul  2</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Undetected - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Undetected is a fun medium linux box that will have you working on the trail of an attacker. Foothold is pretty easy as the site is using a PHP library that allows for RCE. Once on the box, you wil...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
         <a href="/posts/hackthebox/pandora.html">
           <div class="card-body"><!--
   Date format snippet
@@ -1212,20 +1226,6 @@ int main(){
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Pandora - HackTheBox</h3>
             <div class="text-muted small">
               <p>Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give yo...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
-        <a href="/posts/hackthebox/bountyhunter.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2021-11-18 00:00:00 +0100">Nov 18, 2021</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>BountyHunter - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on ...
               </p>
             </div>
           </div>
@@ -1272,7 +1272,7 @@ int main(){
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/lfi/">lfi</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>

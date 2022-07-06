@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/admirertoo.html"},"url":"https://4g3nt47.github.io/posts/hackthebox/admirertoo.html","headline":"AdmirerToo - HackTheBox","dateModified":"2022-05-29T00:00:00+01:00","datePublished":"2022-05-29T00:00:00+01:00","description":"AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, which you can access by setting up an SSH tunnel. OpenCATS is running as the user devel, who has write permissions on the directory /usr/local/etc, and is vulnerable object injection that you can use to write files in the directory, and exploit the Fail2Ban service to gain code execution as root.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"AdmirerToo - HackTheBox","dateModified":"2022-05-29T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/admirertoo.html","datePublished":"2022-05-29T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/admirertoo.html"},"description":"AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, which you can access by setting up an SSH tunnel. OpenCATS is running as the user devel, who has write permissions on the directory /usr/local/etc, and is vulnerable object injection that you can use to write files in the directory, and exploit the Fail2Ban service to gain code execution as root.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>AdmirerToo - HackTheBox | 4g3nt47
   </title><!--
@@ -72,7 +72,7 @@
     <div class="site-title mt-3">
       <a href="/">4g3nt47</a>
     </div>
-    <div class="site-subtitle font-italic">Welcome to my InfoSec blog</div>
+    <div class="site-subtitle font-italic">Welcome to my infosec blog</div>
 
   </div><!-- .profile-wrapper -->
 
@@ -766,7 +766,7 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/lfi/">lfi</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
 <script src="/assets/js/bootstrap-toc.min.js"></script>
@@ -803,20 +803,6 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
           </div>
         </a>
       </div><div class="card">
-        <a href="/posts/hackthebox/forge.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2022-01-23 00:00:00 +0100">Jan 23</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Forge - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This ...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
         <a href="/posts/hackthebox/timing.html">
           <div class="card-body"><!--
   Date format snippet
@@ -826,6 +812,20 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
             <div class="text-muted small">
               <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/forge.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-01-23 00:00:00 +0100">Jan 23</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Forge - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This ...
               </p>
             </div>
           </div>
@@ -872,7 +872,7 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/lfi/">lfi</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>
