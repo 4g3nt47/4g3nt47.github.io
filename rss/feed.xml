@@ -1,4 +1,782 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-07-17T07:45:15+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Undetected - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/undetected.html" rel="alternate" type="text/html" title="Undetected - HackTheBox" /><published>2022-07-02T00:00:00+01:00</published><updated>2022-07-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/undetected</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/undetected.html"><![CDATA[<p><strong>Undetected</strong> is a fun medium linux box that will have you working on the trail of an attacker. Foothold is pretty easy as the site is using a PHP library that allows for RCE. Once on the box, you will need to recover the password of a local user account from a binary that was dropped by the attacker. PrivEsc is through a backdoored SSH daemon (SSHDoor).</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2022-08-16T11:12:00+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Catch - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/catch.html" rel="alternate" type="text/html" title="Catch - HackTheBox" /><published>2022-08-16T00:00:00+01:00</published><updated>2022-08-16T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/catch</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/catch.html"><![CDATA[<p><strong>Catch</strong> is a very interesting <em>medium-rated</em> linux box on <em>HackTheBox</em>. It starts with some light reversing of an android application to obtain an access token for the <em>Let’s Chat</em> API running on the host. This token will lead you to some credentials in the chat logs, which are reused in the <em>Cachet</em> instance running on the host, which you can exploit to leak the application config and obtain a password that was reused for SSH login. Once inside the box, you will be exploiting a custom cron job that process user controlled files in an unsafe way, leading to code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+
+<p><br /></p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/20220317072018.png" alt="" /></p>
+
+<p><img src="/assets/img/20220317072038.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+<p><br /></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Mon Mar 14 06:44:58 2022 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.150
+Nmap scan report for catch.htb (10.10.11.150)
+Host is up (0.36s latency).
+Not shown: 995 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.4 (Ubuntu Linux; protocol 2.0)
+80/tcp   open  http    Apache httpd 2.4.41 ((Ubuntu))
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Catch Global Systems
+3000/tcp open  ppp?
+| fingerprint-strings: 
+|   GenericLines, Help, RTSPRequest: 
+|     HTTP/1.1 400 Bad Request
+|     Content-Type: text/plain; charset=utf-8
+|     Connection: close
+|     Request
+|   GetRequest: 
+|     HTTP/1.0 200 OK
+|     Content-Type: text/html; charset=UTF-8
+|     Set-Cookie: i_like_gitea=f9ae0e9b88600477; Path=/; HttpOnly
+|     Set-Cookie: _csrf=1thsrzl3dfhhgLXqP2EYU0Yr2VU6MTY0NzIzNjc0NjEwNzA3MDM1NQ; Path=/; Expires=Tue, 15 Mar 2022 05:45:46 GMT; HttpOnly; SameSite=Lax
+|     Set-Cookie: macaron_flash=; Path=/; Max-Age=0; HttpOnly
+|     X-Frame-Options: SAMEORIGIN
+|     Date: Mon, 14 Mar 2022 05:45:46 GMT
+|     &lt;!DOCTYPE html&gt;
+|     &lt;html lang="en-US" class="theme-"&gt;
+|     &lt;head data-suburl=""&gt;
+|     &lt;meta charset="utf-8"&gt;
+|     &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+|     &lt;meta http-equiv="x-ua-compatible" content="ie=edge"&gt;
+|     &lt;title&gt; Catch Repositories &lt;/title&gt;
+|     &lt;link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2F0Y2ggUmVwb3NpdG9yaWVzIiwic2hvcnRfbmFtZSI6IkNhdGNoIFJlcG9zaXRvcmllcyIsInN0YXJ0X3VybCI6Imh0dHA6Ly9naXRlYS5jYXRjaC5odGI6MzAwMC8iLCJpY29ucyI6W3sic3JjIjoiaHR0cDovL2dpdGVhLmNhdGNoLmh0Yjoz
+|   HTTPOptions: 
+|     HTTP/1.0 405 Method Not Allowed
+|     Set-Cookie: i_like_gitea=e96c0ccbcd15e95b; Path=/; HttpOnly
+|     Set-Cookie: _csrf=idequJw78CbNGhYDHkv0-BdGyA06MTY0NzIzNjc1NDIxOTc0MjU3Nw; Path=/; Expires=Tue, 15 Mar 2022 05:45:54 GMT; HttpOnly; SameSite=Lax
+|     Set-Cookie: macaron_flash=; Path=/; Max-Age=0; HttpOnly
+|     X-Frame-Options: SAMEORIGIN
+|     Date: Mon, 14 Mar 2022 05:45:54 GMT
+|_    Content-Length: 0
+5000/tcp open  upnp?
+| fingerprint-strings: 
+|   DNSStatusRequestTCP, DNSVersionBindReqTCP, Help, RPCCheck, RTSPRequest, SMBProgNeg, ZendJavaBridge: 
+|     HTTP/1.1 400 Bad Request
+|     Connection: close
+|   GetRequest: 
+|     HTTP/1.1 302 Found
+|     X-Frame-Options: SAMEORIGIN
+|     X-Download-Options: noopen
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 1; mode=block
+|     Content-Security-Policy: 
+|     X-Content-Security-Policy: 
+|     X-WebKit-CSP: 
+|     X-UA-Compatible: IE=Edge,chrome=1
+|     Location: /login
+|     Vary: Accept, Accept-Encoding
+|     Content-Type: text/plain; charset=utf-8
+|     Content-Length: 28
+|     Set-Cookie: connect.sid=s%3AhXxhtsBrUI_XDU_i3ZgGjgu033W-HpWG.KVpt61zx0JMhA1rttVRXksZCCwcY0tu9zcySTvWADoI; Path=/; HttpOnly
+|     Date: Mon, 14 Mar 2022 05:45:50 GMT
+|     Connection: close
+|     Found. Redirecting to /login
+|   HTTPOptions: 
+|     HTTP/1.1 200 OK
+|     X-Frame-Options: SAMEORIGIN
+|     X-Download-Options: noopen
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 1; mode=block
+|     Content-Security-Policy: 
+|     X-Content-Security-Policy: 
+|     X-WebKit-CSP: 
+|     X-UA-Compatible: IE=Edge,chrome=1
+|     Allow: GET,HEAD
+|     Content-Type: text/html; charset=utf-8
+|     Content-Length: 8
+|     ETag: W/"8-ZRAf8oNBS3Bjb/SU2GYZCmbtmXg"
+|     Set-Cookie: connect.sid=s%3Aq0XcpC9e25YC_BRaqUaIpr7SAkXEtcer.%2BQNjRwdTsHh5gZU8NxXCD0%2F02xispYhj9lSo2TGZgmQ; Path=/; HttpOnly
+|     Vary: Accept-Encoding
+|     Date: Mon, 14 Mar 2022 05:45:55 GMT
+|     Connection: close
+|_    GET,HEAD
+8000/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
+|_http-favicon: Unknown favicon MD5: 69A0E6A171C4ED8855408ED902951594
+| http-methods: 
+|_  Supported Methods: GET HEAD OPTIONS
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+|_http-title: Catch Global Systems
+2 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+
+---[snip]---
+
+SF:"HTTP/1\.1\x20400\x20Bad\x20Request\r\nConnection:\x20close\r\n\r\n");
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Mon Mar 14 06:47:39 2022 -- 1 IP address (1 host up) scanned in 161.48 seconds
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="web-services">Web Services</h4>
+<p><br /></p>
+
+<p>The main service on port <strong>80</strong> appears to be static, with a download link to an APK file;</p>
+
+<p><img src="/assets/img/20220317072352.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="gitea">Gitea</h4>
+<p><br /></p>
+
+<p>The service on port <strong>3000</strong> is an instance of <em>Gitea</em> version <strong>1.14.1</strong>;</p>
+
+<p><img src="/assets/img/20220317072552.png" alt="" /></p>
+
+<p>Viewing the source of the page showed a subdomain;</p>
+
+<p><img src="/assets/img/20220317072626.png" alt="" /></p>
+
+<p>Trying common usernames and passwords in the login page didn’t work. Only one user was found in the <em>explore</em> tab, and doesn’t have any repo;</p>
+
+<p><img src="/assets/img/20220317073022.png" alt="" /></p>
+
+<p><br /></p>
+
+<h4 id="lets-chat">Let’s Chat</h4>
+<p><br /></p>
+
+<p>The service on port <strong>5000</strong> is an instance of <em>Let’s Chat</em>, which is available at https://github.com/sdelements/lets-chat. This is a <em>self-hosted chat app for small teams</em>;</p>
+
+<p><img src="/assets/img/20220317073230.png" alt="" /></p>
+
+<p>Testing simple usernames and passwords in the login page didn’t yield anything.</p>
+
+<p><br /></p>
+
+<h4 id="cachet">Cachet</h4>
+<p><br /></p>
+
+<p>The service on port <strong>8000</strong> is an instance of <em>Cachet</em>, and according to it’s GitHub page, it is a <em>a beautiful and powerful open source status page system</em>;</p>
+
+<p><img src="/assets/img/20220317073639.png" alt="" /></p>
+
+<p>At the bottom of the page, there is a link to <code class="language-plaintext highlighter-rouge">/dashboard</code> and <code class="language-plaintext highlighter-rouge">/subscribe</code>. The <code class="language-plaintext highlighter-rouge">/subscribe</code> page gave a <strong>500</strong> internal server error, while the <code class="language-plaintext highlighter-rouge">/dashboard</code> redirected to <code class="language-plaintext highlighter-rouge">/auth/login</code>, which gave a login form;</p>
+
+<p><img src="/assets/img/20220317073824.png" alt="" /></p>
+
+<p>Some quick searches showed that this service is vulnerable to unauthenticated SQL injection;</p>
+
+<p><img src="/assets/img/20220317074030.png" alt="" /></p>
+
+<p>I looked for any sort of PoC for this vulnerability, but I couldn’t find any. So I installed the application locally to see if I can figure it out, but I couldn’t. The vulnerable function is defined in <code class="language-plaintext highlighter-rouge">app/Models/Traits/SearchableTrait.php</code>;</p>
+
+<p><img src="/assets/img/20220317074417.png" alt="" /></p>
+
+<p>I modified this code in an attempt to see when it’s being used, but that didn’t work. So I just moved on.</p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="apk-reversing">APK Reversing</h3>
+<p><br /></p>
+
+<p>The homepage of the main site links to an APK file at <code class="language-plaintext highlighter-rouge">/catchv1.0.apk</code>. I checked for other APK files that may exist on the server by bruteforcing the version number, but none was found.</p>
+
+<p>I used <code class="language-plaintext highlighter-rouge">apktool</code> to unpack the APK file, which will give me the decoded resources used by the app, but the code will all be in <code class="language-plaintext highlighter-rouge">.smali</code>;</p>
+
+<p><img src="/assets/img/20220317075305.png" alt="" /></p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">unzip</code>, I extracted the APK file to obtain the <code class="language-plaintext highlighter-rouge">.dex</code> file;</p>
+
+<p><img src="/assets/img/20220317075454.png" alt="" /></p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">dex2jar</code>, I converted the <code class="language-plaintext highlighter-rouge">.dex</code> file into <code class="language-plaintext highlighter-rouge">.jar</code>, and decompiled it using <code class="language-plaintext highlighter-rouge">cfr</code>;</p>
+
+<p><img src="/assets/img/20220317075623.png" alt="" />
+<img src="/assets/img/20220317075907.png" alt="" /></p>
+
+<p>As per the <em>AndroidManifest.xml</em> fille decoded by <code class="language-plaintext highlighter-rouge">apktool</code>, the class <code class="language-plaintext highlighter-rouge">com.example.acatch.MainActivity</code> is the main activity of the application, which is the class that will be called when the application is launched;</p>
+
+<p><img src="/assets/img/20220317080133.png" alt="" /></p>
+
+<p>The application appears to be an android webview application, which is a technology used by android apps that make them act like browsers for accessing websites. Looking through the code, a HTTPs URL was found;</p>
+
+<p><img src="/assets/img/20220317080453.png" alt="" /></p>
+
+<p>This doesn’t make sense because port <strong>443</strong> is not open on the server;</p>
+
+<p><img src="/assets/img/20220317080601.png" alt="" /></p>
+
+<p>Going to the subdomain over HTTP also showed the exact same homepage.</p>
+
+<p>I made a mistake at this stage of the box and just ignored the APK, since the main class doesn’t appear to be doing anything more than viewing that URL, which isn’t even valid. As it turns out, there are some very interesting entries in the XML file <code class="language-plaintext highlighter-rouge">res/values/strings.xml</code>, which is used by android to define strings in key-value mappings that make it easy to reuse data throughout the application. Going through the file, I found some very interesting entries;</p>
+
+<p><img src="/assets/img/20220317081525.png" alt="" /></p>
+
+<p>The token for <em>Gitea</em> just didn’t work, so I’m guessing it had been revoked. The token for <em>Let’s Chat</em> is a base64 string, so I decoded it, which gave me <code class="language-plaintext highlighter-rouge">61b86aead984e2451036eb16:d588468ff8bae446379a57fa2b4e63a2368224336b5949c5</code>. This sort of token format is usually used in HTTP <em>Authorization: bearer</em> header, which contains the username and password separated by a colon. Testing the values as username and password in the login form of <em>Let’s Chat</em> didn’t work. So I tried passing the token in the <em>authorization</em> header, and it appeared to work, but just hanged;</p>
+
+<p><img src="/assets/img/20220317082420.png" alt="" /></p>
+
+<p>Viewing the source code of the page, the authentication appeared to have worked;</p>
+
+<p><img src="/assets/img/20220317082543.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="lets-chat-1">Let’s Chat</h3>
+<p><br /></p>
+
+<p>Let’s Chat has a powerful API, and it’s documentation is available at https://github.com/sdelements/lets-chat/wiki/API. With the help of the guide, I was able to enumerate valid users;</p>
+
+<p><img src="/assets/img/20220317083058.png" alt="" /></p>
+
+<p>This gave me four usernames: <code class="language-plaintext highlighter-rouge">admin</code>, <code class="language-plaintext highlighter-rouge">john</code>, <code class="language-plaintext highlighter-rouge">will</code>, and <code class="language-plaintext highlighter-rouge">lucas</code>. There are 3 rooms in the chat service, none of which are password-protected;</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+</pre></td><td class="rouge-code"><pre><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"61b86b28d984e2451036eb17"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"status"</span><span class="p">,</span><span class="w">                                                                                                                 
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Status"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cachet Updates and Maintenance"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"lastActive"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-12-14T10:34:20.749Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"created"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-12-14T10:00:08.384Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"owner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"61b86aead984e2451036eb16"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"private"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"hasPassword"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"participants"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"61b8708efe190b466d476bfb"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"android_dev"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Android Development"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Android App Updates, Issues &amp; More"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"lastActive"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-12-14T10:24:21.145Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"created"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-12-14T10:23:10.474Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"owner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"61b86aead984e2451036eb16"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"private"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">                                                                                                                 
+    </span><span class="nl">"hasPassword"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">                                                                                                             
+    </span><span class="nl">"participants"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">                                   
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"61b86b3fd984e2451036eb18"</span><span class="p">,</span><span class="w">                    
+    </span><span class="nl">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"employees"</span><span class="p">,</span><span class="w">                               
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Employees"</span><span class="p">,</span><span class="w">                 
+    </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"New Joinees, Org updates"</span><span class="p">,</span><span class="w">       
+    </span><span class="nl">"lastActive"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-12-14T10:18:04.710Z"</span><span class="p">,</span><span class="w">             
+    </span><span class="nl">"created"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-12-14T10:00:31.043Z"</span><span class="p">,</span><span class="w">                                                                                            
+    </span><span class="nl">"owner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"61b86aead984e2451036eb16"</span><span class="p">,</span><span class="w"> 
+    </span><span class="nl">"private"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"hasPassword"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"participants"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Dumping the messages in the first channel gave a credential;</p>
+
+<p><img src="/assets/img/20220317083810.png" alt="" /></p>
+
+<p>Trying this credential in the login page of Cachet instance at <code class="language-plaintext highlighter-rouge">http://catch.htb:8000/auth/login</code>, I was able to log in;</p>
+
+<p><img src="/assets/img/20220317083941.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="cachet-1">Cachet</h3>
+<p><br /></p>
+
+<p><em>Cachet</em> has a few vulnerabilities, which are well explained in the blog post https://blog.sonarsource.com/cachet-code-execution-via-laravel-configuration-injection. The newline injection vulnerability in the web app immediately caught my attention, as it can be used to override the parameters defined in the configuration file, which is in <code class="language-plaintext highlighter-rouge">.env</code>. Going through the file, the parameter <code class="language-plaintext highlighter-rouge">DB_HOST</code> looks interesting as it defined the address of the backend database to use, which by default is MySQL.</p>
+
+<p>The newline injection can be triggered when updating the <em>mail</em> settings according to the article;</p>
+
+<p><img src="/assets/img/20220317084828.png" alt="" /></p>
+
+<p>Here is a sample of the configuration file;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+</pre></td><td class="rouge-code"><pre>APP_ENV=production
+APP_DEBUG=false
+APP_URL=http://localhost
+APP_KEY=SomeRandomString
+
+DB_DRIVER=mysql
+DB_HOST=localhost
+DB_DATABASE=cachet
+DB_USERNAME=homestead
+DB_PASSWORD=secret
+DB_PORT=null
+DB_PREFIX=null
+
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+QUEUE_DRIVER=sync
+CACHET_EMOJI=false
+
+MAIL_DRIVER=smtp
+MAIL_HOST=mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ADDRESS=null
+MAIL_NAME=null
+MAIL_ENCRYPTION=tls
+---[snip]---
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Doing a normal update generated the following request;</p>
+
+<p><img src="/assets/img/20220317085558.png" alt="" /></p>
+
+<p>Notice how the parameter names are all submitted in the request as some sort of index key inside the variable <code class="language-plaintext highlighter-rouge">config</code>. This hints at a possible <em>mass assignment</em> vulnerability. So I changed the <code class="language-plaintext highlighter-rouge">config[mail_host]</code> submitted in the request to <code class="language-plaintext highlighter-rouge">config[db_host]</code> and set the value to my IP, then start up metasploit and used the module <code class="language-plaintext highlighter-rouge">auxiliary/server/capture/mysql</code> to capture MySQL handshake, and it worked;</p>
+
+<p><img src="/assets/img/20220317090459.png" alt="" /></p>
+
+<p><img src="/assets/img/20220317090615.png" alt="" /></p>
+
+<p>Forwarding the request, metasploit captured a challenge for the user <code class="language-plaintext highlighter-rouge">will</code>;</p>
+
+<p><img src="/assets/img/20220317090803.png" alt="" /></p>
+
+<p>To my surprise, <code class="language-plaintext highlighter-rouge">john</code> was unable to crack the hash using <code class="language-plaintext highlighter-rouge">rockyou.txt</code>, which is the standard for HTB boxes when it comes to crackable passwords;</p>
+
+<p><img src="/assets/img/20220317091207.png" alt="" /></p>
+
+<p>Looking further into the article mentioned above, I learned that <em>Cachet</em> is also vulnerable to configuration leaks. This happens when you supply a parameter name wrapped in <code class="language-plaintext highlighter-rouge">${}</code>, like <code class="language-plaintext highlighter-rouge">${DB_HOST}</code>. Using this, I was able to leak the plain MySQL password by setting the value of the <code class="language-plaintext highlighter-rouge">Mail From Address</code> field to <code class="language-plaintext highlighter-rouge">${DB_PASSWORD}</code>, submitting the request, and reloading the page;</p>
+
+<p><img src="/assets/img/20220317092034.png" alt="" /></p>
+
+<p>This gave me the password;</p>
+
+<p><img src="/assets/img/20220317092131.png" alt="" /></p>
+
+<p>Since metasploit earlier told me the database user is <code class="language-plaintext highlighter-rouge">will</code>, I tested the credential on the SSH service running on the host, and I was able to login;</p>
+
+<p><img src="/assets/img/20220317210917.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="privesc">Privesc</h3>
+<p><br /></p>
+
+<p>No sudo permission is available for the user <strong>will</strong>. Running LinPEAS also didn’t show anything very interesting at a quick glance. Running <code class="language-plaintext highlighter-rouge">pspy</code> on the host showed something;</p>
+
+<p><img src="/assets/img/20220318062906.png" alt="" /></p>
+
+<p>Going to the <code class="language-plaintext highlighter-rouge">/opt/mdm</code> directory, I found the shell script that’s being run as root;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+</pre></td><td class="rouge-code"><pre><span class="c">#!/bin/bash</span>
+
+<span class="c">###################</span>
+<span class="c"># Signature Check #</span>
+<span class="c">###################</span>
+
+sig_check<span class="o">()</span> <span class="o">{</span>
+        jarsigner <span class="nt">-verify</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">/</span><span class="nv">$2</span><span class="s2">"</span> 2&gt;/dev/null <span class="o">&gt;</span>/dev/null
+        <span class="k">if</span> <span class="o">[[</span> <span class="nv">$?</span> <span class="nt">-eq</span> 0 <span class="o">]]</span><span class="p">;</span> <span class="k">then
+                </span><span class="nb">echo</span> <span class="s1">'[+] Signature Check Passed'</span>
+        <span class="k">else
+                </span><span class="nb">echo</span> <span class="s1">'[!] Signature Check Failed. Invalid Certificate.'</span>
+                cleanup
+                <span class="nb">exit
+        </span><span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="c">#######################</span>
+<span class="c"># Compatibility Check #</span>
+<span class="c">#######################</span>
+
+comp_check<span class="o">()</span> <span class="o">{</span>
+        apktool d <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">/</span><span class="nv">$2</span><span class="s2">"</span> <span class="nt">-o</span> <span class="nv">$3</span> 2&gt;/dev/null <span class="o">&gt;</span>/dev/null
+        <span class="nv">COMPILE_SDK_VER</span><span class="o">=</span><span class="si">$(</span><span class="nb">grep</span> <span class="nt">-oPm1</span> <span class="s2">"(?&lt;=compileSdkVersion=</span><span class="se">\"</span><span class="s2">)[^</span><span class="se">\"</span><span class="s2">]+"</span> <span class="s2">"</span><span class="nv">$PROCESS_BIN</span><span class="s2">/AndroidManifest.xml"</span><span class="si">)</span>
+        <span class="k">if</span> <span class="o">[</span> <span class="nt">-z</span> <span class="s2">"</span><span class="nv">$COMPILE_SDK_VER</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
+                </span><span class="nb">echo</span> <span class="s1">'[!] Failed to find target SDK version.'</span>
+                cleanup
+                <span class="nb">exit
+        </span><span class="k">else
+                if</span> <span class="o">[</span> <span class="nv">$COMPILE_SDK_VER</span> <span class="nt">-lt</span> 18 <span class="o">]</span><span class="p">;</span> <span class="k">then
+                        </span><span class="nb">echo</span> <span class="s2">"[!] APK Doesn't meet the requirements"</span>
+                        cleanup
+                        <span class="nb">exit
+                </span><span class="k">fi
+        fi</span>
+<span class="o">}</span>
+
+<span class="c">####################</span>
+<span class="c"># Basic App Checks #</span>
+<span class="c">####################</span>
+
+app_check<span class="o">()</span> <span class="o">{</span>
+        <span class="nv">APP_NAME</span><span class="o">=</span><span class="si">$(</span><span class="nb">grep</span> <span class="nt">-oPm1</span> <span class="s2">"(?&lt;=&lt;string name=</span><span class="se">\"</span><span class="s2">app_name</span><span class="se">\"</span><span class="s2">&gt;)[^&lt;]+"</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">/res/values/strings.xml"</span><span class="si">)</span>
+        <span class="nb">echo</span> <span class="nv">$APP_NAME</span>
+        <span class="k">if</span> <span class="o">[[</span> <span class="nv">$APP_NAME</span> <span class="o">==</span> <span class="k">*</span><span class="s2">"Catch"</span><span class="k">*</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
+                </span><span class="nb">echo</span> <span class="nt">-n</span> <span class="nv">$APP_NAME</span>|xargs <span class="nt">-I</span> <span class="o">{}</span> sh <span class="nt">-c</span> <span class="s1">'mkdir {}'</span>
+                <span class="nb">mv</span> <span class="s2">"</span><span class="nv">$3</span><span class="s2">/</span><span class="nv">$APK_NAME</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$2</span><span class="s2">/</span><span class="nv">$APP_NAME</span><span class="s2">/</span><span class="nv">$4</span><span class="s2">"</span>
+        <span class="k">else
+                </span><span class="nb">echo</span> <span class="s2">"[!] App doesn't belong to Catch Global"</span>
+                cleanup
+                <span class="nb">exit
+        </span><span class="k">fi</span>
+<span class="o">}</span>
+
+
+<span class="c">###########</span>
+<span class="c"># Cleanup #</span>
+<span class="c">###########</span>
+
+cleanup<span class="o">()</span> <span class="o">{</span>
+        <span class="nb">rm</span> <span class="nt">-rf</span> <span class="nv">$PROCESS_BIN</span><span class="p">;</span><span class="nb">rm</span> <span class="nt">-rf</span> <span class="s2">"</span><span class="nv">$DROPBOX</span><span class="s2">/*"</span> <span class="s2">"</span><span class="nv">$IN_FOLDER</span><span class="s2">/*"</span><span class="p">;</span><span class="nb">rm</span> <span class="nt">-rf</span> <span class="si">$(</span><span class="nb">ls</span> <span class="nt">-A</span> /opt/mdm | <span class="nb">grep</span> <span class="nt">-v</span> apk_bin | <span class="nb">grep</span> <span class="nt">-v</span> verify.sh<span class="si">)</span>
+<span class="o">}</span>
+
+
+<span class="c">###################</span>
+<span class="c"># MDM CheckerV1.0 #</span>
+<span class="c">###################</span>
+
+<span class="nv">DROPBOX</span><span class="o">=</span>/opt/mdm/apk_bin
+<span class="nv">IN_FOLDER</span><span class="o">=</span>/root/mdm/apk_bin
+<span class="nv">OUT_FOLDER</span><span class="o">=</span>/root/mdm/certified_apps
+<span class="nv">PROCESS_BIN</span><span class="o">=</span>/root/mdm/process_bin
+
+<span class="k">for </span>IN_APK_NAME <span class="k">in</span> <span class="nv">$DROPBOX</span>/<span class="k">*</span>.apk<span class="p">;</span><span class="k">do
+        </span><span class="nv">OUT_APK_NAME</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span><span class="nb">echo</span> <span class="k">${</span><span class="nv">IN_APK_NAME</span><span class="p">##*/</span><span class="k">}</span> | <span class="nb">cut</span> <span class="nt">-d</span> <span class="s1">'.'</span> <span class="nt">-f1</span><span class="si">)</span><span class="s2">_verified.apk"</span>
+        <span class="nv">APK_NAME</span><span class="o">=</span><span class="s2">"</span><span class="si">$(</span>openssl rand <span class="nt">-hex</span> 12<span class="si">)</span><span class="s2">.apk"</span>
+        <span class="k">if</span> <span class="o">[[</span> <span class="nt">-L</span> <span class="s2">"</span><span class="nv">$IN_APK_NAME</span><span class="s2">"</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then
+                </span><span class="nb">exit
+        </span><span class="k">else
+                </span><span class="nb">mv</span> <span class="s2">"</span><span class="nv">$IN_APK_NAME</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$IN_FOLDER</span><span class="s2">/</span><span class="nv">$APK_NAME</span><span class="s2">"</span>
+        <span class="k">fi
+        </span>sig_check <span class="nv">$IN_FOLDER</span> <span class="nv">$APK_NAME</span>
+        comp_check <span class="nv">$IN_FOLDER</span> <span class="nv">$APK_NAME</span> <span class="nv">$PROCESS_BIN</span>
+        app_check <span class="nv">$PROCESS_BIN</span> <span class="nv">$OUT_FOLDER</span> <span class="nv">$IN_FOLDER</span> <span class="nv">$OUT_APK_NAME</span>
+<span class="k">done
+</span>cleanup
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>After studying the code for a while, I undertood what it does;</p>
+
+<ol>
+  <li>Loop over all apk files in the directory <code class="language-plaintext highlighter-rouge">$DROPBOX</code> point to, which is <code class="language-plaintext highlighter-rouge">/opt/mdm/apk_bin</code>. We have write access to this directory.</li>
+  <li>Obtain the filename, and remove the <code class="language-plaintext highlighter-rouge">.apk</code> extension in the filename and append <code class="language-plaintext highlighter-rouge">_verified.apk</code></li>
+  <li>Generate a 24 character long hex string, which the APK file will be renamed to in the <code class="language-plaintext highlighter-rouge">$DROPBOX</code> directory.</li>
+  <li>Verify if the APK is signed  by calling <code class="language-plaintext highlighter-rouge">sig_check()</code>, which uses <code class="language-plaintext highlighter-rouge">jarsigner -verify &lt;apk-file&gt;</code>, and check if the exit code is 0. I doubt we need to worry about this because testing <code class="language-plaintext highlighter-rouge">jarsigner -verify</code> on my machine, even on unsigned APK file, exited with <code class="language-plaintext highlighter-rouge">0</code> exit code, which is what the script is looking for.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">comp_check()</code>, which decompile the APK file using <code class="language-plaintext highlighter-rouge">apktool</code>, and check if the <code class="language-plaintext highlighter-rouge">compileSdkVersion</code> defined in the android manifest is at least <strong>18</strong> using <code class="language-plaintext highlighter-rouge">grep</code>.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">app_check()</code>, which extract the name of the app from <code class="language-plaintext highlighter-rouge">res/values/strings.xml</code> using the key <code class="language-plaintext highlighter-rouge">app_name</code>, ensure that it contains the string <code class="language-plaintext highlighter-rouge">Catch</code>, and pass it in an unsafe way to a shell command that create directory using <code class="language-plaintext highlighter-rouge">mkdir + &lt;app_name&gt;</code>.</li>
+</ol>
+
+<p>After some local testing, step <strong>6</strong> appears to be exploitable if we can inject a command in the name of the app we drop into the <code class="language-plaintext highlighter-rouge">/opt/mdm/apk_bin</code> directory. My first attempt was to do this using <code class="language-plaintext highlighter-rouge">apktool</code>. I used the <em>catchv1.0.apk</em> app downloaded earlier from the site. For some reasons, <code class="language-plaintext highlighter-rouge">apktool</code> is unable to compile the decompiled and modified APK, so I started looking for other alternatives.</p>
+
+<p>Since this is a very simple change, as we are only modifying the name of the app, I started looking for android apps that could get the job done, and I found a great one named <strong>APK Editor Pro</strong>. So installed it, and did it on android by;</p>
+<ol>
+  <li>Loading the apk file</li>
+  <li>Selecting the “Full Edit” option</li>
+  <li>Selecting the “Decode All Files” option</li>
+  <li>Moving to the “Files” tab</li>
+  <li>Opening <code class="language-plaintext highlighter-rouge">res/values/strings.xml</code></li>
+  <li>Changing line <strong>30</strong> from <code class="language-plaintext highlighter-rouge">&lt;string name="app_name"&gt;Catch&lt;/string&gt;</code> to <code class="language-plaintext highlighter-rouge">&lt;string name="app_name"&gt;Catch; /dev/shm/payload&lt;/string&gt;</code></li>
+</ol>
+
+<p>I then rebuit the apk, which saved it as <code class="language-plaintext highlighter-rouge">gen_signed.apk</code>. I copied it over to the web directory on my attack box, and created a file named <code class="language-plaintext highlighter-rouge">payload</code> with my reverse shell. I chose this approach to avoid having characters in the name of the app that may not be allowed.</p>
+
+<p>I SSHed back into the box as <strong>will</strong>, and download the <code class="language-plaintext highlighter-rouge">gen_signed.apk</code> and <code class="language-plaintext highlighter-rouge">payload</code> file to <code class="language-plaintext highlighter-rouge">/dev/shm</code>. I made the payload executable, and moved the APK to <code class="language-plaintext highlighter-rouge">/opt/mdm/apk_bin</code>, and waited for the cron task to process it;</p>
+
+<p><img src="/assets/img/20220318065817.png" alt="" /></p>
+
+<p>After a few seconds, my malicious APK file was processed, and I got a reverse shell on the box as root;</p>
+
+<p><img src="/assets/img/20220318065833.png" alt="" /></p>
+
+<p><br /></p>
+
+<hr />
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Identified port <strong>22</strong>, <strong>80</strong>, <strong>3000</strong> (Gitea), <strong>5000</strong> (Let’s Chat), and <strong>8000</strong> (Cachet) using <code class="language-plaintext highlighter-rouge">nmap</code></li>
+  <li>Reversed the APK file obtained from the main site, and recovered some tokens.</li>
+  <li>One of the tokens gave access to the API of <em>Let’s Chat</em>
+    <ul>
+      <li>Chat logs obtained using the API revealed a credential for <strong>john</strong></li>
+      <li>This credential is reused on the <em>Cachet</em> instance.</li>
+    </ul>
+  </li>
+  <li>Inside <em>Cachet</em> as <strong>john</strong>
+    <ul>
+      <li>Exploited a <em>mass assignment</em> vulnerability to hijack backend MySQL server used, and capture handshake using <em>metasploit’s</em> <code class="language-plaintext highlighter-rouge">auxiliary/server/capture/mysql</code>. The handshake could not be cracked using <code class="language-plaintext highlighter-rouge">rockyou.txt</code></li>
+      <li>Exploited a configuration leak to obtain the plaintext password of the MySQL backend, which gave me access to the box as user <strong>will</strong> over SSH.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <strong>will</strong>
+    <ul>
+      <li>Identified a cron task running as root that calls <code class="language-plaintext highlighter-rouge">/opt/mdm/verify.sh</code></li>
+      <li>This script process APK files in a directory we can write to.</li>
+      <li>Studied the code, and built a malicious APK file that exploited a <em>command injection</em> vulnerability in how the name of the app as defined in <code class="language-plaintext highlighter-rouge">res/values/strings.xml</code> is processed, which gave me access to the box as <strong>root</strong></li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="api" /><category term="git" /><category term="gitea" /><category term="cachet" /><category term="android" /><category term="apktool" /><category term="reverse engineering" /><category term="custom exploitation" /><category term="cron" /><category term="password reuse" /><summary type="html"><![CDATA[Catch is a very interesting medium-rated linux box on HackTheBox. It starts with some light reversing of an android application to obtain an access token for the Let’s Chat API running on the host. This token will lead you to some credentials in the chat logs, which are reused in the Cachet instance running on the host, which you can exploit to leak the application config and obtain a password that was reused for SSH login. Once inside the box, you will be exploiting a custom cron job that process user controlled files in an unsafe way, leading to code execution as root.]]></summary></entry><entry><title type="html">Undetected - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/undetected.html" rel="alternate" type="text/html" title="Undetected - HackTheBox" /><published>2022-07-02T00:00:00+01:00</published><updated>2022-07-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/undetected</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/undetected.html"><![CDATA[<p><strong>Undetected</strong> is a fun medium linux box that will have you working on the trail of an attacker. Foothold is pretty easy as the site is using a PHP library that allows for RCE. Once on the box, you will need to recover the password of a local user account from a binary that was dropped by the attacker. PrivEsc is through a backdoored SSH daemon (SSHDoor).</p>
 
 <p><br /></p>
 
@@ -3056,74 +3834,4 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
       <li>Found an exploit using <code class="language-plaintext highlighter-rouge">searchsploit</code>, which gave me root access to the box.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="zabbix" /><category term="udp" /><category term="ipmi" /><category term="mysql" /><category term="wsrep" /><category term="metasploit" /><category term="asf-rmcp" /><summary type="html"><![CDATA[Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.]]></summary></entry><entry><title type="html">Blind SQL Injection- DVWA</title><link href="https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli.html" rel="alternate" type="text/html" title="Blind SQL Injection- DVWA" /><published>2022-03-27T00:00:00+01:00</published><updated>2022-03-27T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli</id><content type="html" xml:base="https://4g3nt47.github.io/posts/dvwa/dvwa_blind_sqli.html"><![CDATA[<p>This is an exercise in OWASP DVWA for exploiting blind SQL injection.</p>
-
-<p><br /></p>
-
-<h3 id="blind-sql-injection---dvwa">Blind SQL Injection - DVWA</h3>
-<p><br /></p>
-
-<h4 id="difficulty-easy">Difficulty: Easy</h4>
-<p><br /></p>
-
-<p>In this mode, we are given a simple form that checks if a user exists with the given ID;</p>
-
-<p><img src="/assets/img/20220327082816.png" alt="" /></p>
-
-<p>When given an invalid user ID, the application respond with this;</p>
-
-<p><img src="/assets/img/20220327083013.png" alt="" /></p>
-
-<p>The application appears to be vulnerable to <em>blind SQL injection</em> because injecting an SQL query that will always evaluate to true gave a positive output;</p>
-
-<p><img src="/assets/img/20220327083207.png" alt="" /></p>
-
-<p>Blind injections are a pain to exploit manually, so I called in <code class="language-plaintext highlighter-rouge">sqlmap</code>;</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre>sqlmap <span class="nt">-u</span> <span class="s1">'http://buster/dvwa/vulnerabilities/sqli_blind/?id=1&amp;Submit=Submit'</span> <span class="nt">-p</span> <span class="nb">id</span> <span class="nt">--cookie</span> <span class="s1">'security=low; PHPSESSID=5c8siun1tr567gd519v1mivcbi'</span> <span class="nt">--dbs</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><img src="/assets/img/20220327083557.png" alt="" /></p>
-
-<p>Tables in <code class="language-plaintext highlighter-rouge">dvwa</code> database;</p>
-
-<p><img src="/assets/img/20220327083621.png" alt="" /></p>
-
-<p>Contents of <code class="language-plaintext highlighter-rouge">users</code> table;</p>
-
-<p><img src="/assets/img/20220327083912.png" alt="" /></p>
-
-<p>Blind SQL injections can be pretty slow, even with <code class="language-plaintext highlighter-rouge">sqlmap</code>. You can speed up the process by increasing the number of threads using the <code class="language-plaintext highlighter-rouge">--threads</code> argument, but this could easily corrupt the data being dumped when <code class="language-plaintext highlighter-rouge">sqlmap</code> is using a <em>time delay</em> technique in an unstable connection.</p>
-
-<p><br /></p>
-
-<h4 id="difficulty-medium">Difficulty: Medium</h4>
-<p><br /></p>
-
-<p>In this mode, we get a different form where the inputs are predefined in the form;</p>
-
-<p><img src="/assets/img/20220327084414.png" alt="" /></p>
-
-<p>The challenges are looking similar to the ones in error-based SQL injection section. Using a proxy and injecting an SQL query that always evaluate to true gives a positive result, indicating the application is vulnerable;</p>
-
-<p><img src="/assets/img/20220327084936.png" alt="" /></p>
-
-<p><img src="/assets/img/20220327085000.png" alt="" /></p>
-
-<p>This is exploitable using <code class="language-plaintext highlighter-rouge">sqlmap</code>;</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre>sqlmap <span class="nt">-u</span> <span class="s1">'http://buster/dvwa/vulnerabilities/sqli_blind/'</span> <span class="nt">--data</span> <span class="s1">'id=1&amp;Submit=Submit'</span> <span class="nt">--cookie</span> <span class="s1">'security=medium; PHPSESSID=5c8siun1tr567gd519v1mivcbi'</span> <span class="nt">-p</span> <span class="nb">id</span> <span class="nt">--dbs</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><img src="/assets/img/20220327085253.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="difficulty-high">Difficulty: High</h4>
-<p><br /></p>
-
-<p>This mode is also similar to the <em>high difficulty</em> level of the error-based SQL injection challenge. Only difference is this one is blind;</p>
-
-<p><img src="/assets/img/20220327085544.png" alt="" /></p>]]></content><author><name></name></author><category term="dvwa" /><category term="dvwa" /><category term="sql injection" /><category term="sqlmap" /><summary type="html"><![CDATA[This is an exercise in OWASP DVWA for exploiting blind SQL injection.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="zabbix" /><category term="udp" /><category term="ipmi" /><category term="mysql" /><category term="wsrep" /><category term="metasploit" /><category term="asf-rmcp" /><summary type="html"><![CDATA[Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.]]></summary></entry></feed>
