@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2022-08-16T11:12:00+01:00</updated>
+  <updated>2022-11-26T12:53:32+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,54 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>RedPanda - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/redpanda.html" rel="alternate" type="text/html" title="RedPanda - HackTheBox" />
+    <published>2022-11-26T00:00:00+01:00</published>
+  
+    <updated>2022-11-26T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/redpanda.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/redpanda.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      RedPanda is a very easy linux box. It starts with a web service that’s vulnerable to Server-side Template Injection (SSTI) using Thymeleaf to gain RCE. Privesc involves exploiting two (2) path path traversal vulnerabilites, and an XXE injection to read SSH key of root.
+
+
+
+About
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+# Nmap 7.70 scan initiated Wed Aug 17 08:06:18 2022 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.1...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -184,35 +232,6 @@ Recon
 
 
 NMAP...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Timing - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/timing.html" rel="alternate" type="text/html" title="Timing - HackTheBox" />
-    <published>2022-06-04T00:00:00+01:00</published>
-  
-    <updated>2022-06-04T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/timing.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/timing.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recov...
     </summary>
   
 
