@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-02-27T09:06:40+01:00</updated>
+  <updated>2023-03-23T16:57:45+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,53 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Cyber Apocalypse 2023 - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html" rel="alternate" type="text/html" title="Cyber Apocalypse 2023 - HackTheBox" />
+    <published>2023-03-23T00:00:00+01:00</published>
+  
+    <updated>2023-03-23T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Cyber Apocalypse 2023 is a very nice jeopardy-style CTF competition hosted by HackTheBox. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges that I managed to solve during the competition.
+
+
+
+Web
+
+
+Trapped Source
+
+
+
+  Difficulty: very easy
+
+
+Challenge has no downloadables. Starting the container and going to homepage showed a lock;
+
+
+
+Checkin...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -188,50 +235,6 @@ NMAP
 
 # Nmap 7.70 scan initiated Sun Feb  6 02:17:09 2022 as: nmap -sC -sC -oN nmap.txt -v 10.10.11.143
 Nmap scan ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Meta - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/meta.html" rel="alternate" type="text/html" title="Meta - HackTheBox" />
-    <published>2022-06-10T00:00:00+01:00</published>
-  
-    <updated>2022-06-10T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/meta.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/meta.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Meta is a pretty easy medium-rated box on HackTheBox. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an exiftool CVE. User access is also another CVE targeting ImageMagick, and privesc to root is through a vulnerable sudo configuration on neofetch, which allows you to hijack the configuration file used by the program.
-
-
-
-Info
-
-
-
-
-
-
-
-Recon
-
-
-NMAP...
     </summary>
   
 
