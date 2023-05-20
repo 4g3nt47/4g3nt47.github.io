@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-03-23T16:57:45+01:00</updated>
+  <updated>2023-05-20T18:32:41+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,55 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Precious - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/precious.html" rel="alternate" type="text/html" title="Precious - HackTheBox" />
+    <published>2023-05-20T00:00:00+01:00</published>
+  
+    <updated>2023-05-20T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/precious.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/precious.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Precious is a very easy linux machine on HackTheBox. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves finding a password in a configuration file, and a custom YAML deserialization exploit to elevate to root.
+
+
+
+About
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.70 scan initiated Wed Mar 15 07:29:11 2023 as: nmap -s...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -186,55 +235,6 @@ NMAP
 
 
 # Nmap 7.7...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Paper - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/paper.html" rel="alternate" type="text/html" title="Paper - HackTheBox" />
-    <published>2022-06-18T00:00:00+01:00</published>
-  
-    <updated>2022-06-18T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/paper.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/paper.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Paper is a nice and easy linux box. It starts with a wordpress site that can be exploited to leak user drafts, which will lead you to an instance of RocketChat with a custom bot that’s vulnerable to path traversal. Privesc is through a CVE affecting Polkit.
-
-
-
-Info
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-# Nmap 7.70 scan initiated Sun Feb  6 02:17:09 2022 as: nmap -sC -sC -oN nmap.txt -v 10.10.11.143
-Nmap scan ...
     </summary>
   
 
