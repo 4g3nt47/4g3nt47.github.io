@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-05-20T18:32:41+01:00</updated>
+  <updated>2023-07-31T21:19:03+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Payback - OdysseyCTF</title>
+    <link href="https://4g3nt47.github.io/posts/ctf/payback.html" rel="alternate" type="text/html" title="Payback - OdysseyCTF" />
+    <published>2023-07-31T00:00:00+01:00</published>
+  
+    <updated>2023-07-31T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/ctf/payback.html</id>
+    <content src="https://4g3nt47.github.io/posts/ctf/payback.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="ctf" />
+    
+  
+
+  
+    <summary>
+      
+      Payback is a hard-rated box created by me for the OdysseyCTF. It starts with exploiting a NoSQL injection vulnerability in a custom application to bypass registration restrictions, and then a mass assignment vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to LFI, which can be used to gain a shell on the box. Once inside, a hidden applic...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -186,55 +215,6 @@ NMAP
     <summary>
       
       Catch is a very interesting medium-rated linux box on HackTheBox. It starts with some light reversing of an android application to obtain an access token for the Let’s Chat API running on the host. This token will lead you to some credentials in the chat logs, which are reused in the Cachet instance running on the host, which you can exploit to leak the application config and obtain a password ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Undetected - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/undetected.html" rel="alternate" type="text/html" title="Undetected - HackTheBox" />
-    <published>2022-07-02T00:00:00+01:00</published>
-  
-    <updated>2022-07-02T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/undetected.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/undetected.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Undetected is a fun medium linux box that will have you working on the trail of an attacker. Foothold is pretty easy as the site is using a PHP library that allows for RCE. Once on the box, you will need to recover the password of a local user account from a binary that was dropped by the attacker. PrivEsc is through a backdoored SSH daemon (SSHDoor).
-
-
-
-About
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.7...
     </summary>
   
 
