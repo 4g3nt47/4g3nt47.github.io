@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"Shibboleth - HackTheBox","dateModified":"2022-04-02T00:00:00+01:00","url":"https://4g3nt47.github.io/posts/hackthebox/shibboleth.html","datePublished":"2022-04-02T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/shibboleth.html"},"description":"Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.","@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/shibboleth.html","headline":"Shibboleth - HackTheBox","dateModified":"2022-04-02T00:00:00+01:00","datePublished":"2022-04-02T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/shibboleth.html"},"description":"Shibboleth is a relatively easy medium linux box. It’s running an instance of Zabbix which you can identify by bruteforcing for hidden subdomains. Once discovered, you need to exploit an ASF-RMCP/IPMI service running on UDP port 623 to extract and crack the hash of an administrator, which will give you access to the Zabbix dashboard. The box itself is configured as a Zabbix agent, so you can use this to gain code execution. Once inside, you will be moving laterally to another user through password reuse, and gain root access to the box thanks to a vulnerable MySQL service.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Shibboleth - HackTheBox | 4g3nt47
   </title><!--
@@ -481,7 +481,7 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
 <script src="/assets/js/bootstrap-toc.min.js"></script>
@@ -504,20 +504,6 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/admirertoo.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2022-05-29 00:00:00 +0100">May 29, 2022</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>AdmirerToo - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as ...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
         <a href="/posts/hackthebox/cyberapoc_23.html">
           <div class="card-body"><!--
   Date format snippet
@@ -541,6 +527,20 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Backdoor - HackTheBox</h3>
             <div class="text-muted small">
               <p>Backdoor is a very easy linux box on HackTheBox. It starts with a web service running wordpress with a plugin that’s vulnerable to path traversal, which you can use to read arbitrary files on the b...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/admirertoo.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-05-29 00:00:00 +0100">May 29, 2022</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>AdmirerToo - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as ...
               </p>
             </div>
           </div>
@@ -587,7 +587,7 @@ mysql <span class="nt">-u</span> &lt;user&gt; <span class="nt">-p</span> <span c
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a><a class="post-tag" href="/tags/sql-injection/">sql injection</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>

