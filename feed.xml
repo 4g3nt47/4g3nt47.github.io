@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-08-05T16:36:21+01:00</updated>
+  <updated>2023-08-12T18:31:43+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,54 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Busqueda - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" rel="alternate" type="text/html" title="Busqueda - HackTheBox" />
+    <published>2023-08-12T00:00:00+01:00</published>
+  
+    <updated>2023-08-12T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/busqueda.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Busqueda is a nice easy linux machine on HackTheBox. It starts with a web application that’s vulnerable to RCE. Once on the box, you will find a GIT repo that has a cred in it’s remote origin config, which will give you access to a Gitea instance. Privesc is by exploiting a custom script with sudo perms.
+
+
+
+About
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.70 scan initiated Mon Jul 31 06:51:57 2023 as: nma...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -167,54 +215,6 @@ Challenge has no downloadables. Starting the container and going to homepage sho
 
 
 Checkin...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>RedPanda - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/redpanda.html" rel="alternate" type="text/html" title="RedPanda - HackTheBox" />
-    <published>2022-11-26T00:00:00+01:00</published>
-  
-    <updated>2022-11-26T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/redpanda.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/redpanda.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      RedPanda is a very easy linux box. It starts with a web service that’s vulnerable to Server-side Template Injection (SSTI) using Thymeleaf to gain RCE. Privesc involves exploiting two (2) path path traversal vulnerabilites, and an XXE injection to read SSH key of root.
-
-
-
-About
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-# Nmap 7.70 scan initiated Wed Aug 17 08:06:18 2022 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.1...
     </summary>
   
 

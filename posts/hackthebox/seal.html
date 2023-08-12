@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/seal.html","headline":"Seal - HackTheBox","dateModified":"2021-11-13T00:00:00+01:00","datePublished":"2021-11-13T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/seal.html"},"description":"Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page, but access to the panel was blocked by nginx. This was bypassed thanks to a path normalization vulnerability, and the .war upload used to deploy web applications in tomcat was used to gain code execution on the server.","@context":"https://schema.org"}</script>
+{"description":"Seal is a medium linux box. It features a web service on port 443 running Apache Tomcat, and a GitBucket installation running locally, but accessible through the proxy on port 8080 (nginx). The GitBucket allows a user to create an account, which I did. Once inside, I recovered a password in a previous commit in one of the repositories. This credential was accepted by the tomcat admin login page, but access to the panel was blocked by nginx. This was bypassed thanks to a path normalization vulnerability, and the .war upload used to deploy web applications in tomcat was used to gain code execution on the server.","@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/seal.html","headline":"Seal - HackTheBox","dateModified":"2021-11-13T00:00:00+01:00","datePublished":"2021-11-13T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/seal.html"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Seal - HackTheBox | 4g3nt47
   </title><!--
@@ -568,20 +568,6 @@ Service detection performed. Please report any incorrect results at https://nmap
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/timing.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2022-06-04 00:00:00 +0100">Jun  4, 2022</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
         <a href="/posts/hackthebox/catch.html">
           <div class="card-body"><!--
   Date format snippet
@@ -605,6 +591,20 @@ Service detection performed. Please report any incorrect results at https://nmap
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Cyber Apocalypse 2023 - HackTheBox</h3>
             <div class="text-muted small">
               <p>Cyber Apocalypse 2023 is a very nice jeopardy-style CTF competition hosted by HackTheBox. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges tha...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/timing.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-06-04 00:00:00 +0100">Jun  4, 2022</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
               </p>
             </div>
           </div>

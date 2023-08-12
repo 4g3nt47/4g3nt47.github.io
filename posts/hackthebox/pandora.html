@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/pandora.html","headline":"Pandora - HackTheBox","dateModified":"2022-05-21T00:00:00+01:00","datePublished":"2022-05-21T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/pandora.html"},"description":"Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through path tampering to gain code execution as root.","@context":"https://schema.org"}</script>
+{"description":"Pandora is an easy linux box. It starts with a website, which you don’t really need because foothold involves enumerating an SNMP service on port 161 (UDP) for running processes, which will give you the credentials of a local user. This will give you SSH access to the box, which you will use to setup a tunnel to an apache vhost that’s accessible only locally. This site is vulnerable to LFI ( I later found out this is unintended, and never got around to actually doing the box the intended way :p ) which you can use to move to another local user, and from there exploit a custom SUID binary through path tampering to gain code execution as root.","@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/pandora.html","headline":"Pandora - HackTheBox","dateModified":"2022-05-21T00:00:00+01:00","datePublished":"2022-05-21T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/pandora.html"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Pandora - HackTheBox | 4g3nt47
   </title><!--
@@ -443,20 +443,6 @@ Service detection performed. Please report any incorrect results at https://nmap
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/timing.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2022-06-04 00:00:00 +0100">Jun  4, 2022</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
         <a href="/posts/hackthebox/undetected.html">
           <div class="card-body"><!--
   Date format snippet
@@ -466,6 +452,20 @@ Service detection performed. Please report any incorrect results at https://nmap
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Undetected - HackTheBox</h3>
             <div class="text-muted small">
               <p>Undetected is a fun medium linux box that will have you working on the trail of an attacker. Foothold is pretty easy as the site is using a PHP library that allows for RCE. Once on the box, you wil...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/timing.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-06-04 00:00:00 +0100">Jun  4, 2022</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
               </p>
             </div>
           </div>

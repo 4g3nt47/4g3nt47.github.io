@@ -24,7 +24,7 @@
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/catch.html","headline":"Catch - HackTheBox","dateModified":"2022-08-16T00:00:00+01:00","datePublished":"2022-08-16T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/catch.html"},"description":"Catch is a very interesting medium-rated linux box on HackTheBox. It starts with some light reversing of an android application to obtain an access token for the Let’s Chat API running on the host. This token will lead you to some credentials in the chat logs, which are reused in the Cachet instance running on the host, which you can exploit to leak the application config and obtain a password that was reused for SSH login. Once inside the box, you will be exploiting a custom cron job that process user controlled files in an unsafe way, leading to code execution as root.","@context":"https://schema.org"}</script>
+{"description":"Catch is a very interesting medium-rated linux box on HackTheBox. It starts with some light reversing of an android application to obtain an access token for the Let’s Chat API running on the host. This token will lead you to some credentials in the chat logs, which are reused in the Cachet instance running on the host, which you can exploit to leak the application config and obtain a password that was reused for SSH login. Once inside the box, you will be exploiting a custom cron job that process user controlled files in an unsafe way, leading to code execution as root.","@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/catch.html","headline":"Catch - HackTheBox","dateModified":"2022-08-16T00:00:00+01:00","datePublished":"2022-08-16T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/catch.html"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <title>Catch - HackTheBox | 4g3nt47
   </title><!--
@@ -1055,20 +1055,6 @@ cleanup<span class="o">()</span> <span class="o">{</span>
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/timing.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2022-06-04 00:00:00 +0100">Jun  4, 2022</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
         <a href="/posts/hackthebox/secret.html">
           <div class="card-body"><!--
   Date format snippet
@@ -1078,6 +1064,20 @@ cleanup<span class="o">()</span> <span class="o">{</span>
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Secret - HackTheBox</h3>
             <div class="text-muted small">
               <p>Secret is an easy linux box where you have to exploit a sensitive information leak in a git repo to recover a JWT secret, which allows you to forge a JWT token that gives you access to an API endpo...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/timing.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-06-04 00:00:00 +0100">Jun  4, 2022</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Timing - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Timing is a very nice medium-rated linux box that involves a bit of static analysis on PHP files. Foothold involves quite a few steps that start with an LFI vulnerability to read source code of the...
               </p>
             </div>
           </div>
