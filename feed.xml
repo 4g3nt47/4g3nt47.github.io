@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-08-12T18:31:43+01:00</updated>
+  <updated>2023-08-26T12:20:26+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,52 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>OnlyForYou - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/only4you.html" rel="alternate" type="text/html" title="OnlyForYou - HackTheBox" />
+    <published>2023-08-26T00:00:00+01:00</published>
+  
+    <updated>2023-08-26T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/only4you.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/only4you.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      OnlyForYou is a medium linux box on HackTheBox. It starts with exploiting an LFI vulnerability to leak application source code, which reveals a code injection vulnerability. Once inside the box, you setup a tunnel to a local web app that’s vulnerable to Cypher Injection. Privesc is through a sudo permission on pip3 download.
+
+Info
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.80 scan initiated Sat Aug 19 12:...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -168,53 +214,6 @@ NMAP
 
 
 # Nmap 7.70 scan initiated Wed Mar 15 07:29:11 2023 as: nmap -s...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Cyber Apocalypse 2023 - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html" rel="alternate" type="text/html" title="Cyber Apocalypse 2023 - HackTheBox" />
-    <published>2023-03-23T00:00:00+01:00</published>
-  
-    <updated>2023-03-23T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/cyberapoc_23.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Cyber Apocalypse 2023 is a very nice jeopardy-style CTF competition hosted by HackTheBox. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges that I managed to solve during the competition.
-
-
-
-Web
-
-
-Trapped Source
-
-
-
-  Difficulty: very easy
-
-
-Challenge has no downloadables. Starting the container and going to homepage showed a lock;
-
-
-
-Checkin...
     </summary>
   
 
