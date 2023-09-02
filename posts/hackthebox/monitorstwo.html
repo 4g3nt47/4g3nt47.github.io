@@ -10,23 +10,23 @@
     <meta name="minute-prompt" content="minutes ago">
     <meta name="justnow-prompt" content="just now"><!-- Begin Jekyll SEO tag v2.7.1 -->
 <meta name="generator" content="Jekyll v4.2.1" />
-<meta property="og:title" content="Cap - HackTheBox" />
+<meta property="og:title" content="MonitorsTwo - HackTheBox" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="Cap is a very easy linux box. It has a web service that allows you to view network interfaces as the output of ifconfig, and the ability to briefly capture packets for 5 seconds (and download the .pcap file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an IDOR vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have SUID permissions, which indicate the python interpreter may actually be running as root." />
-<meta property="og:description" content="Cap is a very easy linux box. It has a web service that allows you to view network interfaces as the output of ifconfig, and the ability to briefly capture packets for 5 seconds (and download the .pcap file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an IDOR vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have SUID permissions, which indicate the python interpreter may actually be running as root." />
-<link rel="canonical" href="https://4g3nt47.github.io/posts/hackthebox/cap.html" />
-<meta property="og:url" content="https://4g3nt47.github.io/posts/hackthebox/cap.html" />
+<meta name="description" content="MonitorsTwo is an easy linux box that starts with exploiting a vulnerable instance of Cacti to gain a shell on the box. This drops you into a docker container that has SUID set on capsh, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box." />
+<meta property="og:description" content="MonitorsTwo is an easy linux box that starts with exploiting a vulnerable instance of Cacti to gain a shell on the box. This drops you into a docker container that has SUID set on capsh, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box." />
+<link rel="canonical" href="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" />
+<meta property="og:url" content="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" />
 <meta property="og:site_name" content="4g3nt47" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2021-10-30T00:00:00+01:00" />
+<meta property="article:published_time" content="2023-09-02T00:00:00+01:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Cap - HackTheBox" />
+<meta property="twitter:title" content="MonitorsTwo - HackTheBox" />
 <meta name="twitter:site" content="@UmarAbdoul" />
 <meta name="google-site-verification" content="google_meta_tag_verification" />
 <script type="application/ld+json">
-{"description":"Cap is a very easy linux box. It has a web service that allows you to view network interfaces as the output of ifconfig, and the ability to briefly capture packets for 5 seconds (and download the .pcap file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an IDOR vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have SUID permissions, which indicate the python interpreter may actually be running as root.","@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/cap.html","headline":"Cap - HackTheBox","dateModified":"2021-10-30T00:00:00+01:00","datePublished":"2021-10-30T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/cap.html"},"@context":"https://schema.org"}</script>
+{"description":"MonitorsTwo is an easy linux box that starts with exploiting a vulnerable instance of Cacti to gain a shell on the box. This drops you into a docker container that has SUID set on capsh, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box.","@type":"BlogPosting","url":"https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html","headline":"MonitorsTwo - HackTheBox","dateModified":"2023-09-02T00:00:00+01:00","datePublished":"2023-09-02T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<title>Cap - HackTheBox | 4g3nt47
+<title>MonitorsTwo - HackTheBox | 4g3nt47
   </title><!--
   The Favicons for Web, Android, Microsoft, and iOS (iPhone and iPad) Apps
   Generated by: https://realfavicongenerator.net/
@@ -124,7 +124,7 @@
             <a href="/">
               Home
             </a>
-          </span><span>Cap - HackTheBox</span></span><!-- endof #breadcrumb -->
+          </span><span>MonitorsTwo - HackTheBox</span></span><!-- endof #breadcrumb -->
 
     <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i>
 
@@ -159,7 +159,7 @@
   https://github.com/penibelst/jekyll-compress-html/issues/71#issuecomment-188144901
 --><!-- Add attribute 'hide-bullet' to the checkbox list --><!-- images --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add CDN URL --><!-- Add image path --><!-- lazy-load images <https://github.com/ApoorvSaxena/lozad.js#usage> --><!-- Add SVG placehoder to prevent layout reflow --><!-- Bypass the HTML-proofer test --><!-- Add header for code snippets --><!-- Create heading anchors --><!-- return -->
 
-<h1 data-toc-skip>Cap - HackTheBox</h1>
+<h1 data-toc-skip>MonitorsTwo - HackTheBox</h1>
 
 <div class="post-meta text-muted">
 
@@ -176,17 +176,17 @@
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeago"
-    date="2021-10-30 00:00:00 +0100"data-toggle="tooltip"
+    date="2023-09-02 00:00:00 +0100"data-toggle="tooltip"
       data-placement="bottom"
-      title="Sat, Oct 30, 2021, 12:00 AM +0100">Oct 30, 2021</em>
+      title="Sat, Sep  2, 2023, 12:00 AM +0100">Sep  2</em>
 </span>
 
       <!-- lastmod date --><!-- read time --><!--
   Calculate the post's reading time, and display the word count in tooltip
  --><!-- words per minute  --><!-- return element -->
 <span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="832 words">
-  <em>4 min</em> read</span>
+  title="1001 words">
+  <em>5 min</em> read</span>
 <!-- page views --></div>
 
   </div> <!-- .d-flex -->
@@ -194,122 +194,233 @@
 </div> <!-- .post-meta -->
 
 <div class="post-content">
-  <p><strong>Cap</strong> is a very easy linux box. It has a web service that allows you to view network interfaces as the output of <code class="language-plaintext highlighter-rouge">ifconfig</code>, and the ability to briefly capture packets for 5 seconds (and download the <code class="language-plaintext highlighter-rouge">.pcap</code> file to your own machine). The URL to download the PCAP file contains a numeric ID, and was found to be vulnerable to an <em>IDOR</em> vulnerability, which I exploited to enumerate previously capture PCAPs, one of which contains a credential for an FTP service, which gave me access to the box over SSH. Once in, I analysed the source code of the web application, and found that it’s performing privileged operations (capturing traffic) without explicitly elevating privileges. The script does not have <em>SUID</em> permissions, which indicate the python interpreter may actually be running as <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p><br /></p>
+  <p><strong>MonitorsTwo</strong> is an easy linux box that starts with exploiting a vulnerable instance of <em>Cacti</em> to gain a shell on the box. This drops you into a docker container that has SUID set on <code class="language-plaintext highlighter-rouge">capsh</code>, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box.</p>
 
 <h3 id="info">Info<a href="#info" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
-<ul>
-  <li><em>OS</em> - Linux</li>
-  <li><em>Difficulty</em> - Easy</li>
-  <li><em>Points</em> - 20</li>
-  <li><em>Release</em> - 05/Jun/2021</li>
-  <li><em>IP</em> - 10.10.10.245</li>
-</ul>
+<p><img data-src="/assets/img/Pasted image 20230830125522.png" alt="" data-proofer-ignore></p>
+
+<p><img data-src="/assets/img/Pasted image 20230830125558.png" alt="" data-proofer-ignore></p>
+
+<hr />
 
 <p><br /></p>
 
-<hr />
 <h3 id="recon">Recon<a href="#recon" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
 <h4 id="nmap">NMAP<a href="#nmap" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
-
-<p><img data-src="/assets/img/20210927164226.png" alt="" data-proofer-ignore></p>
-
-<h4 id="wappalyzer">Wappalyzer<a href="#wappalyzer" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
-
-<p><img data-src="/assets/img/20210608113700.png" alt="" data-proofer-ignore></p>
-
-<p>The web app provide an option for downloading pcap files. The path in the menu is <code class="language-plaintext highlighter-rouge">/data/8</code>, which contains only one packet. Bruteforcing the number in the URL revealed that <code class="language-plaintext highlighter-rouge">/data/6</code> contains <strong>16</strong> packets.</p>
-
-<p><img data-src="/assets/img/20210608115015.png" alt="" data-proofer-ignore></p>
-
-<p>In the navigation menu, there is a <em>Network status</em> option that showed some <code class="language-plaintext highlighter-rouge">netstat</code> output, and seemed to be running on the host. It also revealed a possible user named <strong>Nathan</strong>;</p>
-
-<p><img data-src="/assets/img/20210927163913.png" alt="" data-proofer-ignore></p>
-
-<p>Searching Expoit DB using <code class="language-plaintext highlighter-rouge">searchsploit</code> indicate the <em>vsftpd</em> service running on the host is vulnerable to a <em>DoS</em> attack. This isn’t something I’m interested in doing.</p>
-
-<p><img data-src="/assets/img/20210927164515.png" alt="" data-proofer-ignore>
-<img data-src="/assets/img/20210927164640.png" alt="" data-proofer-ignore>
-<br /></p>
-
-<h4 id="python-gunicorn-web-server">Python GUNICORN Web Server<a href="#python-gunicorn-web-server" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
-
-<p><img data-src="/assets/img/20210927165406.png" alt="" data-proofer-ignore></p>
-
-<p><img data-src="/assets/img/20210927165340.png" alt="" data-proofer-ignore>
-<br /></p>
-
-<hr />
-<h3 id="foothold">Foothold<a href="#foothold" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
-<p>The below URL provide a PCAP for download. On analysis, the capture packets showed many HTTP packets exchanged between my attack host and the target box. This makes sense since at the time of the download, I was using <strong>ffuf</strong> in the background to bruteforce hidden files on the web root. The PCAPs were generated after making a request to <code class="language-plaintext highlighter-rouge">/capture</code>.</p>
+<div class="language-plaintext highlighter-rouge"><div class="code-header"><span label-text="Plaintext"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="rouge-code"><pre># Nmap 7.70 scan initiated Wed Aug  2 06:22:06 2023 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.211
+Nmap scan report for 10.10.11.211
+Host is up (0.60s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    nginx 1.18.0 (Ubuntu)
+|_http-favicon: Unknown favicon MD5: 4F12CCCD3C42A4A478F067337FE92794
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title: Login to Cacti
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-<p><img data-src="/assets/img/20210927165715.png" alt="" data-proofer-ignore></p>
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Wed Aug  2 06:23:17 2023 -- 1 IP address (1 host up) scanned in 70.81 seconds
+</pre></td></tr></tbody></table></code></div></div>
 
-<p><img data-src="/assets/img/20210927170123.png" alt="" data-proofer-ignore></p>
+<p><br /></p>
 
-<p>Through testing, it was found that the packet capture is initiated when the <code class="language-plaintext highlighter-rouge">/capture</code> path was requested, and captures packets for 5 seconds. Making the capture request while pinging the host showed some ICMP packets in the PCAP file;</p>
+<h4 id="web">Web<a href="#web" class="anchor"><i class="fas fa-hashtag"></i></a></h4></h4>
+<p><br /></p>
 
-<p><img data-src="/assets/img/20210927171122.png" alt="" data-proofer-ignore></p>
+<p>Site is running <em>Cacti v1.2.22</em>;
+<img data-src="/assets/img/Pasted image 20230830130033.png" alt="" data-proofer-ignore></p>
 
-<p>The exploit code provided in Exploit DB for the DoS is quite messy and creates a lot of processes that just refuse to die even after I terminated the main process;</p>
+<p>Quick search showed it’s vulnerable to <a href="https://github.com/Cacti/cacti/security/advisories/GHSA-6p93-p743-35gf"><strong>CVE-2022-46169</strong></a>. PoC found in <a href="https://github.com/N1arut/CVE-2022-46169_POC">this repo</a>. The exploit errored out after a while;
+<img data-src="/assets/img/Pasted image 20230830130836.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210927173128.png" alt="" data-proofer-ignore></p>
+<p>So I modified the script to go through my proxy to see what’s up. The exploit is bruteforcing the <code class="language-plaintext highlighter-rouge">local_data_ids</code> parameter;
+<img data-src="/assets/img/Pasted image 20230830132815.png" alt="" data-proofer-ignore></p>
 
-<p>The packets captured during the DoS attack indicate the FTP server <strong>rejecting connections</strong> from our host due to too many connections made;</p>
+<p>So I setup a numeric bruteforce on the field;
+<img data-src="/assets/img/Pasted image 20230830133040.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210927174401.png" alt="" data-proofer-ignore></p>
+<p>Running it, we got a few interesting results;
+<img data-src="/assets/img/Pasted image 20230830133257.png" alt="" data-proofer-ignore></p>
 
-<p>This indicate my approach of DoSing out a connected user in hope of capturing authentication packets during reconnection probably won’t work.</p>
+<p>From the code, the output of <code class="language-plaintext highlighter-rouge">finding_id()</code> is what’s passed to the <code class="language-plaintext highlighter-rouge">rev_shell()</code> function, which appends the payload to the URL parameter <code class="language-plaintext highlighter-rouge">poller_id</code>;
+<img data-src="/assets/img/Pasted image 20230830133550.png" alt="" data-proofer-ignore></p>
 
-<p>Every time a request was made to <code class="language-plaintext highlighter-rouge">/capture</code>, the web app hangs for 5 seconds (to capture the packets I guess?) and redirect user to <code class="language-plaintext highlighter-rouge">/data/&lt;n&gt;</code> (where <code class="language-plaintext highlighter-rouge">&lt;n&gt;</code> is a number) to download the captured PCAP. So I decided to bruteforce the number in hope of finding other PCAPs, and the first one yielded an FTP credential <code class="language-plaintext highlighter-rouge">nathan:Buck3tH4TF0RM3!</code>;</p>
-
-<p><img data-src="/assets/img/20210927180517.png" alt="" data-proofer-ignore></p>
-
-<p><img data-src="/assets/img/20210927175931.png" alt="" data-proofer-ignore></p>
-
-<p>Using the credential, I was able to access the box via SSH and obtain user flag;</p>
-
-<p><img data-src="/assets/img/20210927180753.png" alt="" data-proofer-ignore>
-<br /></p>
+<p>Testing this in the replay tab, I got code execution;
+<img data-src="/assets/img/Pasted image 20230830134246.png" alt="" data-proofer-ignore>
+<img data-src="/assets/img/Pasted image 20230830134212.png" alt="" data-proofer-ignore></p>
 
 <hr />
+
+<p><br /></p>
+
+<h3 id="user">User<a href="#user" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
+<p><br /></p>
+
+<p>Python not installed locally, so used <code class="language-plaintext highlighter-rouge">script /dev/null -qc /bin/bash</code> for TTY upgrade. Presence of <code class="language-plaintext highlighter-rouge">/.dockerenv</code> indicates we are in a container. MySQL creds found in <code class="language-plaintext highlighter-rouge">/var/www/html/include/config.php</code>;
+<img data-src="/assets/img/Pasted image 20230830135203.png" alt="" data-proofer-ignore>
+<img data-src="/assets/img/Pasted image 20230830135315.png" alt="" data-proofer-ignore></p>
+
+<p>Cacti uses <code class="language-plaintext highlighter-rouge">user_auth</code> table to store user creds;</p>
+<div class="language-plaintext highlighter-rouge"><div class="code-header"><span label-text="Plaintext"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+</pre></td><td class="rouge-code"><pre>MySQL [cacti]&gt; describe user_auth;
++------------------------+-----------------------+------+-----+---------+----------------+
+| Field                  | Type                  | Null | Key | Default | Extra          |
++------------------------+-----------------------+------+-----+---------+----------------+
+| id                     | mediumint(8) unsigned | NO   | PRI | NULL    | auto_increment |
+| username               | varchar(50)           | NO   | MUL | 0       |                |
+| password               | varchar(256)          | NO   |     |         |                |
+| realm                  | mediumint(8)          | NO   | MUL | 0       |                |
+| full_name              | varchar(100)          | YES  |     | 0       |                |
+| email_address          | varchar(128)          | YES  |     | NULL    |                |
+| must_change_password   | char(2)               | YES  |     | NULL    |                |
+| password_change        | char(2)               | YES  |     | on      |                |
+| show_tree              | char(2)               | YES  |     | on      |                |
+| show_list              | char(2)               | YES  |     | on      |                |
+| show_preview           | char(2)               | NO   |     | on      |                |
+| graph_settings         | char(2)               | YES  |     | NULL    |                |
+| login_opts             | tinyint(3) unsigned   | NO   |     | 1       |                |
+| policy_graphs          | tinyint(3) unsigned   | NO   |     | 1       |                |
+| policy_trees           | tinyint(3) unsigned   | NO   |     | 1       |                |
+| policy_hosts           | tinyint(3) unsigned   | NO   |     | 1       |                |
+| policy_graph_templates | tinyint(3) unsigned   | NO   |     | 1       |                |
+| enabled                | char(2)               | NO   | MUL | on      |                |
+| lastchange             | int(11)               | NO   |     | -1      |                |
+| lastlogin              | int(11)               | NO   |     | -1      |                |
+| password_history       | varchar(4096)         | NO   |     | -1      |                |
+| locked                 | varchar(3)            | NO   |     |         |                |
+| failed_attempts        | int(5)                | NO   |     | 0       |                |
+| lastfail               | int(10) unsigned      | NO   |     | 0       |                |
+| reset_perms            | int(10) unsigned      | NO   |     | 0       |                |
++------------------------+-----------------------+------+-----+---------+----------------+
+25 rows in set (0.001 sec)
+</pre></td></tr></tbody></table></code></div></div>
+
+<p>Found 2 hashes;</p>
+<div class="language-plaintext highlighter-rouge"><div class="code-header"><span label-text="Plaintext"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre>MySQL [cacti]&gt; select username, password from user_auth;
++----------+--------------------------------------------------------------+
+| username | password                                                     |
++----------+--------------------------------------------------------------+
+| admin    | $2y$10$IhEA.Og8vrvwueM7VEDkUes3pwc3zaBbQ/iuqMft/llx8utpR1hjC |
+| guest    | 43e9a4ab75570f5b                                             |
+| marcus   | $2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C |
++----------+--------------------------------------------------------------+
+</pre></td></tr></tbody></table></code></div></div>
+
+<p>Cracked that of <code class="language-plaintext highlighter-rouge">marcus</code> successfully;
+<img data-src="/assets/img/Pasted image 20230830135710.png" alt="" data-proofer-ignore></p>
+
+<p>This gave me access to the main host over SSH;
+<img data-src="/assets/img/Pasted image 20230830140527.png" alt="" data-proofer-ignore></p>
+
+<hr />
+
+<p><br /></p>
+
 <h3 id="privesc">PrivEsc<a href="#privesc" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
-<p>The <strong>nathan</strong> user is not allowed sudo access.</p>
+<p><code class="language-plaintext highlighter-rouge">marcus</code> does not have sudo perms, and is also not in any special group. File system enum showed we have execute permission on <code class="language-plaintext highlighter-rouge">/var/lib/docker</code>, which means we can enter the directory;
+<img data-src="/assets/img/Pasted image 20230830140233.png" alt="" data-proofer-ignore></p>
 
-<p><code class="language-plaintext highlighter-rouge">linPEAS</code> doesn’t yield anything interesting. However, reading the source code of the python web app revelealed an interesting block of code I can probably exploit. It contains the code that captures the packets using <code class="language-plaintext highlighter-rouge">tcpdump</code>;</p>
+<p>Searching about how this could be exploited lead me to <a href="https://github.com/UncleJ4ck/CVE-2021-41091">CVE-2021-41091</a>;</p>
+<blockquote>
+  <p>CVE-2021-41091 is a flaw in Moby (Docker Engine) that allows unprivileged Linux users to traverse and execute programs within the data directory (usually located at /var/lib/docker) due to improperly restricted permissions. This vulnerability is present when containers contain executable programs with extended permissions, such as setuid. Unprivileged Linux users can then discover and execute those programs, as well as modify files if the UID of the user on the host matches the file owner or group inside the container.</p>
+</blockquote>
 
-<p><img data-src="/assets/img/20210927183511.png" alt="" data-proofer-ignore></p>
+<p>For this exploit to work though, we need to be <code class="language-plaintext highlighter-rouge">root</code> in one of the docker containers on the host. So I went back in as <code class="language-plaintext highlighter-rouge">www-data</code> using the previous <em>Cacti</em> RCE. Searching for SUIDs gave an interesting result;
+<img data-src="/assets/img/Pasted image 20230830141647.png" alt="" data-proofer-ignore></p>
 
-<p>My first attempt to inject code into the <code class="language-plaintext highlighter-rouge">app.py</code> file above does not work for some reasons.
-Looking at the code file permissions, I noticed it those not have any special permissions, but manages to execute <code class="language-plaintext highlighter-rouge">tcpdump</code> and capture packets, which is clearly a privileged operation. The call to <code class="language-plaintext highlighter-rouge">python3</code> highlighted above is also direct with no special permissions, which indicate privileges are acquired by the call to <code class="language-plaintext highlighter-rouge">os.setuid(0)</code>. So I opened a python3 shell as <code class="language-plaintext highlighter-rouge">nathan</code>, and execute the <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> command, which gave me root privileges that I used to spawn a bash shell;</p>
+<p><code class="language-plaintext highlighter-rouge">capsh</code> is a utility for managing capabilities/perms. Using <code class="language-plaintext highlighter-rouge">capsh --gid=0 --uid=0 --</code> (from <a href="https://gtfobins.github.io">gtfobins</a>), I was elevated to <code class="language-plaintext highlighter-rouge">root</code>;
+<img data-src="/assets/img/Pasted image 20230830143748.png" alt="" data-proofer-ignore></p>
 
-<p><img data-src="/assets/img/20210927185821.png" alt="" data-proofer-ignore>
-<br /></p>
+<p>I then setup SUID on <code class="language-plaintext highlighter-rouge">/bin/bash</code>, then ran the exploit again, which gave me root on main;
+<img data-src="/assets/img/Pasted image 20230830144138.png" alt="" data-proofer-ignore></p>
 
 <hr />
+
+<p><br /></p>
+
 <h3 id="summary">Summary<a href="#summary" class="anchor"><i class="fas fa-hashtag"></i></a></h3></h3>
 <p><br /></p>
 
 <ul>
-  <li>Identified running services with <em>NMAP</em>, and web technologies with <em>Wappalyzer</em>.</li>
-  <li>Found an option on the web app for starting a 5 second packet capture, and downloading the <em>PCAP</em> file generated.</li>
-  <li>Found a <em>DoS</em> exploit for <em>VSFPD</em> service running on the host.</li>
-  <li>Mistook an established SSH connection shown in the <em>Network Status</em> menu as a connected FTP session. Got the idea to use the DoS exploit in the hope that the client will be disconnected, and authentication traffic captured during reconnection. It failed horribly, with the FTP server rejecting connections from my IP.</li>
-  <li>Discovered a PCAP file with captured FTP authentication traffic by bruteforcing the numeric identifier in the PCAP download URL. The PCAP contains FTP login credentials for a user named <code class="language-plaintext highlighter-rouge">nathan</code>, which gave me access to the system via SSH.</li>
-  <li>In  the system as the user <code class="language-plaintext highlighter-rouge">nathan</code> via SSH;
+  <li>NMAP showed port <strong>22</strong> and <strong>80</strong></li>
+  <li>Web server running an instance of <em>Cacti v1.2.22</em>, which is vulnerable to <strong>CVE-2022-46169</strong> (RCE)</li>
+  <li>Inside as <code class="language-plaintext highlighter-rouge">www-data</code>;
     <ul>
-      <li>Found the source code file of the python3 script that performs the packet capture requested through the web application.</li>
-      <li>It uses <code class="language-plaintext highlighter-rouge">tcpdump</code> to capture packet after a call to <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> to obtain privileges.</li>
-      <li>Launching the python CLI shell and calling the <code class="language-plaintext highlighter-rouge">os.setuid(0)</code> method granted me root privileges, indicating the python3 binary likely has SUID bit enabled.</li>
+      <li><code class="language-plaintext highlighter-rouge">capsh</code> SUID allowed me to elevate to <code class="language-plaintext highlighter-rouge">root</code></li>
+      <li>Obtained and crack the hash of <code class="language-plaintext highlighter-rouge">marcus</code> from local MySQL, which gave me a shell on the main box.</li>
+    </ul>
+  </li>
+  <li>Inside as <code class="language-plaintext highlighter-rouge">marcus</code>;
+    <ul>
+      <li>Global execute permission on <code class="language-plaintext highlighter-rouge">/var/lib/docker</code> (CVE-2021-41091)</li>
+      <li>Exploit it to gain code execution as <code class="language-plaintext highlighter-rouge">root</code></li>
     </ul>
   </li>
 </ul>
@@ -322,11 +433,14 @@ Looking at the code file permissions, I noticed it those not have any special pe
     <i class="far fa-folder-open fa-fw mr-1"></i><a href='/categories/hackthebox/'>hackthebox</a></div><!-- tags --><div class="post-tags">
     <i class="fa fa-tags fa-fw mr-1"></i><a href="/tags/hackthebox/"
           class="post-tag no-text-decoration" >hackthebox</a><a href="/tags/linux/"
-          class="post-tag no-text-decoration" >linux</a><a href="/tags/traffic-analysis/"
-          class="post-tag no-text-decoration" >traffic analysis</a><a href="/tags/python/"
-          class="post-tag no-text-decoration" >python</a><a href="/tags/custom-exploitation/"
-          class="post-tag no-text-decoration" >custom exploitation</a><a href="/tags/idor/"
-          class="post-tag no-text-decoration" >idor</a></div><div class="post-tail-bottom
+          class="post-tag no-text-decoration" >linux</a><a href="/tags/easy/"
+          class="post-tag no-text-decoration" >easy</a><a href="/tags/web/"
+          class="post-tag no-text-decoration" >web</a><a href="/tags/cacti/"
+          class="post-tag no-text-decoration" >cacti</a><a href="/tags/cve/"
+          class="post-tag no-text-decoration" >cve</a><a href="/tags/capsh/"
+          class="post-tag no-text-decoration" >capsh</a><a href="/tags/mysql/"
+          class="post-tag no-text-decoration" >mysql</a><a href="/tags/docker/"
+          class="post-tag no-text-decoration" >docker</a></div><div class="post-tail-bottom
     d-flex justify-content-between align-items-center mt-3 pt-5 pb-2">
     <div class="license-wrapper">This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">
           CC BY 4.0
@@ -336,13 +450,13 @@ Looking at the code file permissions, I noticed it those not have any special pe
 
 <div class="share-wrapper">
   <span class="share-label text-muted mr-1">Share</span>
-  <span class="share-icons"><a href="https://twitter.com/intent/tweet?text=Cap - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/cap.html" data-toggle="tooltip" data-placement="top"
+  <span class="share-icons"><a href="https://twitter.com/intent/tweet?text=MonitorsTwo - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" data-toggle="tooltip" data-placement="top"
           title="Twitter" target="_blank" rel="noopener" aria-label="Twitter">
           <i class="fa-fw fab fa-twitter"></i>
-        </a><a href="https://www.facebook.com/sharer/sharer.php?title=Cap - HackTheBox - 4g3nt47&u=https://4g3nt47.github.io/posts/hackthebox/cap.html" data-toggle="tooltip" data-placement="top"
+        </a><a href="https://www.facebook.com/sharer/sharer.php?title=MonitorsTwo - HackTheBox - 4g3nt47&u=https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" data-toggle="tooltip" data-placement="top"
           title="Facebook" target="_blank" rel="noopener" aria-label="Facebook">
           <i class="fa-fw fab fa-facebook-square"></i>
-        </a><a href="https://telegram.me/share?text=Cap - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/cap.html" data-toggle="tooltip" data-placement="top"
+        </a><a href="https://telegram.me/share?text=MonitorsTwo - HackTheBox - 4g3nt47&url=https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" data-toggle="tooltip" data-placement="top"
           title="Telegram" target="_blank" rel="noopener" aria-label="Telegram">
           <i class="fa-fw fab fa-telegram"></i>
         </a><i id="copy-link" class="fa-fw fas fa-link small"
@@ -388,43 +502,43 @@ Looking at the code file permissions, I noticed it those not have any special pe
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/bountyhunter.html">
+        <a href="/posts/hackthebox/backdoor.html">
           <div class="card-body"><!--
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeagosmall"
-    date="2021-11-18 00:00:00 +0100">Nov 18, 2021</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>BountyHunter - HackTheBox</h3>
+    date="2022-04-23 00:00:00 +0100">Apr 23, 2022</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Backdoor - HackTheBox</h3>
             <div class="text-muted small">
-              <p>Another interesting easy linux box, Bounty Hunter is a box that features a web application that is vulnerable to XML External Entitiy injection. This flaw allows an attacker to read local files on ...
+              <p>Backdoor is a very easy linux box on HackTheBox. It starts with a web service running wordpress with a plugin that’s vulnerable to path traversal, which you can use to read arbitrary files on the b...
               </p>
             </div>
           </div>
         </a>
       </div><div class="card">
-        <a href="/posts/hackthebox/forge.html">
+        <a href="/posts/hackthebox/cyberapoc_23.html">
           <div class="card-body"><!--
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeagosmall"
-    date="2022-01-23 00:00:00 +0100">Jan 23, 2022</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Forge - HackTheBox</h3>
+    date="2023-03-23 00:00:00 +0100">Mar 23</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Cyber Apocalypse 2023 - HackTheBox</h3>
             <div class="text-muted small">
-              <p>Forge is a very nice medium linux box featuring a web service that allows for local and remote file upload (via URL). After the upload, user is given a random URL to access the uploaded file. This ...
+              <p>Cyber Apocalypse 2023 is a very nice jeopardy-style CTF competition hosted by HackTheBox. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges tha...
               </p>
             </div>
           </div>
         </a>
       </div><div class="card">
-        <a href="/posts/hackthebox/catch.html">
+        <a href="/posts/hackthebox/precious.html">
           <div class="card-body"><!--
   Date format snippet
   See: ${JS_ROOT}/utils/timeago.js
 --><em class="timeagosmall"
-    date="2022-08-16 00:00:00 +0100">Aug 16, 2022</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Catch - HackTheBox</h3>
+    date="2023-05-20 00:00:00 +0100">May 20</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Precious - HackTheBox</h3>
             <div class="text-muted small">
-              <p>Catch is a very interesting medium-rated linux box on HackTheBox. It starts with some light reversing of an android application to obtain an access token for the Let’s Chat API running on the host....
+              <p>Precious is a very easy linux machine on HackTheBox. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves fi...
               </p>
             </div>
           </div>
@@ -434,13 +548,13 @@ Looking at the code file permissions, I noticed it those not have any special pe
   Navigation buttons at the bottom of the post.
 -->
 
-<div class="post-navigation d-flex justify-content-between"><a href="/posts/hackthebox/dynstr.html" class="btn btn-outline-primary"
+<div class="post-navigation d-flex justify-content-between"><a href="/posts/hackthebox/only4you.html" class="btn btn-outline-primary"
     prompt="Older">
-    <p>Dynstr - HackTheBox</p>
-  </a><a href="/posts/hackthebox/explore.html" class="btn btn-outline-primary"
+    <p>OnlyForYou - HackTheBox</p>
+  </a><span class="btn btn-outline-primary disabled"
     prompt="Newer">
-    <p>Explore - HackTheBox</p>
-  </a></div>
+    <p>-</p>
+  </span></div>
 <!--  The comments switcher --></div>
   </div>
 </div> <!-- .row --><!--

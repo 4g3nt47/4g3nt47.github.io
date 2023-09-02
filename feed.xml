@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-08-26T12:20:26+01:00</updated>
+  <updated>2023-09-02T10:23:22+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,51 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>MonitorsTwo - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" rel="alternate" type="text/html" title="MonitorsTwo - HackTheBox" />
+    <published>2023-09-02T00:00:00+01:00</published>
+  
+    <updated>2023-09-02T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      MonitorsTwo is an easy linux box that starts with exploiting a vulnerable instance of Cacti to gain a shell on the box. This drops you into a docker container that has SUID set on capsh, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box.
+
+Info
+
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NM...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -165,55 +210,6 @@ NMAP
     <summary>
       
       Payback is a hard-rated box created by me for the OdysseyCTF. It starts with exploiting a NoSQL injection vulnerability in a custom application to bypass registration restrictions, and then a mass assignment vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to LFI, which can be used to gain a shell on the box. Once inside, a hidden applic...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Precious - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/precious.html" rel="alternate" type="text/html" title="Precious - HackTheBox" />
-    <published>2023-05-20T00:00:00+01:00</published>
-  
-    <updated>2023-05-20T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/precious.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/precious.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Precious is a very easy linux machine on HackTheBox. It starts with exploiting a web application that generates a PDF file based on the output of a URL. Lateral movement to a local user involves finding a password in a configuration file, and a custom YAML deserialization exploit to elevate to root.
-
-
-
-About
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.70 scan initiated Wed Mar 15 07:29:11 2023 as: nmap -s...
     </summary>
   
 
