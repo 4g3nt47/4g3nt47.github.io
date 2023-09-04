@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-09-02T16:32:13+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">MonitorsTwo - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" rel="alternate" type="text/html" title="MonitorsTwo - HackTheBox" /><published>2023-09-02T00:00:00+01:00</published><updated>2023-09-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/monitorstwo</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html"><![CDATA[<p><strong>MonitorsTwo</strong> is an easy linux box that starts with exploiting a vulnerable instance of <em>Cacti</em> to gain a shell on the box. This drops you into a docker container that has SUID set on <code class="language-plaintext highlighter-rouge">capsh</code>, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-09-04T09:35:05+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">MonitorsTwo - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" rel="alternate" type="text/html" title="MonitorsTwo - HackTheBox" /><published>2023-09-02T00:00:00+01:00</published><updated>2023-09-02T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/monitorstwo</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html"><![CDATA[<p><strong>MonitorsTwo</strong> is an easy linux box that starts with exploiting a vulnerable instance of <em>Cacti</em> to gain a shell on the box. This drops you into a docker container that has SUID set on <code class="language-plaintext highlighter-rouge">capsh</code>, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box.</p>
 
 <h3 id="info">Info</h3>
 <p><br /></p>
@@ -58,26 +58,33 @@ Service detection performed. Please report any incorrect results at https://nmap
 <h4 id="web">Web</h4>
 <p><br /></p>
 
-<p>Site is running <em>Cacti v1.2.22</em>;
-<img src="/assets/img/Pasted image 20230830130033.png" alt="" /></p>
+<p>Site is running <em>Cacti v1.2.22</em>;</p>
 
-<p>Quick search showed it’s vulnerable to <a href="https://github.com/Cacti/cacti/security/advisories/GHSA-6p93-p743-35gf"><strong>CVE-2022-46169</strong></a>. PoC found in <a href="https://github.com/N1arut/CVE-2022-46169_POC">this repo</a>. The exploit errored out after a while;
-<img src="/assets/img/Pasted image 20230830130836.png" alt="" /></p>
+<p><img src="/assets/img/Pasted image 20230830130033.png" alt="" /></p>
 
-<p>So I modified the script to go through my proxy to see what’s up. The exploit is bruteforcing the <code class="language-plaintext highlighter-rouge">local_data_ids</code> parameter;
-<img src="/assets/img/Pasted image 20230830132815.png" alt="" /></p>
+<p>Quick search showed it’s vulnerable to <a href="https://github.com/Cacti/cacti/security/advisories/GHSA-6p93-p743-35gf"><strong>CVE-2022-46169</strong></a>. PoC found in <a href="https://github.com/N1arut/CVE-2022-46169_POC">this repo</a>. The exploit errored out after a while;</p>
 
-<p>So I setup a numeric bruteforce on the field;
-<img src="/assets/img/Pasted image 20230830133040.png" alt="" /></p>
+<p><img src="/assets/img/Pasted image 20230830130836.png" alt="" /></p>
 
-<p>Running it, we got a few interesting results;
-<img src="/assets/img/Pasted image 20230830133257.png" alt="" /></p>
+<p>So I modified the script to go through my proxy to see what’s up. The exploit is bruteforcing the <code class="language-plaintext highlighter-rouge">local_data_ids</code> parameter;</p>
 
-<p>From the code, the output of <code class="language-plaintext highlighter-rouge">finding_id()</code> is what’s passed to the <code class="language-plaintext highlighter-rouge">rev_shell()</code> function, which appends the payload to the URL parameter <code class="language-plaintext highlighter-rouge">poller_id</code>;
-<img src="/assets/img/Pasted image 20230830133550.png" alt="" /></p>
+<p><img src="/assets/img/Pasted image 20230830132815.png" alt="" /></p>
 
-<p>Testing this in the replay tab, I got code execution;
-<img src="/assets/img/Pasted image 20230830134246.png" alt="" />
+<p>So I setup a numeric bruteforce on the field;</p>
+
+<p><img src="/assets/img/Pasted image 20230830133040.png" alt="" /></p>
+
+<p>Running it, we got a few interesting results;</p>
+
+<p><img src="/assets/img/Pasted image 20230830133257.png" alt="" /></p>
+
+<p>From the code, the output of <code class="language-plaintext highlighter-rouge">finding_id()</code> is what’s passed to the <code class="language-plaintext highlighter-rouge">rev_shell()</code> function, which appends the payload to the URL parameter <code class="language-plaintext highlighter-rouge">poller_id</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230830133550.png" alt="" /></p>
+
+<p>Testing this in the replay tab, I got code execution;</p>
+
+<p><img src="/assets/img/Pasted image 20230830134246.png" alt="" />
 <img src="/assets/img/Pasted image 20230830134212.png" alt="" /></p>
 
 <hr />
@@ -87,11 +94,13 @@ Service detection performed. Please report any incorrect results at https://nmap
 <h3 id="user">User</h3>
 <p><br /></p>
 
-<p>Python not installed locally, so used <code class="language-plaintext highlighter-rouge">script /dev/null -qc /bin/bash</code> for TTY upgrade. Presence of <code class="language-plaintext highlighter-rouge">/.dockerenv</code> indicates we are in a container. MySQL creds found in <code class="language-plaintext highlighter-rouge">/var/www/html/include/config.php</code>;
-<img src="/assets/img/Pasted image 20230830135203.png" alt="" />
+<p>Python not installed locally, so used <code class="language-plaintext highlighter-rouge">script /dev/null -qc /bin/bash</code> for TTY upgrade. Presence of <code class="language-plaintext highlighter-rouge">/.dockerenv</code> indicates we are in a container. MySQL creds found in <code class="language-plaintext highlighter-rouge">/var/www/html/include/config.php</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20230830135203.png" alt="" />
 <img src="/assets/img/Pasted image 20230830135315.png" alt="" /></p>
 
 <p>Cacti uses <code class="language-plaintext highlighter-rouge">user_auth</code> table to store user creds;</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
 2
 3
@@ -157,6 +166,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 </pre></td></tr></tbody></table></code></pre></div></div>
 
 <p>Found 2 hashes;</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
 2
 3
@@ -175,11 +185,13 @@ Service detection performed. Please report any incorrect results at https://nmap
 +----------+--------------------------------------------------------------+
 </pre></td></tr></tbody></table></code></pre></div></div>
 
-<p>Cracked that of <code class="language-plaintext highlighter-rouge">marcus</code> successfully;
-<img src="/assets/img/Pasted image 20230830135710.png" alt="" /></p>
+<p>Cracked that of <code class="language-plaintext highlighter-rouge">marcus</code> successfully;</p>
 
-<p>This gave me access to the main host over SSH;
-<img src="/assets/img/Pasted image 20230830140527.png" alt="" /></p>
+<p><img src="/assets/img/Pasted image 20230830135710.png" alt="" /></p>
+
+<p>This gave me access to the main host over SSH;</p>
+
+<p><img src="/assets/img/Pasted image 20230830140527.png" alt="" /></p>
 
 <hr />
 
@@ -188,8 +200,9 @@ Service detection performed. Please report any incorrect results at https://nmap
 <h3 id="privesc">PrivEsc</h3>
 <p><br /></p>
 
-<p><code class="language-plaintext highlighter-rouge">marcus</code> does not have sudo perms, and is also not in any special group. File system enum showed we have execute permission on <code class="language-plaintext highlighter-rouge">/var/lib/docker</code>, which means we can enter the directory;
-<img src="/assets/img/Pasted image 20230830140233.png" alt="" /></p>
+<p><code class="language-plaintext highlighter-rouge">marcus</code> does not have sudo perms, and is also not in any special group. File system enum showed we have execute permission on <code class="language-plaintext highlighter-rouge">/var/lib/docker</code>, which means we can enter the directory;</p>
+
+<p><img src="/assets/img/Pasted image 20230830140233.png" alt="" /></p>
 
 <p>Searching about how this could be exploited lead me to <a href="https://github.com/UncleJ4ck/CVE-2021-41091">CVE-2021-41091</a>;</p>
 <blockquote>
@@ -200,11 +213,13 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 <p><img src="/assets/img/Pasted image 20230830141647.png" alt="" /></p>
 
-<p><code class="language-plaintext highlighter-rouge">capsh</code> is a utility for managing capabilities/perms. Using <code class="language-plaintext highlighter-rouge">capsh --gid=0 --uid=0 --</code> (from <a href="https://gtfobins.github.io">gtfobins</a>), I was elevated to <code class="language-plaintext highlighter-rouge">root</code>;
-<img src="/assets/img/Pasted image 20230830143748.png" alt="" /></p>
+<p><code class="language-plaintext highlighter-rouge">capsh</code> is a utility for managing capabilities/perms. Using <code class="language-plaintext highlighter-rouge">capsh --gid=0 --uid=0 --</code> (from <a href="https://gtfobins.github.io">gtfobins</a>), I was elevated to <code class="language-plaintext highlighter-rouge">root</code>;</p>
 
-<p>I then setup SUID on <code class="language-plaintext highlighter-rouge">/bin/bash</code>, then ran the exploit again, which gave me root on main;
-<img src="/assets/img/Pasted image 20230830144138.png" alt="" /></p>
+<p><img src="/assets/img/Pasted image 20230830143748.png" alt="" /></p>
+
+<p>I then setup SUID on <code class="language-plaintext highlighter-rouge">/bin/bash</code>, then ran the exploit again, which gave me root on main;</p>
+
+<p><img src="/assets/img/Pasted image 20230830144138.png" alt="" /></p>
 
 <hr />
 
