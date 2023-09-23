@@ -18,6 +18,7 @@
 <meta property="og:url" content="https://4g3nt47.github.io/page4/" />
 <meta property="og:site_name" content="4g3nt47" />
 <link rel="prev" href="https://4g3nt47.github.io/page3" />
+<link rel="next" href="https://4g3nt47.github.io/page5" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="4g3nt47" />
 <meta name="twitter:site" content="@UmarAbdoul" />
@@ -143,6 +144,37 @@
   <!-- core -->
   <div id="core-wrapper" class="col-12 col-lg-11 col-xl-8">
     <div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><!-- Get pinned posts --><!-- Get default posts --><div id="post-list"><div class="post-preview">
+    <h1>
+      <a href="/posts/hackthebox/horizontall.html">Horizontall - HackTheBox</a>
+    </h1>
+
+    <div class="post-content">
+      <p>Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which ...
+      </p>
+    </div>
+
+    <div class="post-meta text-muted d-flex">
+
+      <div class="mr-auto">
+        <!-- posted date -->
+        <i class="far fa-calendar fa-fw"></i><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeago"
+    date="2022-02-05 00:00:00 +0100"data-toggle="tooltip"
+      data-placement="bottom"
+      title="Sat, Feb  5, 2022, 12:00 AM +0100">Feb  5, 2022</em>
+<!-- time to read -->
+        <i class="far fa-clock fa-fw"></i><!--
+  Calculate the post's reading time, and display the word count in tooltip
+ --><!-- words per minute  --><!-- return element -->
+<span class="readtime" data-toggle="tooltip" data-placement="bottom"
+  title="927 words">
+  <em>5 min</em></span>
+<!-- categories --><i class="far fa-folder-open fa-fw"></i>
+          <span>hackthebox</span></div></div> <!-- .post-meta -->
+
+  </div> <!-- .post-review --><div class="post-preview">
     <h1>
       <a href="/posts/tutorial/mitmproxy.html">Exploiting Web Applications with MITM Proxy and Elinks</a>
     </h1>
@@ -421,37 +453,6 @@
 <!-- categories --><i class="far fa-folder-open fa-fw"></i>
           <span>hackthebox</span></div></div> <!-- .post-meta -->
 
-  </div> <!-- .post-review --><div class="post-preview">
-    <h1>
-      <a href="/posts/hackthebox/dynstr.html">Dynstr - HackTheBox</a>
-    </h1>
-
-    <div class="post-content">
-      <p>Dynstr, a cool medium-rated linux box that’s all about DNS (as you probably guessed from the name). It features a web service that allows you to update DNS records on the server. One of the paramet...
-      </p>
-    </div>
-
-    <div class="post-meta text-muted d-flex">
-
-      <div class="mr-auto">
-        <!-- posted date -->
-        <i class="far fa-calendar fa-fw"></i><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeago"
-    date="2021-10-20 00:00:00 +0100"data-toggle="tooltip"
-      data-placement="bottom"
-      title="Wed, Oct 20, 2021, 12:00 AM +0100">Oct 20, 2021</em>
-<!-- time to read -->
-        <i class="far fa-clock fa-fw"></i><!--
-  Calculate the post's reading time, and display the word count in tooltip
- --><!-- words per minute  --><!-- return element -->
-<span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="1779 words">
-  <em>9 min</em></span>
-<!-- categories --><i class="far fa-folder-open fa-fw"></i>
-          <span>hackthebox</span></div></div> <!-- .post-meta -->
-
   </div> <!-- .post-review --></div> <!-- #post-list --><!--
   The paginator for post list on HomgPage.
 -->
@@ -466,23 +467,25 @@
   <!-- page numbers --><!-- show number -->
       <li class="page-item">
         <a class="page-link btn-box-shadow" href="/">1</a>
-      </li><!-- show number -->
-      <li class="page-item">
-        <a class="page-link btn-box-shadow" href="/page2/">2</a>
-      </li><!-- show number -->
+      </li><!-- hide number --><li class="page-item disabled">
+          <span class="page-link btn-box-shadow">...</span>
+        </li><!-- show number -->
       <li class="page-item">
         <a class="page-link btn-box-shadow" href="/page3/">3</a>
       </li><!-- show number -->
       <li class="page-itemactive">
         <a class="page-link btn-box-shadow" href="/page4/">4</a>
+      </li><!-- show number -->
+      <li class="page-item">
+        <a class="page-link btn-box-shadow" href="/page5/">5</a>
       </li><!-- mobile pagination -->
   <li class="page-index align-middle">
     <span>4</span>
-    <span class="text-muted">/ 4</span>
+    <span class="text-muted">/ 5</span>
   </li>
 
-  <!-- right arrow --><li class="page-itemdisabled">
-    <a class="page-link btn-box-shadow" href="#" aria-label="next-page">
+  <!-- right arrow --><li class="page-item">
+    <a class="page-link btn-box-shadow" href="/page5" aria-label="next-page">
       <i class="fas fa-angle-right"></i>
     </a>
   </li>
@@ -496,7 +499,7 @@
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/rce/">rce</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div>-->
     </div></div>
 
@@ -530,7 +533,7 @@
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/rce/">rce</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>

@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-09-04T09:35:05+01:00</updated>
+  <updated>2023-09-23T10:02:13+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,56 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Snoopy - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/snoopy.html" rel="alternate" type="text/html" title="Snoopy - HackTheBox" />
+    <published>2023-09-23T00:00:00+01:00</published>
+  
+    <updated>2023-09-23T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/snoopy.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/snoopy.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Snoopy is a hard-rated linux machine on HackTheBox. It starts with a domain takeover by leaking DNS key to takeover a Mattermost account and exploit a custom command to capture SSH credentials. You’ll then move to another local user by exploiting CVE-2023-23946 affecting git apply. Privilege escalation to root is through ClamAV.
+
+
+
+info
+
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.80 scan initiated Sat Au...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -181,35 +231,6 @@ NMAP
     <summary>
       
       Agile is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the Werkzeug debug console. Once on the box, you’ll recover some creds from a MySQL database and gain access to a local user account. You’ll then be required to exploit a previously discovered vulnerability but this time using a local symlink to get through a filter, and then expl...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Payback - OdysseyCTF</title>
-    <link href="https://4g3nt47.github.io/posts/ctf/payback.html" rel="alternate" type="text/html" title="Payback - OdysseyCTF" />
-    <published>2023-07-31T00:00:00+01:00</published>
-  
-    <updated>2023-07-31T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/ctf/payback.html</id>
-    <content src="https://4g3nt47.github.io/posts/ctf/payback.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="ctf" />
-    
-  
-
-  
-    <summary>
-      
-      Payback is a hard-rated box created by me for the OdysseyCTF. It starts with exploiting a NoSQL injection vulnerability in a custom application to bypass registration restrictions, and then a mass assignment vulnerability to escalate to a higher privilege. This exposes an administrative function that’s vulnerable to LFI, which can be used to gain a shell on the box. Once inside, a hidden applic...
     </summary>
   
 
