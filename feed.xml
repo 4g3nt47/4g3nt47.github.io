@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-09-23T10:02:13+01:00</updated>
+  <updated>2023-09-30T09:19:49+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,35 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Format - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/format.html" rel="alternate" type="text/html" title="Format - HackTheBox" />
+    <published>2023-09-30T00:00:00+01:00</published>
+  
+    <updated>2023-09-30T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/format.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/format.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Format is a nice medium linux machine on HackTheBox. It features a custom web application for creating blogs that is vulnerable to arbitrary read and write, which is easy to detect as the full application source code is accessible in a public Gitea repo. Once inside, you’ll be recovering some creds from the backend redis server, and exploiting a format string vulnerability in a python program t...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -45,7 +74,7 @@
 
 
 
-info
+Info
 
 
 
@@ -202,35 +231,6 @@ NMAP
 
 
 # Nmap 7.70 scan initiated Mon Jul 31 06:51:57 2023 as: nma...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Agile - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/agile.html" rel="alternate" type="text/html" title="Agile - HackTheBox" />
-    <published>2023-08-05T00:00:00+01:00</published>
-  
-    <updated>2023-08-05T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/agile.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/agile.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Agile is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the Werkzeug debug console. Once on the box, you’ll recover some creds from a MySQL database and gain access to a local user account. You’ll then be required to exploit a previously discovered vulnerability but this time using a local symlink to get through a filter, and then expl...
     </summary>
   
 
