@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-09-30T09:19:49+01:00</updated>
+  <updated>2023-10-07T17:23:08+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -17,6 +17,56 @@
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>PC - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/pc.html" rel="alternate" type="text/html" title="PC - HackTheBox" />
+    <published>2023-10-07T00:00:00+01:00</published>
+  
+    <updated>2023-10-07T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/pc.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/pc.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      PC is an easy linux machine on HackTheBox. It starts with exploiting an SQL injection vulnerability on an open RPC service to dump a user password. Once inside, you will have access to a local instance of PyLoad that has a pre-auth RCE CVE, which will give you access as root.
+
+
+
+Info
+
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.80 scan initiated Tue Aug 15 23:21:43 2023 as: nmap -sC -sV -p22,50051 -v -Pn ...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -183,54 +233,6 @@ NMAP
 
 
 # Nmap 7.80 scan initiated Sat Aug 19 12:...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Busqueda - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" rel="alternate" type="text/html" title="Busqueda - HackTheBox" />
-    <published>2023-08-12T00:00:00+01:00</published>
-  
-    <updated>2023-08-12T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/busqueda.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/busqueda.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Busqueda is a nice easy linux machine on HackTheBox. It starts with a web application that’s vulnerable to RCE. Once on the box, you will find a GIT repo that has a cred in it’s remote origin config, which will give you access to a Gitea instance. Privesc is by exploiting a custom script with sudo perms.
-
-
-
-About
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.70 scan initiated Mon Jul 31 06:51:57 2023 as: nma...
     </summary>
   
 
