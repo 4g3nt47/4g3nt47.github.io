@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-10-07T17:23:08+01:00</updated>
+  <updated>2023-10-22T06:54:55+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -20,14 +20,14 @@
 
   
   <entry>
-    <title>PC - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/pc.html" rel="alternate" type="text/html" title="PC - HackTheBox" />
-    <published>2023-10-07T00:00:00+01:00</published>
+    <title>Zipping - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/zipping.html" rel="alternate" type="text/html" title="Zipping - HackTheBox" />
+    <published>2023-10-22T00:00:00+01:00</published>
   
-    <updated>2023-10-07T00:00:00+01:00</updated>
+    <updated>2023-10-22T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/pc.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/pc.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/zipping.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/zipping.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -41,7 +41,107 @@
   
     <summary>
       
-      PC is an easy linux machine on HackTheBox. It starts with exploiting an SQL injection vulnerability on an open RPC service to dump a user password. Once inside, you will have access to a local instance of PyLoad that has a pre-auth RCE CVE, which will give you access as root.
+      Zipping is a nice medium linux box on HackTheBox. It starts with exploiting a descrepancy on how gz (CLI) and ZipArchive (PHP) works to fool the web app into extracting a ZIP file containing a PHP file thinking it’s a PDF. This approach turns out to be unintended, but I liked it more. Privesc to root is through dynamic import hijack with dlopen().
+
+
+
+Info
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.80 scan...
+    </summary>
+  
+
+  </entry>
+
+  
+  <entry>
+    <title>Topology - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/topology.html" rel="alternate" type="text/html" title="Topology - HackTheBox" />
+    <published>2023-10-22T00:00:00+01:00</published>
+  
+    <updated>2023-10-22T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/topology.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/topology.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Topology is an easy linux machine on HackTheBox. It starts with exploiting a custom LaTeX parser to get LFI and leak creds to get a foothold on the box. Root involves exploiting gnuplot.
+
+
+
+Info
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+(Scan missed port 22 for some reason, but it’s open)
+
+# Nmap 7.80 scan initiated Wed Aug 16 23:23:05 2023 as: nmap -sC -sV -oN nmap.txt -v -T5 -Pn 10.10.11.217
+Warning: 10.10.11....
+    </summary>
+  
+
+  </entry>
+
+  
+  <entry>
+    <title>Sau - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/sau.html" rel="alternate" type="text/html" title="Sau - HackTheBox" />
+    <published>2023-10-22T00:00:00+01:00</published>
+  
+    <updated>2023-10-22T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/hackthebox/sau.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/sau.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="hackthebox" />
+    
+  
+
+  
+    <summary>
+      
+      Sau is probably the shortest box ever released on HackTheBox. Foothold involves exploiting Request Baskets to access a hidden instance of Maltrail, which is vulnerable to RCE. Privesc is through the linux CLI pager invoked by systemctl.
 
 
 
@@ -62,7 +162,8 @@ Recon
 NMAP
 
 
-# Nmap 7.80 scan initiated Tue Aug 15 23:21:43 2023 as: nmap -sC -sV -p22,50051 -v -Pn ...
+# Nmap 7.80 scan initiated Wed Aug 16 17:59:21 2023 as: nmap -sS -p- -v -oN nmap-all.txt -min-rate 500 10.10.11.224
+Nmap scan r...
     </summary>
   
 
@@ -70,14 +171,14 @@ NMAP
 
   
   <entry>
-    <title>Format - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/format.html" rel="alternate" type="text/html" title="Format - HackTheBox" />
-    <published>2023-09-30T00:00:00+01:00</published>
+    <title>Sandworm - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/sandworm.html" rel="alternate" type="text/html" title="Sandworm - HackTheBox" />
+    <published>2023-10-22T00:00:00+01:00</published>
   
-    <updated>2023-09-30T00:00:00+01:00</updated>
+    <updated>2023-10-22T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/format.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/format.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/sandworm.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/sandworm.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -91,7 +192,28 @@ NMAP
   
     <summary>
       
-      Format is a nice medium linux machine on HackTheBox. It features a custom web application for creating blogs that is vulnerable to arbitrary read and write, which is easy to detect as the full application source code is accessible in a public Gitea repo. Once inside, you’ll be recovering some creds from the backend redis server, and exploiting a format string vulnerability in a python program t...
+      Sandworm is a nice medium linux box on HackTheBox. It starts with exploiting an SSTI vulnerability in a custom web app that does some PGP operations using user input. Once inside, you’ll need to break out of firejail by injecting payload into a Go project that’s been used in a cron job. Privesc is through SUID exploit on firejail.
+
+
+
+Sandworm
+
+
+
+
+
+
+
+
+
+
+Recon
+
+
+NMAP
+
+
+# Nmap 7.80 scan initiated ...
     </summary>
   
 
@@ -99,14 +221,14 @@ NMAP
 
   
   <entry>
-    <title>Snoopy - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/snoopy.html" rel="alternate" type="text/html" title="Snoopy - HackTheBox" />
-    <published>2023-09-23T00:00:00+01:00</published>
+    <title>Pilgrimage - HackTheBox</title>
+    <link href="https://4g3nt47.github.io/posts/hackthebox/pilgrimage.html" rel="alternate" type="text/html" title="Pilgrimage - HackTheBox" />
+    <published>2023-10-22T00:00:00+01:00</published>
   
-    <updated>2023-09-23T00:00:00+01:00</updated>
+    <updated>2023-10-22T00:00:00+01:00</updated>
   
-    <id>https://4g3nt47.github.io/posts/hackthebox/snoopy.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/snoopy.html" />
+    <id>https://4g3nt47.github.io/posts/hackthebox/pilgrimage.html</id>
+    <content src="https://4g3nt47.github.io/posts/hackthebox/pilgrimage.html" />
     <author>
       <name>Umar Abdul</name>
     </author>
@@ -120,7 +242,7 @@ NMAP
   
     <summary>
       
-      Snoopy is a hard-rated linux machine on HackTheBox. It starts with a domain takeover by leaking DNS key to takeover a Mattermost account and exploit a custom command to capture SSH credentials. You’ll then move to another local user by exploiting CVE-2023-23946 affecting git apply. Privilege escalation to root is through ClamAV.
+      Pilgrimage is an easy linux machine on HackTheBox. It starts with a exploiting a CVE on ImageMagick to leak a local sqlite database. Privesc to root is through a binwalk exploit.
 
 
 
@@ -141,98 +263,11 @@ Recon
 NMAP
 
 
-# Nmap 7.80 scan initiated Sat Au...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>MonitorsTwo - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" rel="alternate" type="text/html" title="MonitorsTwo - HackTheBox" />
-    <published>2023-09-02T00:00:00+01:00</published>
-  
-    <updated>2023-09-02T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/monitorstwo.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      MonitorsTwo is an easy linux box that starts with exploiting a vulnerable instance of Cacti to gain a shell on the box. This drops you into a docker container that has SUID set on capsh, which allows for easy privesc. You then move laterally to the main host by cracking a hash obtained from a local MySQL server, and then exploit CVE-2021-41091 to gain root on the box.
-
-Info
-
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NM...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>OnlyForYou - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/only4you.html" rel="alternate" type="text/html" title="OnlyForYou - HackTheBox" />
-    <published>2023-08-26T00:00:00+01:00</published>
-  
-    <updated>2023-08-26T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/only4you.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/only4you.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      OnlyForYou is a medium linux box on HackTheBox. It starts with exploiting an LFI vulnerability to leak application source code, which reveals a code injection vulnerability. Once inside the box, you setup a tunnel to a local web app that’s vulnerable to Cypher Injection. Privesc is through a sudo permission on pip3 download.
-
-Info
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.80 scan initiated Sat Aug 19 12:...
+# Nmap 7.80 scan initiated Wed Aug 16 10:43:20 2023 as: nmap -sC -sV -oN nmap.txt 10.10.11.219
+Nmap scan report for 10.10.11.219
+Host is up (0.40s latency).
+Not shown: 998 closed ports
+...
     </summary>
   
 

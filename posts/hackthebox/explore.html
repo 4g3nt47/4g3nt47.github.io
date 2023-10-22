@@ -404,7 +404,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 
     <div class="access"><!--<div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/easy/">easy</a></div>
   </div>-->
     </div><!-- BS-toc.js will be loaded at medium priority -->
 <script src="/assets/js/bootstrap-toc.min.js"></script>
@@ -427,34 +427,6 @@ Service detection performed. Please report any incorrect results at https://nmap
     <h3 class="pt-2 mt-1 mb-4 ml-1"
       data-toc-skip>Further Reading</h3>
     <div class="card-deck mb-4"><div class="card">
-        <a href="/posts/hackthebox/cyberapoc_23.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2023-03-23 00:00:00 +0100">Mar 23</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Cyber Apocalypse 2023 - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Cyber Apocalypse 2023 is a very nice jeopardy-style CTF competition hosted by HackTheBox. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges tha...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
-        <a href="/posts/hackthebox/agile.html">
-          <div class="card-body"><!--
-  Date format snippet
-  See: ${JS_ROOT}/utils/timeago.js
---><em class="timeagosmall"
-    date="2023-08-05 00:00:00 +0100">Aug  5</em>
-<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Agile - HackTheBox</h3>
-            <div class="text-muted small">
-              <p>Agile is a medium linux box by 0xdf featuring a simple web-based LFI that could be used to bypass PIN validation in the Werkzeug debug console. Once on the box, you’ll recover some creds from a MyS...
-              </p>
-            </div>
-          </div>
-        </a>
-      </div><div class="card">
         <a href="/posts/hackthebox/horizontall.html">
           <div class="card-body"><!--
   Date format snippet
@@ -464,6 +436,34 @@ Service detection performed. Please report any incorrect results at https://nmap
 <h3 class="pt-0 mt-1 mb-3" data-toc-skip>Horizontall - HackTheBox</h3>
             <div class="text-muted small">
               <p>Horizontall is an easy linux box featuring two RCEs. It has a web service that is generated using some imported JavaScript. Analysing the JavaScript code will lead you to a hidden subdomain, which ...
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/catch.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2022-08-16 00:00:00 +0100">Aug 16, 2022</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Catch - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Catch is a very interesting medium-rated linux box on HackTheBox. It starts with some light reversing of an android application to obtain an access token for the Let’s Chat API running on the host....
+              </p>
+            </div>
+          </div>
+        </a>
+      </div><div class="card">
+        <a href="/posts/hackthebox/cyberapoc_23.html">
+          <div class="card-body"><!--
+  Date format snippet
+  See: ${JS_ROOT}/utils/timeago.js
+--><em class="timeagosmall"
+    date="2023-03-23 00:00:00 +0100">Mar 23</em>
+<h3 class="pt-0 mt-1 mb-3" data-toc-skip>Cyber Apocalypse 2023 - HackTheBox</h3>
+            <div class="text-muted small">
+              <p>Cyber Apocalypse 2023 is a very nice jeopardy-style CTF competition hosted by HackTheBox. It was a 5-day CTF played between 19th - 23rd March, 2023. This is a write-up on some of the challenges tha...
               </p>
             </div>
           </div>
@@ -510,7 +510,7 @@ Service detection performed. Please report any incorrect results at https://nmap
   <div class="col-12 col-sm-11 post-content">
     <div id="search-hints"><div id="access-tags">
     <div class="panel-heading">Trending Tags</div>
-    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/rce/">rce</a></div>
+    <div class="d-flex flex-wrap mt-3 mb-1 mr-3"><a class="post-tag" href="/tags/hackthebox/">hackthebox</a><a class="post-tag" href="/tags/linux/">linux</a><a class="post-tag" href="/tags/web/">web</a><a class="post-tag" href="/tags/lfi/">lfi</a><a class="post-tag" href="/tags/static-analysis/">static analysis</a><a class="post-tag" href="/tags/command-injection/">command injection</a><a class="post-tag" href="/tags/custom-exploitation/">custom exploitation</a><a class="post-tag" href="/tags/python/">python</a><a class="post-tag" href="/tags/dvwa/">dvwa</a><a class="post-tag" href="/tags/easy/">easy</a></div>
   </div></div>
     <div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div>
   </div>
