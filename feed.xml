@@ -4,7 +4,7 @@
   <id>https://4g3nt47.github.io/</id>
   <title>4g3nt47</title>
   <subtitle>A blog for infosec stuff.</subtitle>
-  <updated>2023-10-22T06:54:55+01:00</updated>
+  <updated>2024-05-09T11:07:20+01:00</updated>
   <author>
     <name>Umar Abdul</name>
     <uri>https://4g3nt47.github.io/</uri>
@@ -13,10 +13,74 @@
   <link rel="alternate" type="text/html" hreflang="en"
     href="https://4g3nt47.github.io/"/>
   <generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator>
-  <rights> © 2023 Umar Abdul </rights>
+  <rights> © 2024 Umar Abdul </rights>
   <icon>/assets/img/favicons/favicon.ico</icon>
   <logo>/assets/img/favicons/favicon-96x96.png</logo>
 
+
+  
+  <entry>
+    <title>Injectable Shellcodes: The ADDRESS Challenge</title>
+    <link href="https://4g3nt47.github.io/posts/shellcoding/shellcoding_addr_chall.html" rel="alternate" type="text/html" title="Injectable Shellcodes: The ADDRESS Challenge" />
+    <published>2024-05-09T00:00:00+01:00</published>
+  
+    <updated>2024-05-09T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/shellcoding/shellcoding_addr_chall.html</id>
+    <content src="https://4g3nt47.github.io/posts/shellcoding/shellcoding_addr_chall.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="shellcoding" />
+    
+  
+
+  
+    <summary>
+      
+      One challenging aspect of creating a shellcode is dealing with addresses. Your shellcode will often need to reference certain locations, which gets complicated when working in the context of the program you are injecting into. These problems can be solved using a few tricks;
+
+
+
+The JMP + CALL trick
+
+One simple way of solving address challenges when writing a shellcode is by taking advantage of ...
+    </summary>
+  
+
+  </entry>
+
+  
+  <entry>
+    <title>Introduction to Format Strings Vulnerabilities</title>
+    <link href="https://4g3nt47.github.io/posts/binary%20exploitation/format_strings_intro.html" rel="alternate" type="text/html" title="Introduction to Format Strings Vulnerabilities" />
+    <published>2024-05-09T00:00:00+01:00</published>
+  
+    <updated>2024-05-09T00:00:00+01:00</updated>
+  
+    <id>https://4g3nt47.github.io/posts/binary%20exploitation/format_strings_intro.html</id>
+    <content src="https://4g3nt47.github.io/posts/binary%20exploitation/format_strings_intro.html" />
+    <author>
+      <name>Umar Abdul</name>
+    </author>
+
+  
+    
+    <category term="binary exploitation" />
+    
+  
+
+  
+    <summary>
+      
+      A format string is, simply put, a string that is used to format dynamic data for display. They are typically used to avoid hard-coding variables into a string, and also allows the programmer to specify the format in which specific data is to be displayed. Example: You are making a social media application and you want to display the username of a user when they open their profile. A minimalisti...
+    </summary>
+  
+
+  </entry>
 
   
   <entry>
@@ -164,110 +228,6 @@ NMAP
 
 # Nmap 7.80 scan initiated Wed Aug 16 17:59:21 2023 as: nmap -sS -p- -v -oN nmap-all.txt -min-rate 500 10.10.11.224
 Nmap scan r...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Sandworm - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/sandworm.html" rel="alternate" type="text/html" title="Sandworm - HackTheBox" />
-    <published>2023-10-22T00:00:00+01:00</published>
-  
-    <updated>2023-10-22T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/sandworm.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/sandworm.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Sandworm is a nice medium linux box on HackTheBox. It starts with exploiting an SSTI vulnerability in a custom web app that does some PGP operations using user input. Once inside, you’ll need to break out of firejail by injecting payload into a Go project that’s been used in a cron job. Privesc is through SUID exploit on firejail.
-
-
-
-Sandworm
-
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.80 scan initiated ...
-    </summary>
-  
-
-  </entry>
-
-  
-  <entry>
-    <title>Pilgrimage - HackTheBox</title>
-    <link href="https://4g3nt47.github.io/posts/hackthebox/pilgrimage.html" rel="alternate" type="text/html" title="Pilgrimage - HackTheBox" />
-    <published>2023-10-22T00:00:00+01:00</published>
-  
-    <updated>2023-10-22T00:00:00+01:00</updated>
-  
-    <id>https://4g3nt47.github.io/posts/hackthebox/pilgrimage.html</id>
-    <content src="https://4g3nt47.github.io/posts/hackthebox/pilgrimage.html" />
-    <author>
-      <name>Umar Abdul</name>
-    </author>
-
-  
-    
-    <category term="hackthebox" />
-    
-  
-
-  
-    <summary>
-      
-      Pilgrimage is an easy linux machine on HackTheBox. It starts with a exploiting a CVE on ImageMagick to leak a local sqlite database. Privesc to root is through a binwalk exploit.
-
-
-
-Info
-
-
-
-
-
-
-
-
-
-
-Recon
-
-
-NMAP
-
-
-# Nmap 7.80 scan initiated Wed Aug 16 10:43:20 2023 as: nmap -sC -sV -oN nmap.txt 10.10.11.219
-Nmap scan report for 10.10.11.219
-Host is up (0.40s latency).
-Not shown: 998 closed ports
-...
     </summary>
   
 
